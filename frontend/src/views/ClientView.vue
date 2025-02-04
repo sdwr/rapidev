@@ -48,10 +48,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
+import { getClientOrders, upsertOrder } from '@/api/api'
 
 const tabs = [
   { id: 'profile', label: 'My Profile' },
@@ -62,16 +63,41 @@ const tabs = [
 const currentTab = ref('order')
 const orderStatus = ref('')
 const orderHistory = ref<OrderType[]>([])
+const loadingOrders = ref(false)
+const error = ref('')
 
 const handleProfileSave = (profileData) => {
   console.log('Profile saved:', profileData)
 }
 
-const handleOrderCreated = (orderData) => {
-  console.log('Order created:', orderData)
-  orderStatus.value = 'Order submitted successfully!'
-  // Here you would typically send this to your backend
+const fetchOrders = async () => {
+  loadingOrders.value = true
+  try {
+    // For now, using a hardcoded client ID until we have auth
+    orderHistory.value = await getClientOrders('test-client-id')
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    loadingOrders.value = false
+  }
 }
+
+const handleOrderCreated = async (orderData) => {
+  try {
+    const savedOrder = await upsertOrder({
+      ...orderData,
+      clientId: 'test-client-id' // Replace with actual client ID from auth
+    })
+    orderStatus.value = 'Order submitted successfully!'
+    await fetchOrders() // Refresh the order list
+  } catch (e) {
+    orderStatus.value = `Error: ${e.message}`
+  }
+}
+
+onMounted(() => {
+  fetchOrders()
+})
 </script>
 
 <style scoped>

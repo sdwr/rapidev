@@ -29,7 +29,8 @@
     "#database/*": "./database/*.js",
     "#start/*": "./start/*.js",
     "#tests/*": "./tests/*.js",
-    "#config/*": "./config/*.js"
+    "#config/*": "./config/*.js",
+    "#shared/*": "../shared/*"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
@@ -51,6 +52,7 @@
     "typescript": "~5.7"
   },
   "dependencies": {
+    "shared": "../shared",
     "@adonisjs/auth": "^9.2.4",
     "@adonisjs/core": "^6.17.0",
     "@adonisjs/cors": "^2.2.1",

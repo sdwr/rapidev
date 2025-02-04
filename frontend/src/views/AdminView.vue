@@ -77,7 +77,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getAllClients } from '@/api/api'
+import { getAllClients, getAllOrders } from '@/api/api'
 import type { Order } from '@/models/Order'
 import type { ProfileInfo } from '@/models/ProfileInfo'
 
@@ -100,6 +100,7 @@ const couriers = ref<Courier[]>([])
 const orderHistory = ref<Order[]>([])
 const activeOrders = ref<Order[]>([])
 const loadingClients = ref(false)
+const loadingOrders = ref(false)
 const error = ref('')
 
 const fetchClients = async () => {
@@ -113,8 +114,26 @@ const fetchClients = async () => {
   }
 }
 
+const fetchOrders = async () => {
+  loadingOrders.value = true
+  try {
+    const orders = await getAllOrders()
+    activeOrders.value = orders.filter(o => 
+      ['DRAFT', 'PENDING', 'ACCEPTED', 'PICKED_UP', 'IN_TRANSIT'].includes(o.status)
+    )
+    orderHistory.value = orders.filter(o => 
+      ['DELIVERED', 'CANCELLED'].includes(o.status)
+    )
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    loadingOrders.value = false
+  }
+}
+
 onMounted(() => {
   fetchClients()
+  fetchOrders()
 })
 
 const updateOrderStatus = (orderId: string, status: string) => {

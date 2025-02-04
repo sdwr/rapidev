@@ -1,8 +1,10 @@
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import type { OrderItem } from '../../../shared/models/Order'
 import Profile from './profile'
+import OrderStatus from './order_status'
 import Courier from './courier'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 
 export default class Order extends BaseModel {
   @column({ isPrimary: true })
@@ -32,10 +34,13 @@ export default class Order extends BaseModel {
   @belongsTo(() => Profile, {
     foreignKey: 'clientId',
   })
-  declare client: Profile
+  declare client: BelongsTo<typeof Profile>
 
   @belongsTo(() => Courier, {
     foreignKey: 'courierId',
   })
-  declare courier: Courier
+  declare courier: BelongsTo<typeof Courier>
+
+  @hasMany(() => OrderStatus)
+  declare orderStatuses: HasMany<typeof OrderStatus>
 } 
