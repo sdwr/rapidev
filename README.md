@@ -30,9 +30,11 @@ sudo systemctl enable postgresql
 4. Create a new database and user
 ```
 sudo -u postgres psql
-CREATE DATABASE delivery_db;
-CREATE USER delivery_user WITH ENCRYPTED PASSWORD 'delivery_pass';
-GRANT ALL PRIVILEGES ON DATABASE delivery_db TO delivery_user;
+CREATE DATABASE rapidev;
+CREATE USER rapidev_user WITH ENCRYPTED PASSWORD 'rapidev_pass';
+GRANT ALL PRIVILEGES ON DATABASE rapidev TO rapidev_user;
+\c rapidev
+GRANT ALL ON SCHEMA public TO rapidev_user; 
 \q
 ```
 
@@ -42,4 +44,10 @@ GRANT ALL PRIVILEGES ON DATABASE delivery_db TO delivery_user;
 1. Run `sudo systemctl status postgresql` to check the status of the PostgreSQL service
 2. Run `sudo systemctl start postgresql` to start the PostgreSQL service
 3. Run `sudo systemctl enable postgresql` to enable the PostgreSQL service to start on boot
+
+## Migrations
+
+1. Run `node ace migration:run` to run the migrations
+2. Run `node ace migration:rollback` to rollback the migrations
+3. Run `node ace migration:refresh` to refresh the migrations
 

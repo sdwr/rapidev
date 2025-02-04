@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import type { Order } from '../../../shared/models/Order'
+import Order from '#models/order'
 
 export class OrderController {
   async upsertOrder({ request, response }: HttpContext) {

@@ -1,15 +1,22 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'profiles'
+  protected tableName = 'order_statuses'
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary()
-      table.string('name').notNullable()
-      table.string('phone', 10).notNullable()
-      table.string('email').unique().notNullable()
-      table.text('pickup_address').notNullable()
+      table.uuid('order_id').references('id').inTable('orders').onDelete('CASCADE')
+      table.enum('status', [
+        'DRAFT',
+        'PENDING',
+        'ACCEPTED',
+        'PICKED_UP',
+        'IN_TRANSIT',
+        'DELIVERED',
+        'CANCELLED'
+      ]).notNullable()
+      table.boolean('is_current').defaultTo(true)
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
     })

@@ -16,10 +16,13 @@
       <!-- All Clients Tab -->
       <div v-if="currentTab === 'clients'" class="tab-panel">
         <h2>All Clients</h2>
+        <div v-if="error" class="error-message">{{ error }}</div>
+        <div v-if="loadingClients" class="loading">Loading clients...</div>
         <div class="list-container">
-          <p v-if="!clients.length">No clients registered yet.</p>
+          <p v-if="!loadingClients && !clients.length">No clients registered yet.</p>
           <div v-else v-for="client in clients" :key="client.id" class="list-item">
             <h3>{{ client.name }}</h3>
+            <p>Email: {{ client.email }}</p>
             <p>Phone: {{ client.phone }}</p>
             <p>Address: {{ client.pickupAddress }}</p>
           </div>
@@ -73,7 +76,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { getAllClients } from '@/api/api'
 import type { Order } from '@/models/Order'
 import type { ProfileInfo } from '@/models/ProfileInfo'
 
@@ -95,6 +99,23 @@ const clients = ref<ProfileInfo[]>([])
 const couriers = ref<Courier[]>([])
 const orderHistory = ref<Order[]>([])
 const activeOrders = ref<Order[]>([])
+const loadingClients = ref(false)
+const error = ref('')
+
+const fetchClients = async () => {
+  loadingClients.value = true
+  try {
+    clients.value = await getAllClients()
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    loadingClients.value = false
+  }
+}
+
+onMounted(() => {
+  fetchClients()
+})
 
 const updateOrderStatus = (orderId: string, status: string) => {
   console.log(`Updating order ${orderId} to status: ${status}`)

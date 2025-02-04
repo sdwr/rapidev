@@ -14,14 +14,17 @@ export async function getClientProfile(clientId: string): Promise<ProfileInfo> {
 }
 
 export async function upsertClientProfile(profile: ProfileInfo): Promise<ProfileInfo> {
-  const response = await fetch(`${BASE_URL}/api/clients/${profile.id}/profile`, {
-    method: profile.id ? 'PUT' : 'POST',
+  const response = await fetch(`${BASE_URL}/api/clients/profile`, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(profile),
   })
-  if (!response.ok) throw new Error('Failed to update client profile')
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Failed to update client profile')
+  }
   return response.json()
 }
 
@@ -58,7 +61,10 @@ export async function updateOrderState(orderId: string, status: OrderStatus): Pr
 // Admin API functions
 export async function getAllClients(): Promise<ProfileInfo[]> {
   const response = await fetch(`${BASE_URL}/api/clients/all`)
-  if (!response.ok) throw new Error('Failed to fetch all clients')
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Failed to fetch all clients')
+  }
   return response.json()
 }
 

@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import type { Courier } from '../../../shared/models/Courier'
+import Courier from '#models/courier'
 
 export class CourierController {
   async getAllCouriers({ response }: HttpContext) {

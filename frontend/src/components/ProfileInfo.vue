@@ -2,6 +2,10 @@
   <div class="profile-info">
     <h2>Profile Information</h2>
     <form @submit.prevent="saveProfile">
+      <div v-if="error" class="error-message">
+        {{ error }}
+      </div>
+
       <div class="form-group">
         <label for="name">Full Name</label>
         <input 
@@ -9,6 +13,17 @@
           id="name" 
           v-model="profile.name" 
           placeholder="Enter your full name"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          v-model="profile.email" 
+          placeholder="Enter your email"
           required
         >
       </div>
@@ -37,7 +52,9 @@
         ></textarea>
       </div>
 
-      <button type="submit" class="save-button">Save Profile</button>
+      <button type="submit" class="save-button" :disabled="saving">
+        {{ saving ? 'Saving...' : 'Save Profile' }}
+      </button>
     </form>
   </div>
 </template>
@@ -45,6 +62,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { ProfileInfo } from '@/models/ProfileInfo'
+import { upsertClientProfile } from '@/api/api'
 
 const emit = defineEmits<{
   (e: 'profile-saved', profile: ProfileInfo): void
@@ -53,16 +71,25 @@ const emit = defineEmits<{
 const profile = ref<ProfileInfo>({
   name: '',
   phone: '',
-  pickupAddress: ''
+  pickupAddress: '',
+  email: ''
 })
 
-const saveProfile = () => {
-  const profileData: ProfileInfo = {
-    ...profile.value,
-    updatedAt: new Date()
+const error = ref('')
+const saving = ref(false)
+
+const saveProfile = async () => {
+  saving.value = true
+  error.value = ''
+  
+  try {
+    const savedProfile = await upsertClientProfile(profile.value)
+    emit('profile-saved', savedProfile)
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    saving.value = false
   }
-  console.log('Saving profile:', profileData)
-  emit('profile-saved', profileData)
 }
 </script>
 
