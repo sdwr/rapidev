@@ -1,7 +1,7 @@
-import type { ProfileInfo } from '@/models/ProfileInfo'
-import type { Order } from '@/models/Order'
-import { OrderStatus } from '@/models/Order'
-import type { Courier } from '@/models/Courier'
+import type { ProfileInfo } from '../../../shared/models/ProfileInfo'
+import type { Order } from '../../../shared/models/Order'
+import { OrderStatus } from '../../../shared/enums/OrderEnums'
+import type { Courier } from '../../../shared/models/Courier'
 import { getBaseUrl } from './config'
 
 const BASE_URL = getBaseUrl()
