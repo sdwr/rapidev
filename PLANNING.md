@@ -104,22 +104,21 @@
 ## API Endpoints (to be implemented)
 
 ### Client Endpoints
-- POST /api/clients - Create new client profile
-- PUT /api/clients/:id - Update client profile
-- POST /api/orders - Create new order
-- GET /api/orders/client/:clientId - Get client's orders
+- GET /api/clients/:id/profile - Get client profile
+- PUT /api/clients/:id/profile - Update client profile
+- GET /api/clients/:id/orders - Get client orders
+- POST /api/orders - Create/update order
+- PUT /api/orders/:id/status - Update order status
 
 ### Admin Endpoints
-- GET /api/orders - Get all orders
-- PUT /api/orders/:id/status - Update order status
-- GET /api/clients - Get all clients
-- GET /api/couriers - Get all couriers
-- PUT /api/couriers/:id/status - Update courier status
+- GET /api/clients/all - Get all clients
+- GET /api/orders/all - Get all orders
+- GET /api/couriers/all - Get all couriers
+- PUT /api/orders/:id/assign - Assign order to courier
+- PUT /api/orders/reorder - Reorder orders list
 
 ### Courier Endpoints
-- GET /api/orders/courier/:courierId - Get courier's assigned deliveries
-- PUT /api/orders/:id/delivery-status - Update delivery status
-- PUT /api/couriers/:id/availability - Update courier availability
+- PUT /api/orders/:id/accept - Accept order
 
 ## State Management Requirements
 - Real-time order status updates
