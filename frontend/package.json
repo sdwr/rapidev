@@ -1,0 +1,14 @@
+{
+  "name": "rapidev",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wite",
+    "build": "wite build",
+    "preview": "wite preview"
+  },
+  "devDependencies": {
+    "wite": "^4.5.0"
+  }
+}
