@@ -1,8 +1,8 @@
 import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
-import Order from './order'
-import { CourierStatus } from '../../../shared/enums/CourierEnums'
+import Order from '#models/order'
+import { CourierStatus } from '#shared/enums/CourierEnums'
 
 export default class Courier extends BaseModel {
   @column({ isPrimary: true })

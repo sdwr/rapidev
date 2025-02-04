@@ -2,16 +2,21 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Order from '#models/order'
 import OrderStatus from '#models/order_status'
 import { randomUUID } from 'node:crypto'
-import { OrderStatus as Status } from '../../shared/enums/OrderEnums'
+
+import { OrderStatus as Status } from '#shared/enums/OrderEnums'
 
 export class OrderController {
   async createOrder({ request, response }: HttpContext) {
     const data = request.body()
     
     try {
+      // Remove status from incoming data
+      const { status, ...orderData } = data
+
       const order = await Order.create({
         id: randomUUID(),
-        ...data
+        ...orderData,
+        items: JSON.stringify(orderData.items) // Serialize items array to JSON
       })
 
       // Create initial order status

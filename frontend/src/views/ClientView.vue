@@ -53,6 +53,7 @@ import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
 import { getClientOrders, upsertOrder } from '@/api/api'
+import { randomUUID } from 'node:crypto'
 
 const tabs = [
   { id: 'profile', label: 'My Profile' },
@@ -65,6 +66,8 @@ const orderStatus = ref('')
 const orderHistory = ref<OrderType[]>([])
 const loadingOrders = ref(false)
 const error = ref('')
+
+const TEST_CLIENT_ID = '123e4567-e89b-12d3-a456-426614174000'
 
 const handleProfileSave = (profileData) => {
   console.log('Profile saved:', profileData)
@@ -86,10 +89,10 @@ const handleOrderCreated = async (orderData) => {
   try {
     const savedOrder = await upsertOrder({
       ...orderData,
-      clientId: 'test-client-id' // Replace with actual client ID from auth
+      clientId: TEST_CLIENT_ID,
     })
     orderStatus.value = 'Order submitted successfully!'
-    await fetchOrders() // Refresh the order list
+    await fetchOrders()
   } catch (e) {
     orderStatus.value = `Error: ${e.message}`
   }

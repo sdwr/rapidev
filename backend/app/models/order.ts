@@ -1,9 +1,9 @@
 import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
-import type { OrderItem } from '../../../shared/models/Order'
-import Profile from './profile'
-import OrderStatus from './order_status'
-import Courier from './courier'
+import type { OrderItem } from '#shared/models/Order'
+import Profile from '#models/profile'
+import OrderStatus from '#models/order_status'
+import Courier from '#models/courier'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 
 export default class Order extends BaseModel {
