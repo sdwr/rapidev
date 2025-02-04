@@ -9,6 +9,7 @@
           id="name" 
           v-model="profile.name" 
           placeholder="Enter your full name"
+          required
         >
       </div>
 
@@ -19,6 +20,9 @@
           id="phone" 
           v-model="profile.phone"
           placeholder="Enter your phone number"
+          required
+          pattern="[0-9]{10}"
+          title="Please enter a valid 10-digit phone number"
         >
       </div>
 
@@ -26,9 +30,10 @@
         <label for="address">Pickup Address</label>
         <textarea 
           id="address" 
-          v-model="profile.address"
+          v-model="profile.pickupAddress"
           placeholder="Enter your pickup address"
           rows="3"
+          required
         ></textarea>
       </div>
 
@@ -37,20 +42,27 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
+import type { ProfileInfo } from '@/models/ProfileInfo'
 
-const profile = ref({
+const emit = defineEmits<{
+  (e: 'profile-saved', profile: ProfileInfo): void
+}>()
+
+const profile = ref<ProfileInfo>({
   name: '',
   phone: '',
-  address: ''
+  pickupAddress: ''
 })
 
-const emit = defineEmits(['profile-saved'])
-
 const saveProfile = () => {
-  console.log('Saving profile:', profile.value)
-  emit('profile-saved', profile.value)
+  const profileData: ProfileInfo = {
+    ...profile.value,
+    updatedAt: new Date()
+  }
+  console.log('Saving profile:', profileData)
+  emit('profile-saved', profileData)
 }
 </script>
 
@@ -82,7 +94,7 @@ input, textarea {
 }
 
 .save-button {
-  background: #4CAF50;  /* A nice green color */
+  background: #4CAF50;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
