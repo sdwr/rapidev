@@ -2,44 +2,46 @@
   <div class="view client-view">
     <h1>Client View</h1>
     
-    <div class="tabs">
-      <button 
-        v-for="tab in tabs" 
-        :key="tab.id"
-        :class="['tab-button', { active: currentTab === tab.id }]"
-        @click="currentTab = tab.id"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
-
-    <div class="tab-content">
-      <!-- Profile Tab -->
-      <div v-if="currentTab === 'profile'" class="tab-panel">
-        <h2>My Profile</h2>
-        <ProfileInfo @profile-saved="handleProfileSave" />
+    <div class="view-container">
+      <div class="tabs">
+        <button 
+          v-for="tab in tabs" 
+          :key="tab.id"
+          :class="['tab-button', { active: currentTab === tab.id }]"
+          @click="currentTab = tab.id"
+        >
+          {{ tab.label }}
+        </button>
       </div>
 
-      <!-- Place Order Tab -->
-      <div v-if="currentTab === 'order'" class="tab-panel">
-        <div class="card">
-          <h2>Place Your Order</h2>
-          <Order @order-created="handleOrderCreated" />
-          <div class="order-status" v-if="orderStatus">{{ orderStatus }}</div>
+      <div class="tab-content">
+        <!-- Profile Tab -->
+        <div v-if="currentTab === 'profile'" class="tab-panel">
+          <h2>My Profile</h2>
+          <ProfileInfo @profile-saved="handleProfileSave" />
         </div>
-      </div>
 
-      <!-- Order History Tab -->
-      <div v-if="currentTab === 'history'" class="tab-panel">
-        <h2>Order History</h2>
-        <div class="list-container">
-          <p v-if="!orderHistory.length">No orders yet.</p>
-          <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
-            <h3>Order #{{ order.id }}</h3>
-            <p>Status: {{ order.status }}</p>
-            <p>Delivery Address: {{ order.deliveryAddress }}</p>
-            <p>Items: {{ order.items.length }}</p>
-            <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
+        <!-- Place Order Tab -->
+        <div v-if="currentTab === 'order'" class="tab-panel">
+          <div class="card">
+            <h2>Place Your Order</h2>
+            <Order @order-created="handleOrderCreated" />
+            <div class="order-status" v-if="orderStatus">{{ orderStatus }}</div>
+          </div>
+        </div>
+
+        <!-- Order History Tab -->
+        <div v-if="currentTab === 'history'" class="tab-panel">
+          <h2>Order History</h2>
+          <div class="list-container">
+            <p v-if="!orderHistory.length">No orders yet.</p>
+            <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
+              <h3>Order #{{ order.id }}</h3>
+              <p>Status: {{ order.status }}</p>
+              <p>Delivery Address: {{ order.deliveryAddress }}</p>
+              <p>Items: {{ order.items.length }}</p>
+              <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -104,7 +106,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.view-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .tabs {
+  width: 100%;
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
@@ -133,6 +142,7 @@ onMounted(() => {
 }
 
 .tab-content {
+  width: 100%;
   background: var(--color-background-soft);
   padding: 1.5rem;
   border-radius: 8px;
