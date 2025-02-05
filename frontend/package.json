@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "serve": "vite",
+    "serve:prod": "vite --mode production --port 5174",
     "build": "vite build",
+    "build:prod": "vite build --mode production",
     "preview": "vite preview",
     "lint": "eslint . --fix",
     "format": "prettier --write src/"

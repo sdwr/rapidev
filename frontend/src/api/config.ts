@@ -1,11 +1,13 @@
-const env = process.env.NODE_ENV || 'development'
+const isProd = import.meta.env.VITE_API_ENV === 'production'
+const baseURL = isProd 
+  ? import.meta.env.VITE_BACKEND_URL_PROD 
+  : import.meta.env.VITE_BACKEND_URL_DEV
 
-export const API_CONFIG = {
-  LOCAL_URL: 'http://localhost:3335',
-  PROD_URL: 'https://api.delivery-app.com', // Replace with your actual production URL
-  ENV: env === 'production' ? 'prod' : 'local'
+export const apiConfig = {
+  baseURL,
+  // other config options...
 }
 
 export const getBaseUrl = () => {
-  return API_CONFIG.ENV === 'prod' ? API_CONFIG.PROD_URL : API_CONFIG.LOCAL_URL
+  return apiConfig.baseURL
 } 
