@@ -1,7 +1,7 @@
 const env = process.env.NODE_ENV || 'development'
 
 export const API_CONFIG = {
-  LOCAL_URL: 'http://localhost:3333',
+  LOCAL_URL: 'http://localhost:3335',
   PROD_URL: 'https://api.delivery-app.com', // Replace with your actual production URL
   ENV: env === 'production' ? 'prod' : 'local'
 }
