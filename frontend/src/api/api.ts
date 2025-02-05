@@ -29,7 +29,7 @@ export async function upsertClientProfile(profile: ProfileInfo): Promise<Profile
 }
 
 export async function getClientOrders(clientId: string): Promise<Order[]> {
-  const response = await fetch(`${BASE_URL}/api/clients/${clientId}/orders`)
+  const response = await fetch(`${BASE_URL}/api/orders/client/${clientId}`)
   if (!response.ok) throw new Error('Failed to fetch client orders')
   return response.json()
 }

@@ -1,10 +1,10 @@
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import Order from '#models/order'
-import { OrderStatus as Status } from '#shared/enums/OrderEnums'
+import { Size } from '#shared/enums/OrderEnums'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 
-export default class OrderStatus extends BaseModel {
+export default class OrderItem extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
@@ -12,10 +12,13 @@ export default class OrderStatus extends BaseModel {
   declare orderId: string
 
   @column()
-  declare status: Status
+  declare description: string
 
   @column()
-  declare isCurrent: boolean
+  declare quantity: number
+
+  @column()
+  declare size: Size
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

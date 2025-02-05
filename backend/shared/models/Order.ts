@@ -1,9 +1,8 @@
-import { OrderStatus, Size } from '../enums/OrderEnums'
+import { Size } from '#shared/enums/OrderEnums'
 
 export interface Order {
   id?: string;
   clientId: string;
-  status: OrderStatus;
   pickupAddress: string;
   deliveryAddress: string;
   items: OrderItem[];

@@ -1,72 +1,75 @@
 <template>
   <div class="view admin-view">
     <h1>Admin View</h1>
-    <div class="tabs">
-      <button 
-        v-for="tab in tabs" 
-        :key="tab.id"
-        :class="['tab-button', { active: currentTab === tab.id }]"
-        @click="currentTab = tab.id"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
-
-    <div class="tab-content">
-      <!-- All Clients Tab -->
-      <div v-if="currentTab === 'clients'" class="tab-panel">
-        <h2>All Clients</h2>
-        <div v-if="error" class="error-message">{{ error }}</div>
-        <div v-if="loadingClients" class="loading">Loading clients...</div>
-        <div class="list-container">
-          <p v-if="!loadingClients && !clients.length">No clients registered yet.</p>
-          <div v-else v-for="client in clients" :key="client.id" class="list-item">
-            <h3>{{ client.name }}</h3>
-            <p>Email: {{ client.email }}</p>
-            <p>Phone: {{ client.phone }}</p>
-            <p>Address: {{ client.pickupAddress }}</p>
-          </div>
-        </div>
+    
+    <div class="view-container">
+      <div class="tabs">
+        <button 
+          v-for="tab in tabs" 
+          :key="tab.id"
+          :class="['tab-button', { active: currentTab === tab.id }]"
+          @click="currentTab = tab.id"
+        >
+          {{ tab.label }}
+        </button>
       </div>
 
-      <!-- All Couriers Tab -->
-      <div v-if="currentTab === 'couriers'" class="tab-panel">
-        <h2>All Couriers</h2>
-        <div class="list-container">
-          <p v-if="!couriers.length">No couriers registered yet.</p>
-          <div v-else v-for="courier in couriers" :key="courier.id" class="list-item">
-            <h3>{{ courier.name }}</h3>
-            <p>Status: {{ courier.status }}</p>
+      <div class="tab-content">
+        <!-- All Clients Tab -->
+        <div v-if="currentTab === 'clients'" class="tab-panel">
+          <h2>All Clients</h2>
+          <div v-if="error" class="error-message">{{ error }}</div>
+          <div v-if="loadingClients" class="loading">Loading clients...</div>
+          <div class="list-container">
+            <p v-if="!loadingClients && !clients.length">No clients registered yet.</p>
+            <div v-else v-for="client in clients" :key="client.id" class="list-item">
+              <h3>{{ client.name }}</h3>
+              <p>Email: {{ client.email }}</p>
+              <p>Phone: {{ client.phone }}</p>
+              <p>Address: {{ client.pickupAddress }}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Order History Tab -->
-      <div v-if="currentTab === 'history'" class="tab-panel">
-        <h2>Order History</h2>
-        <div class="list-container">
-          <p v-if="!orderHistory.length">No completed orders.</p>
-          <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
-            <h3>Order #{{ order.id }}</h3>
-            <p>Status: {{ order.status }}</p>
-            <p>Client: {{ order.clientId }}</p>
-            <p>Items: {{ order.items.length }}</p>
+        <!-- All Couriers Tab -->
+        <div v-if="currentTab === 'couriers'" class="tab-panel">
+          <h2>All Couriers</h2>
+          <div class="list-container">
+            <p v-if="!couriers.length">No couriers registered yet.</p>
+            <div v-else v-for="courier in couriers" :key="courier.id" class="list-item">
+              <h3>{{ courier.name }}</h3>
+              <p>Status: {{ courier.status }}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Active Orders Tab -->
-      <div v-if="currentTab === 'active'" class="tab-panel">
-        <h2>Active Orders</h2>
-        <div class="list-container">
-          <p v-if="!activeOrders.length">No active orders.</p>
-          <div v-else v-for="order in activeOrders" :key="order.id" class="list-item">
-            <h3>Order #{{ order.id }}</h3>
-            <p>Status: {{ order.status }}</p>
-            <p>Client: {{ order.clientId }}</p>
-            <div class="order-actions">
-              <button @click="updateOrderStatus(order.id, 'ACCEPTED')">Accept</button>
-              <button @click="updateOrderStatus(order.id, 'CANCELLED')">Cancel</button>
+        <!-- Order History Tab -->
+        <div v-if="currentTab === 'history'" class="tab-panel">
+          <h2>Order History</h2>
+          <div class="list-container">
+            <p v-if="!orderHistory.length">No completed orders.</p>
+            <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
+              <h3>Order #{{ order.id }}</h3>
+              <p>Status: {{ order.status }}</p>
+              <p>Client: {{ order.clientId }}</p>
+              <p>Items: {{ order.items.length }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Orders Tab -->
+        <div v-if="currentTab === 'active'" class="tab-panel">
+          <h2>Active Orders</h2>
+          <div class="list-container">
+            <p v-if="!activeOrders.length">No active orders.</p>
+            <div v-else v-for="order in activeOrders" :key="order.id" class="list-item">
+              <h3>Order #{{ order.id }}</h3>
+              <p>Status: {{ order.status }}</p>
+              <p>Client: {{ order.clientId }}</p>
+              <div class="order-actions">
+                <button @click="updateOrderStatus(order.id, 'ACCEPTED')">Accept</button>
+                <button @click="updateOrderStatus(order.id, 'CANCELLED')">Cancel</button>
+              </div>
             </div>
           </div>
         </div>
@@ -143,7 +146,14 @@ const updateOrderStatus = (orderId: string, status: string) => {
 </script>
 
 <style scoped>
+.view-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .tabs {
+  width: 100%;
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
@@ -172,6 +182,7 @@ const updateOrderStatus = (orderId: string, status: string) => {
 }
 
 .tab-content {
+  width: 100%;
   background: var(--color-background-soft);
   padding: 1.5rem;
   border-radius: 8px;

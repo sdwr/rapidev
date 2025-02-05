@@ -1,3 +1,5 @@
+import type { OrderItem } from './OrderItem'
+
 export interface Order {
   id?: string;
   clientId: string;
@@ -7,12 +9,6 @@ export interface Order {
   items: OrderItem[];
   createdAt?: Date;
   updatedAt?: Date;
-}
-
-export interface OrderItem {
-  description: string;
-  quantity: number;
-  size: Size;
 }
 
 export enum OrderStatus {

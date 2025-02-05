@@ -2,44 +2,46 @@
   <div class="view client-view">
     <h1>Client View</h1>
     
-    <div class="tabs">
-      <button 
-        v-for="tab in tabs" 
-        :key="tab.id"
-        :class="['tab-button', { active: currentTab === tab.id }]"
-        @click="currentTab = tab.id"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
-
-    <div class="tab-content">
-      <!-- Profile Tab -->
-      <div v-if="currentTab === 'profile'" class="tab-panel">
-        <h2>My Profile</h2>
-        <ProfileInfo @profile-saved="handleProfileSave" />
+    <div class="view-container">
+      <div class="tabs">
+        <button 
+          v-for="tab in tabs" 
+          :key="tab.id"
+          :class="['tab-button', { active: currentTab === tab.id }]"
+          @click="currentTab = tab.id"
+        >
+          {{ tab.label }}
+        </button>
       </div>
 
-      <!-- Place Order Tab -->
-      <div v-if="currentTab === 'order'" class="tab-panel">
-        <div class="card">
-          <h2>Place Your Order</h2>
-          <Order @order-created="handleOrderCreated" />
-          <div class="order-status" v-if="orderStatus">{{ orderStatus }}</div>
+      <div class="tab-content">
+        <!-- Profile Tab -->
+        <div v-if="currentTab === 'profile'" class="tab-panel">
+          <h2>My Profile</h2>
+          <ProfileInfo @profile-saved="handleProfileSave" />
         </div>
-      </div>
 
-      <!-- Order History Tab -->
-      <div v-if="currentTab === 'history'" class="tab-panel">
-        <h2>Order History</h2>
-        <div class="list-container">
-          <p v-if="!orderHistory.length">No orders yet.</p>
-          <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
-            <h3>Order #{{ order.id }}</h3>
-            <p>Status: {{ order.status }}</p>
-            <p>Delivery Address: {{ order.deliveryAddress }}</p>
-            <p>Items: {{ order.items.length }}</p>
-            <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
+        <!-- Place Order Tab -->
+        <div v-if="currentTab === 'order'" class="tab-panel">
+          <div class="card">
+            <h2>Place Your Order</h2>
+            <Order @order-created="handleOrderCreated" />
+            <div class="order-status" v-if="orderStatus">{{ orderStatus }}</div>
+          </div>
+        </div>
+
+        <!-- Order History Tab -->
+        <div v-if="currentTab === 'history'" class="tab-panel">
+          <h2>Order History</h2>
+          <div class="list-container">
+            <p v-if="!orderHistory.length">No orders yet.</p>
+            <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
+              <h3>Order #{{ order.id }}</h3>
+              <p>Status: {{ order.status }}</p>
+              <p>Delivery Address: {{ order.deliveryAddress }}</p>
+              <p>Items: {{ order.items.length }}</p>
+              <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -53,6 +55,7 @@ import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
 import { getClientOrders, upsertOrder } from '@/api/api'
+import { randomUUID } from 'node:crypto'
 
 const tabs = [
   { id: 'profile', label: 'My Profile' },
@@ -66,6 +69,8 @@ const orderHistory = ref<OrderType[]>([])
 const loadingOrders = ref(false)
 const error = ref('')
 
+const TEST_CLIENT_ID = '84577c3f-807f-4243-858e-b0f04d90edcf'
+
 const handleProfileSave = (profileData) => {
   console.log('Profile saved:', profileData)
 }
@@ -74,7 +79,7 @@ const fetchOrders = async () => {
   loadingOrders.value = true
   try {
     // For now, using a hardcoded client ID until we have auth
-    orderHistory.value = await getClientOrders('test-client-id')
+    orderHistory.value = await getClientOrders(TEST_CLIENT_ID)
   } catch (e) {
     error.value = e.message
   } finally {
@@ -86,10 +91,10 @@ const handleOrderCreated = async (orderData) => {
   try {
     const savedOrder = await upsertOrder({
       ...orderData,
-      clientId: 'test-client-id' // Replace with actual client ID from auth
+      clientId: TEST_CLIENT_ID,
     })
     orderStatus.value = 'Order submitted successfully!'
-    await fetchOrders() // Refresh the order list
+    await fetchOrders()
   } catch (e) {
     orderStatus.value = `Error: ${e.message}`
   }
@@ -101,7 +106,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.view-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .tabs {
+  width: 100%;
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
@@ -130,6 +142,7 @@ onMounted(() => {
 }
 
 .tab-content {
+  width: 100%;
   background: var(--color-background-soft);
   padding: 1.5rem;
   border-radius: 8px;

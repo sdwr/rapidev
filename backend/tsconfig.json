@@ -10,9 +10,9 @@
   },
   "include": [
     "src/**/*",
-    "../shared/**/*",
     "app/controllers",
     "app/models",
-    "app/validators"
+    "app/validators",
+    "shared",
   ]
 }
