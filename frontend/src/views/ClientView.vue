@@ -69,7 +69,7 @@ const orderHistory = ref<OrderType[]>([])
 const loadingOrders = ref(false)
 const error = ref('')
 
-const TEST_CLIENT_ID = '123e4567-e89b-12d3-a456-426614174000'
+const TEST_CLIENT_ID = '84577c3f-807f-4243-858e-b0f04d90edcf'
 
 const handleProfileSave = (profileData) => {
   console.log('Profile saved:', profileData)
@@ -79,7 +79,7 @@ const fetchOrders = async () => {
   loadingOrders.value = true
   try {
     // For now, using a hardcoded client ID until we have auth
-    orderHistory.value = await getClientOrders('test-client-id')
+    orderHistory.value = await getClientOrders(TEST_CLIENT_ID)
   } catch (e) {
     error.value = e.message
   } finally {

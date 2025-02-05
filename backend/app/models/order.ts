@@ -1,10 +1,10 @@
 import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
-import type { OrderItem } from '#shared/models/Order'
 import Profile from '#models/profile'
 import OrderStatus from '#models/order_status'
 import Courier from '#models/courier'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import OrderItem from '#models/order_item'
 
 export default class Order extends BaseModel {
   @column({ isPrimary: true })
@@ -17,13 +17,10 @@ export default class Order extends BaseModel {
   declare courierId: string | null
 
   @column()
-  declare pickupAddress: string
-
-  @column()
   declare deliveryAddress: string
 
-  @column()
-  declare items: OrderItem[]
+  @hasMany(() => OrderItem)
+  declare items: HasMany<typeof OrderItem>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
