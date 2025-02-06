@@ -17,10 +17,10 @@ router.get('/', async () => {
   }
 })
 
-router.post('api/clients/profile', [ClientController, 'upsertProfile'])
-router.get('api/clients/all', [ClientController, 'getAllProfiles'])
-router.get('api/clients/:id/profile', [ClientController, 'getProfile'])
+router.post('/api/clients/profile', [ClientController, 'upsertProfile'])
+router.get('/api/clients/all', [ClientController, 'getAllProfiles'])
+router.get('/api/clients/:id/profile', [ClientController, 'getProfile'])
 // Order routes
-router.post('api/orders', [OrderController, 'createOrder'])
-router.get('api/orders', [OrderController, 'getAllOrders'])
-router.get('api/orders/client/:clientId', [OrderController, 'getClientOrders'])
+router.post('/api/orders', [OrderController, 'createOrder'])
+router.get('/api/orders', [OrderController, 'getAllOrders'])
+router.get('/api/orders/client/:clientId', [OrderController, 'getClientOrders'])
