@@ -37,7 +37,7 @@
             <p v-if="!orderHistory.length">No orders yet.</p>
             <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
               <h3>Order #{{ order.id }}</h3>
-              <p>Status: {{ order.status }}</p>
+              <p>Status: {{ getCurrentStatus(order) }}</p>
               <p>Delivery Address: {{ order.deliveryAddress }}</p>
               <p>Items: {{ order.items.length }}</p>
               <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
@@ -56,6 +56,7 @@ import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
 import { getClientOrders, upsertOrder } from '@/api/api'
 import { randomUUID } from 'node:crypto'
+import { getCurrentStatus } from '@/utils'
 
 const tabs = [
   { id: 'profile', label: 'My Profile' },

@@ -135,4 +135,13 @@ export class OrderController {
     // TODO: Implement reordering
     return response.json(true)
   }
+
+  async getAllOrderStatuses({ response }: HttpContext) {
+    try {
+      const orderStatuses = await OrderStatus.query()
+      return response.json(orderStatuses)
+    } catch (error) {
+      return response.status(400).json({ error: error.message })
+    }
+  }
 } 

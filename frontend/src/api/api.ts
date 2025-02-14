@@ -115,4 +115,15 @@ export async function acceptOrder(orderId: string, courierId: string): Promise<O
   })
   if (!response.ok) throw new Error('Failed to accept order')
   return response.json()
+}
+
+export const getDebugData = async () => {
+  const response = await fetch(`${getBaseUrl()}/debug`)
+  return response.json()
+}
+
+export async function getAllOrderStatuses() {
+  const response = await fetch(`${BASE_URL}/api/orderstatuses`)
+  if (!response.ok) throw new Error('Failed to fetch all order statuses')
+  return response.json()
 } 

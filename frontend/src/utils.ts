@@ -1,0 +1,10 @@
+import type { Order } from '../shared/models/Order'
+import type { OrderStatus } from '../shared/models/OrderStatus'
+
+export const getCurrentStatus = (order: Order): OrderStatus | undefined => {
+  if (!order.orderStatuses || order.orderStatuses.length === 0) {
+    return undefined
+  }
+  
+  return order.orderStatuses[0].status
+} 

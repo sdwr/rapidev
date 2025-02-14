@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ClientView from '../views/ClientView.vue'
 import AdminView from '../views/AdminView.vue'
 import CourierView from '../views/CourierView.vue'
-
+import DebugView from '../views/DebugView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -20,6 +20,11 @@ const router = createRouter({
       path: '/courier',
       name: 'courier',
       component: CourierView
+    },
+    {
+      path: '/debug',
+      name: 'debug',
+      component: DebugView
     }
   ]
 })

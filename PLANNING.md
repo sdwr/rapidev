@@ -65,6 +65,7 @@
 
 2. Order Management
    - Create new order
+   - Pay for order
    - View order history
    - Cancel pending order
    - Track active order status
