@@ -12,6 +12,8 @@ export default class extends BaseSchema {
       table.text('pickup_address').notNullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
+
+      table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE')
     })
   }
 

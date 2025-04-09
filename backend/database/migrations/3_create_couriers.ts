@@ -10,6 +10,8 @@ export default class extends BaseSchema {
       table.enum('status', ['AVAILABLE', 'BUSY', 'OFFLINE']).notNullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
+
+      table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE')
     })
   }
 

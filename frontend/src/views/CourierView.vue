@@ -49,28 +49,83 @@
             </div>
           </div>
         </div>
+
+        <!-- My Profile Tab -->
+        <div v-if="currentTab === 'profile'" class="tab-panel">
+          <h2>My Profile</h2>
+          <ProfileInfo 
+            profileType="courier"
+            @profile-saved="handleProfileSave"
+          />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import type { Order } from '@/models/Order'
+import { getClientOrders, acceptOrder, getAllCouriers } from '../api/api'
+import ProfileInfo from '../components/ProfileInfo.vue'
 
 const tabs = [
   { id: 'active', label: 'Active Deliveries' },
-  { id: 'history', label: 'Delivery History' }
+  { id: 'history', label: 'Delivery History' },
+  { id: 'profile', label: 'My Profile' }
 ]
 
 const currentTab = ref('active')
 const activeDeliveries = ref<Order[]>([])
 const deliveryHistory = ref<Order[]>([])
+const loading = ref(false)
+const profile = ref({
+  id: null,
+  name: '',
+  email: '',
+  phone: '',
+  address: ''
+})
+
+const getTestCourierId = async () => {
+  const response = await getAllCouriers()
+  return response[0]?.id || null
+}
+
+const handleProfileSave = (profileData) => {
+  console.log('Profile saved:', profileData)
+}
+
+const fetchOrders = async () => {
+  loading.value = true
+  try {
+    // In a real app, you'd fetch orders assigned to this courier
+    const orders = await getClientOrders('all')
+    activeDeliveries.value = orders.filter(order => order.status === 'ACCEPTED')
+    deliveryHistory.value = orders.filter(order => order.status !== 'ACCEPTED')
+  } catch (error) {
+    console.error('Error fetching orders:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleAcceptOrder = async (orderId) => {
+  let courierId = await getTestCourierId()
+  const result = await acceptOrder(orderId, courierId)
+  if (result) {
+    await fetchOrders()
+  }
+}
 
 const updateDeliveryStatus = (orderId: string, status: string) => {
   console.log(`Updating delivery ${orderId} to status: ${status}`)
   // Here you would typically make an API call to update the delivery status
 }
+
+onMounted(() => {
+  fetchOrders()
+})
 </script>
 
 <style scoped>

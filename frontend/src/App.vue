@@ -13,6 +13,7 @@ const showErrorToast = () => {
       <div class="header-text">Rapid App</div>
       <div class="content-container">
         <nav>
+          <RouterLink to="/login">Login</RouterLink>
           <RouterLink to="/">Client</RouterLink>
           <RouterLink to="/admin">Admin</RouterLink>
           <RouterLink to="/courier">Courier</RouterLink>

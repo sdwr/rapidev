@@ -16,6 +16,7 @@ export default class extends BaseSchema {
         'DELIVERED',
         'CANCELLED'
       ]).notNullable()
+      table.string('description').notNullable()
       table.boolean('is_current').defaultTo(true)
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

@@ -18,7 +18,9 @@
         <!-- Profile Tab -->
         <div v-if="currentTab === 'profile'" class="tab-panel">
           <h2>My Profile</h2>
-          <ProfileInfo @profile-saved="handleProfileSave" />
+          <ProfileInfo 
+            profileType="client"
+            @profile-saved="handleProfileSave" />
         </div>
 
         <!-- Place Order Tab -->
@@ -68,8 +70,6 @@ const orderStatus = ref('')
 const orderHistory = ref<OrderType[]>([])
 const loadingOrders = ref(false)
 const error = ref('')
-
-const TEST_CLIENT_ID = '84577c3f-807f-4243-858e-b0f04d90edcf'
 
 const handleProfileSave = (profileData) => {
   console.log('Profile saved:', profileData)

@@ -15,6 +15,9 @@ export default class OrderStatus extends BaseModel {
   declare status: Status
 
   @column()
+  declare description: string
+
+  @column()
   declare isCurrent: boolean
 
   @column.dateTime({ autoCreate: true })

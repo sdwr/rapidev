@@ -121,6 +121,33 @@ export async function getAllCouriers(): Promise<Courier[]> {
   }
 }
 
+export async function getCourierProfile(courierId: string): Promise<ProfileInfo> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/couriers/${courierId}/profile`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function upsertCourierProfile(profile: ProfileInfo): Promise<ProfileInfo> {
+  const response = await fetch(`${BASE_URL}/api/couriers/profile`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(profile),
+  })
+  if (!response.ok) {
+    const error = await response.json()
+    handleApiError(error)
+    return null 
+  }
+  return response.json()
+}
+
 export async function assignOrderToCourier(orderId: string, courierId: string): Promise<Order> {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/${orderId}/assign`, {

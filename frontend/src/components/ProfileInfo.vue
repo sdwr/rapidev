@@ -57,9 +57,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import type { ProfileInfo } from '@/models/ProfileInfo'
-import { upsertClientProfile } from '@/api/api'
+import { getClientProfile, getCourierProfile, upsertClientProfile, upsertCourierProfile } from '@/api/api'
+
+const props = defineProps({
+  profileType: {
+    type: String,
+    default: 'client',
+    validator: (value) => ['client', 'courier'].includes(value)
+  }
+})
 
 const emit = defineEmits<{
   (e: 'profile-saved', profile: ProfileInfo): void
@@ -74,16 +82,56 @@ const profile = ref<ProfileInfo>({
 
 const error = ref('')
 const saving = ref(false)
+const success = ref(false)
 
-const saveProfile = async () => {
-  saving.value = true
-  error.value = ''
+onMounted(async () => {
+  const testId = 'test-user-id'
   
   try {
-    const savedProfile = await upsertClientProfile(profile.value)
-    emit('profile-saved', savedProfile)
-  } catch (e) {
-    error.value = e.message
+    saving.value = true
+    error.value = ''
+    success.value = false
+    
+    if (props.profileType === 'client') {
+      const data = await getClientProfile(testId)
+      if (data) {
+        profile.value = data
+      }
+    } else {
+      // For courier profile
+      const data = await getCourierProfile(testId)
+      if (data) {
+        profile.value = data
+      }
+    }
+  } catch (err) {
+    error.value = 'Failed to load profile'
+  } finally {
+    saving.value = false
+  }
+})
+
+const saveProfile = async () => {
+  try {
+    saving.value = true
+    error.value = ''
+    success.value = false
+    
+    let savedProfile
+    
+    if (props.profileType === 'client') {
+      savedProfile = await upsertClientProfile(profile.value)
+    } else {
+      // For courier profile
+      savedProfile = await upsertCourierProfile(profile.value)
+    }
+    
+    if (savedProfile) {
+      success.value = true
+      emit('profile-saved', savedProfile)
+    }
+  } catch (err) {
+    error.value = 'Failed to save profile'
   } finally {
     saving.value = false
   }
