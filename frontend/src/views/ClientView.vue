@@ -37,7 +37,7 @@
             <p v-if="!orderHistory.length">No orders yet.</p>
             <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
               <h3>Order #{{ order.id }}</h3>
-              <p>Status: {{ getCurrentStatus(order) }}</p>
+              <p>Status: {{ order.status }}</p>
               <p>Delivery Address: {{ order.deliveryAddress }}</p>
               <p>Items: {{ order.items.length }}</p>
               <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
@@ -56,7 +56,6 @@ import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
 import { getClientOrders, upsertOrder, getAllClients } from '@/api/api'
 import { randomUUID } from 'node:crypto'
-import { getCurrentStatus } from '@/utils'
 
 const tabs = [
   { id: 'profile', label: 'My Profile' },
@@ -80,7 +79,10 @@ const fetchOrders = async () => {
   loadingOrders.value = true
   try {
     // For now, using a hardcoded client ID until we have auth
-    orderHistory.value = await getClientOrders(TEST_CLIENT_ID)
+    let clientId = await getTestClientId()
+    orderHistory.value = await getClientOrders(clientId)
+    console.log('orderHistory')
+    console.log(orderHistory.value)
   } catch (e) {
     error.value = e.message
   } finally {

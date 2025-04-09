@@ -18,6 +18,13 @@ export const mapOrderStatuses = (orders: Order[]): Order[] => {
   })
 }
 
+export const mapOrderStatus = (order: Order): Order => {
+  return {
+    ...order,
+    status: getOrderStatus(order)
+  }
+}
+
 const getOrderStatus = (order: Order): OrderStatus => {
   if (order.orderStatuses.length === 0) {
     return null
