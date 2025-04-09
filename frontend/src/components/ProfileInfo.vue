@@ -2,9 +2,6 @@
   <div class="profile-info">
     <h2>Profile Information</h2>
     <form @submit.prevent="saveProfile">
-      <div v-if="error" class="error-message">
-        {{ error }}
-      </div>
 
       <div class="form-group">
         <label for="name">Full Name</label>

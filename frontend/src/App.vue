@@ -1,5 +1,10 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import { toast } from 'vue3-toastify'
+
+const showErrorToast = () => {
+  toast.error('This is an error message!')
+}
 </script>
 
 <template>
@@ -18,6 +23,7 @@ import { RouterLink, RouterView } from 'vue-router'
 
     <main class="content-container">
       <RouterView />
+      <button @click="showErrorToast">Show Error Toast</button>
     </main>
   </div>
 </template>
