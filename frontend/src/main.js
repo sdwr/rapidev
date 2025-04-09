@@ -12,7 +12,9 @@ app.use(router)
 app.use(Vue3Toastify, {
   autoClose: 3000, // Auto close after 3 seconds
   position: 'top-right', // Position of the toast
-  // Add more options as needed
+  pauseOnFocusLoss: false, // Don't pause when window loses focus
+  closeOnClick: true,      // Close when clicked
+  pauseOnHover: true       // Pause on hover
 })
 
 app.mount('#app')

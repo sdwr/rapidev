@@ -14,7 +14,7 @@ export async function getClientProfile(clientId: string): Promise<ProfileInfo> {
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return null
   }
 }
 
@@ -29,7 +29,7 @@ export async function upsertClientProfile(profile: ProfileInfo): Promise<Profile
   if (!response.ok) {
     const error = await response.json()
     handleApiError(error)
-    throw new Error(error.error || 'Failed to update client profile')
+    return null
   }
   return response.json()
 }
@@ -41,7 +41,7 @@ export async function getClientOrders(clientId: string): Promise<Order[]> {
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return []
   }
 }
 
@@ -58,7 +58,7 @@ export async function upsertOrder(order: Order): Promise<Order> {
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return null
   }
 }
 
@@ -75,7 +75,7 @@ export async function updateOrderState(orderId: string, status: OrderStatus): Pr
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return null
   }
 }
 
@@ -84,7 +84,8 @@ export async function getAllClients(): Promise<ProfileInfo[]> {
   const response = await fetch(`${BASE_URL}/api/clients/all`)
   if (!response.ok) {
     const error = await response.json()
-    throw new Error(error.error || 'Failed to fetch all clients')
+    handleApiError(error)
+    return []
   }
   return response.json()
 }
@@ -96,7 +97,7 @@ export async function getAllOrders(): Promise<Order[]> {
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return []
   }
 }
 
@@ -107,7 +108,7 @@ export async function getAllCouriers(): Promise<Courier[]> {
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return []
   }
 }
 
@@ -124,7 +125,7 @@ export async function assignOrderToCourier(orderId: string, courierId: string): 
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return null
   }
 }
 
@@ -141,7 +142,7 @@ export async function reorderOrders(orderIds: string[]): Promise<boolean> {
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return false
   }
 }
 
@@ -159,7 +160,7 @@ export async function acceptOrder(orderId: string, courierId: string): Promise<O
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return null
   }
 }
 
@@ -170,7 +171,7 @@ export const getDebugData = async () => {
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return null
   }
 }
 
@@ -181,6 +182,6 @@ export async function getAllOrderStatuses() {
     return response.json()
   } catch (error) {
     handleApiError(error)
-    throw error
+    return []
   }
 } 
