@@ -8,3 +8,19 @@ export const getCurrentStatus = (order: Order): OrderStatus | undefined => {
   
   return order.orderStatuses[0].status
 } 
+
+export const mapOrderStatuses = (orders: Order[]): Order[] => {
+  return orders.map(order => {
+    return {
+      ...order,
+      status: getOrderStatus(order)
+    }
+  })
+}
+
+const getOrderStatus = (order: Order): OrderStatus => {
+  if (order.orderStatuses.length === 0) {
+    return null
+  }
+  return order.orderStatuses[0].status
+}

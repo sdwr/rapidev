@@ -54,7 +54,7 @@ import { ref, onMounted } from 'vue'
 import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
-import { getClientOrders, upsertOrder } from '@/api/api'
+import { getClientOrders, upsertOrder, getAllClients } from '@/api/api'
 import { randomUUID } from 'node:crypto'
 import { getCurrentStatus } from '@/utils'
 
@@ -88,11 +88,17 @@ const fetchOrders = async () => {
   }
 }
 
+const getTestClientId = async () => {
+  const response = await getAllClients()
+  return response[0]?.id || null
+}
+
 const handleOrderCreated = async (orderData) => {
   try {
+    let clientId = await getTestClientId()
     const savedOrder = await upsertOrder({
       ...orderData,
-      clientId: TEST_CLIENT_ID,
+      clientId: clientId
     })
     orderStatus.value = 'Order submitted successfully!'
     await fetchOrders()

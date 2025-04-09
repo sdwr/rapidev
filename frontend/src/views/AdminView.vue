@@ -83,7 +83,7 @@ import { ref, onMounted } from 'vue'
 import { getAllClients, getAllOrders } from '@/api/api'
 import type { Order } from '@/models/Order'
 import type { ProfileInfo } from '@/models/ProfileInfo'
-
+import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
 interface Courier {
   id: string;
   name: string;
@@ -122,10 +122,10 @@ const fetchOrders = async () => {
   try {
     const orders = await getAllOrders()
     activeOrders.value = orders.filter(o => 
-      ['DRAFT', 'PENDING', 'ACCEPTED', 'PICKED_UP', 'IN_TRANSIT'].includes(o.status)
+      ACTIVE_ORDER_STATUSES.includes(o.status)
     )
     orderHistory.value = orders.filter(o => 
-      ['DELIVERED', 'CANCELLED'].includes(o.status)
+      HISTORY_ORDER_STATUSES.includes(o.status)
     )
   } catch (e) {
     error.value = e.message

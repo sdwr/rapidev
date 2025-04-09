@@ -1,0 +1,13 @@
+export const ACTIVE_ORDER_STATUSES = [
+  'DRAFT',
+  'PENDING',
+  'ACCEPTED',
+  'PICKED_UP',
+  'IN_TRANSIT'
+]
+
+export const HISTORY_ORDER_STATUSES = [
+  'DELIVERED',
+  'CANCELLED'
+]
+

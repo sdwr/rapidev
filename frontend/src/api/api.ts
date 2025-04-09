@@ -4,6 +4,7 @@ import { OrderStatus } from '../../../shared/enums/OrderEnums'
 import type { Courier } from '../../../shared/models/Courier'
 import { getBaseUrl } from './config'
 import { handleApiError } from '../utils/errorHandler'
+import { mapOrderStatuses } from '../utils'
 const BASE_URL = getBaseUrl()
 
 // Client API functions
@@ -94,7 +95,9 @@ export async function getAllOrders(): Promise<Order[]> {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/all`)
     if (!response.ok) throw await response.json()
-    return response.json()
+    let orders = await response.json()
+    orders = mapOrderStatuses(orders)
+    return orders
   } catch (error) {
     handleApiError(error)
     return []
