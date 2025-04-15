@@ -45,39 +45,45 @@
           <div class="list-container">
             <p v-if="!myOrders.length">No active orders.</p>
             <div v-else v-for="order in myOrders" :key="order.id" class="list-item">
-              <h3>Order #{{ order.id }}</h3>
-              <div class="status-chip" :style="{
-                backgroundColor: orderStatusColors[order.status].background,
-                color: orderStatusColors[order.status].text
-              }">
-                {{ order.status }}
+              <div class="order-header" @click="toggleOrder(order.id)">
+                <h3>Order #{{ order.id }}</h3>
+                <div class="status-chip" :style="{
+                  backgroundColor: orderStatusColors[order.status].background,
+                  color: orderStatusColors[order.status].text
+                }">
+                  {{ order.status }}
+                </div>
+                <span class="toggle-icon">{{ expandedOrders[order.id] ? '▼' : '▶' }}</span>
               </div>
-              <p>Delivery Address: {{ order.deliveryAddress }}</p>
-              <p>Items: {{ order.items.length }}</p>
-              <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
               
-              <div class="order-actions">
-                <button 
-                  v-if="order.status === OrderStatus.DRAFT" 
-                  @click="handleCancelOrder(order.id)"
-                  class="action-button cancel"
-                >
-                  Cancel Order
-                </button>
-                <button 
-                  v-if="order.status === OrderStatus.DRAFT" 
-                  @click="handleEditOrder(order)"
-                  class="action-button edit"
-                >
-                  Edit Order
-                </button>
-                <button 
-                  v-if="order.status === OrderStatus.DRAFT" 
-                  @click="handlePayOrder(order.id)"
-                  class="action-button pay"
-                >
-                  Pay Now
-                </button>
+              <div v-if="expandedOrders[order.id]" class="order-details">
+                <p>Delivery Address: {{ order.deliveryAddress }}</p>
+                <p>Items: {{ order.items.length }}</p>
+                <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
+                
+                <div class="order-actions">
+                  <button 
+                    v-if="order.status === OrderStatus.DRAFT" 
+                    @click="handleCancelOrder(order.id)"
+                    class="action-button cancel"
+                  >
+                    Cancel Order
+                  </button>
+                  <button 
+                    v-if="order.status === OrderStatus.DRAFT" 
+                    @click="handleEditOrder(order)"
+                    class="action-button edit"
+                  >
+                    Edit Order
+                  </button>
+                  <button 
+                    v-if="order.status === OrderStatus.DRAFT" 
+                    @click="handlePayOrder(order.id)"
+                    class="action-button pay"
+                  >
+                    Pay Now
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -89,17 +95,23 @@
           <div class="list-container">
             <p v-if="!orderHistory.length">No order history.</p>
             <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
-              <h3>Order #{{ order.id }}</h3>
-              <div class="status-chip" :style="{
-                backgroundColor: orderStatusColors[order.status].background,
-                color: orderStatusColors[order.status].text
-              }">
-                {{ order.status }}
+              <div class="order-header" @click="toggleOrder(order.id)">
+                <h3>Order #{{ order.id }}</h3>
+                <div class="status-chip" :style="{
+                  backgroundColor: orderStatusColors[order.status].background,
+                  color: orderStatusColors[order.status].text
+                }">
+                  {{ order.status }}
+                </div>
+                <span class="toggle-icon">{{ expandedOrders[order.id] ? '▼' : '▶' }}</span>
               </div>
-              <p>Delivery Address: {{ order.deliveryAddress }}</p>
-              <p>Items: {{ order.items.length }}</p>
-              <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
-              <p>Completed: {{ new Date(order.updatedAt).toLocaleString() }}</p>
+              
+              <div v-if="expandedOrders[order.id]" class="order-details">
+                <p>Delivery Address: {{ order.deliveryAddress }}</p>
+                <p>Items: {{ order.items.length }}</p>
+                <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
+                <p>Completed: {{ new Date(order.updatedAt).toLocaleString() }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -134,6 +146,7 @@ const myOrders = ref<OrderType[]>([])
 const orderHistory = ref<OrderType[]>([])
 const loadingOrders = ref(false)
 const error = ref('')
+const expandedOrders = ref<Record<string, boolean>>({})
 
 const handleProfileSave = async (profileData) => {
   try {
@@ -224,6 +237,10 @@ const handleEditOrder = async (order: OrderType) => {
   toast.info('Order editing coming soon')
 }
 
+const toggleOrder = (orderId: string) => {
+  expandedOrders.value[orderId] = !expandedOrders.value[orderId]
+}
+
 onMounted(() => {
   fetchOrders()
 })
@@ -281,6 +298,28 @@ onMounted(() => {
   flex-direction: column;
   gap: 1rem;
   margin-top: 1rem;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.list-container::-webkit-scrollbar {
+  width: 8px;
+  padding-bottom: 1rem;
+}
+
+.list-container::-webkit-scrollbar-track {
+  background: var(--color-background-soft);
+  border-radius: 4px;
+}
+
+.list-container::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.list-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text);
 }
 
 .list-item {
@@ -340,5 +379,37 @@ onMounted(() => {
 .action-button.edit {
   background-color: #2196F3;
   color: white;
+}
+
+.order-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 1rem;
+  background: var(--color-background);
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.order-header h3 {
+  margin: 0;
+  flex: 1;
+}
+
+.toggle-icon {
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.order-details {
+  padding: 1rem;
+  background: var(--color-background-soft);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.order-details p {
+  margin: 0.5rem 0;
 }
 </style> 
