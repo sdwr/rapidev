@@ -17,18 +17,16 @@ onMounted(() => {
 <template>
   <div class="app-container">
     <header>
-      <div class="header-content">
-        <div class="header-text">Rapid Delivery</div>
-        <UserProfile />
-      </div>
       <div class="content-container">
-        <nav>
+        <div class="header-text">Rapid Delivery</div>
+        <nav class="header-nav">
           <RouterLink to="/login">Login</RouterLink>
           <RouterLink to="/">Client</RouterLink>
           <RouterLink to="/admin">Admin</RouterLink>
           <RouterLink to="/courier">Courier</RouterLink>
           <RouterLink to="/debug">Debug</RouterLink>
         </nav>
+        <UserProfile />
       </div>
     </header>
 
@@ -42,7 +40,7 @@ onMounted(() => {
 /* Global styles */
 .app {
   margin: 0 !important;
-  padding: 10px !important;
+  padding: 0px !important;
 }
 .view, 
 .view-container,
@@ -66,6 +64,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -86,6 +86,8 @@ onMounted(() => {
   max-width: 510px;
   margin: 0 auto;
   justify-items: center;
+  display: flex;
+  flex-direction: row;
 }
 
 main {
@@ -102,9 +104,9 @@ header {
   padding: 1rem 0;
 }
 
-nav {
+.header-nav {
   display: flex;
-  gap: 20px;
+  gap: 10px;
   padding: 1rem 0;
 }
 
