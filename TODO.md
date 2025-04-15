@@ -10,30 +10,40 @@
 
 3. accept/assign order flow
 - client creates (using profile location as pickup location, adds note)
-    <STATUS = PENDING>
+    
+    
+    <STATUS = DRAFT>
+    - created order
     - sets dropoff location on order
     - should be able to add pickup note on existing order
     - should be able to set date for pickup (after x time)
 
-- admin accepts order, confirms date
+    <STATUS = PENDING>
+    - after paying for order, waiting to be accepted by admin
+
     <STATUS = ACCEPTED>
+    - admin accepts order, confirms date
 
-- admin assigns courier to order
-    <STATUS = ASSIGNED>
+    <STATUS = ASSIGNED_TO_COURIER>
+        - admin assigns courier to order
 
-- courier accepts order
-    <STATUS = CONFIRMED>
+    <STATUS = CONFIRMED_BY_COURIER>
+        - courier accepts order
+        - courier sees order in delivery list
 
-- courier sees order in delivery list
-
--courier picks up order
     <STATUS = PICKED_UP>
+        -courier picks up order
 
-- courier delivers order
     <STATUS = DELIVERED>
-    - adds confirmation photo/text to order
+        - courier delivers order
+        - adds confirmation photo/text to order
 
+    <STATUS = CANCELLED_BY_CLIENT>
 
+    <STATUS = CANCELLED_BY_COURIER>
+        -admin can reassign to new courier?
+        
+    <STATUS = CANCELLED_BY_ADMIN>
 
 
 
