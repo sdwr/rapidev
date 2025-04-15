@@ -22,10 +22,10 @@ export const useUserStore = defineStore('user', () => {
   async function setUser(newUser: User | null) {
     if (newUser) {
       // Load profile data if user exists
-      const profile = await getProfileByUserId(newUser.id)
+      const response = await getProfileByUserId(newUser.id)
       user.value = {
         ...newUser,
-        profile
+        profile: response?.profile || null
       }
       localStorage.setItem('user', JSON.stringify(user.value))
     } else {
@@ -39,10 +39,10 @@ export const useUserStore = defineStore('user', () => {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser)
       // Reload profile data
-      const profile = await getProfileByUserId(parsedUser.id)
+      const response = await getProfileByUserId(parsedUser.id)
       user.value = {
         ...parsedUser,
-        profile
+        profile: response?.profile || null
       }
     }
   }

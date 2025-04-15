@@ -72,25 +72,19 @@
 <script setup>
 import { ref } from 'vue'
 import { Size, OrderStatus } from '@/models/Order'
+import { useUserStore } from '../stores/userStore'
 
 const props = defineProps({
-  clientId: {
-    type: String,
-    required: true
-  },
-  clientProfileId: {
-    type: String,
-    required: true
-  }
+  // Remove clientId and clientProfileId props since we're using the user store
 })
 
 const emit = defineEmits(['order-created'])
 
 const sizes = Object.values(Size)
 
+const userStore = useUserStore()
+
 const orderData = ref({
-  clientId: props.clientId,
-  clientProfileId: props.clientProfileId,
   deliveryAddress: '',
   items: [{
     description: '',
@@ -111,15 +105,30 @@ const removeItem = (index) => {
   orderData.value.items.splice(index, 1)
 }
 
-const submitOrder = () => {
-  const order = {
-    ...orderData.value,
-    status: OrderStatus.DRAFT,
-    createdAt: new Date(),
-    updatedAt: new Date()
+const submitOrder = async () => {
+  if (!userStore.user?.id || !userStore.user?.profile?.id) {
+    console.error('No user or profile found')
+    return
   }
-  console.log('Submitting order:', order)
-  emit('order-created', order)
+
+  const orderPayload = {
+    clientId: userStore.user.id,
+    clientProfileId: userStore.user.profile.id,
+    items: orderData.value.items,
+    deliveryAddress: orderData.value.deliveryAddress
+  }
+
+  emit('order-created', orderPayload)
+  resetForm()
+}
+
+const resetForm = () => {
+  orderData.value.deliveryAddress = ''
+  orderData.value.items = [{
+    description: '',
+    quantity: 1,
+    size: Size.MEDIUM
+  }]
 }
 </script>
 

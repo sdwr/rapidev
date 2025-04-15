@@ -11,9 +11,7 @@ onMounted(() => {
   userStore.loadUserFromStorage()
 })
 
-const showErrorToast = () => {
-  toast.error('This is an error message!')
-}
+
 </script>
 
 <template>
@@ -36,7 +34,6 @@ const showErrorToast = () => {
 
     <main class="content-container">
       <RouterView />
-      <button @click="showErrorToast">Show Error Toast</button>
     </main>
   </div>
 </template>

@@ -80,17 +80,24 @@ const loadProfile = async () => {
   }
 
   try {
+    console.log('Loading profile for user:', userStore.user.id)
     const response = await getProfileByUserId(userStore.user.id)
+    console.log('Profile response:', response)
+    
     if (response?.profile) {
+      console.log('Setting form data with profile:', response.profile)
       formData.value = {
         name: response.profile.name || '',
         email: response.profile.email || '',
         phone: response.profile.phone || '',
         address: response.profile.address || ''
       }
+    } else {
+      console.log('No profile found in response')
     }
   } catch (e) {
     console.error('Error loading profile:', e)
+    error.value = 'Failed to load profile'
   }
 }
 
@@ -106,10 +113,21 @@ const handleSubmit = async () => {
       ...formData.value,
       userId: userStore.user.id
     }
+    console.log('Saving profile data:', profileData)
     const savedProfile = await upsertProfile(profileData)
-    emit('profile-saved', savedProfile)
+    console.log('Saved profile response:', savedProfile)
+    
+    if (savedProfile) {
+      // Update the user store with the new profile
+      userStore.setUser({
+        ...userStore.user,
+        profile: savedProfile
+      })
+      emit('profile-saved', savedProfile)
+    }
   } catch (e) {
-    error.value = e.message
+    console.error('Error saving profile:', e)
+    error.value = e.message || 'Failed to save profile'
   } finally {
     loading.value = false
   }

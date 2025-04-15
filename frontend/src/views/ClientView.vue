@@ -27,17 +27,15 @@
         <div v-if="currentTab === 'order'" class="tab-panel">
           <div class="card">
             <h2>Place Your Order</h2>
-            <template v-if="userStore.user?.id && userStore.user?.profile?.id">
-              <Order 
-                :clientId="userStore.user.id"
-                :clientProfileId="userStore.user.profile.id"
-                @order-created="handleOrderCreated" 
+            <template v-if="userStore.user?.id && userStore.user?.profile">
+              <Order
+                v-if="currentTab === 'order'"
+                @order-created="handleOrderCreated"
               />
             </template>
             <div v-else class="error-message">
               Please create a profile before placing an order.
             </div>
-            <div class="order-status" v-if="orderStatus">{{ orderStatus }}</div>
           </div>
         </div>
 
@@ -67,6 +65,7 @@ import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
 import { getClientOrders, upsertOrder, getProfileByUserId } from '../api/api'
 import { useUserStore } from '../stores/userStore'
+import { toast } from 'vue3-toastify'
 
 const userStore = useUserStore()
 
@@ -77,13 +76,21 @@ const tabs = [
 ]
 
 const currentTab = ref('order')
-const orderStatus = ref('')
 const orderHistory = ref<OrderType[]>([])
 const loadingOrders = ref(false)
 const error = ref('')
 
-const handleProfileSave = (profileData) => {
-  console.log('Profile saved:', profileData)
+const handleProfileSave = async (profileData) => {
+  try {
+    await userStore.setUser({
+      ...userStore.user,
+      profile: profileData
+    })
+    toast.success('Profile saved successfully!')
+  } catch (error) {
+    console.error('Error saving profile:', error)
+    toast.error('Failed to save profile')
+  }
 }
 
 const fetchOrders = async () => {
@@ -105,31 +112,31 @@ const fetchOrders = async () => {
 const handleOrderCreated = async (orderData: OrderType) => {
   if (!userStore.user?.id) {
     console.error('No user logged in')
+    toast.error('Please log in to create an order')
+    return
+  }
+
+  if (!userStore.user?.profile) {
+    console.error('No profile found for user')
+    toast.error('Please create a profile before placing an order')
     return
   }
 
   try {
-    // Get the user's profile
-    const profile = await getProfileByUserId(userStore.user.id)
-    if (!profile) {
-      console.error('No profile found for user')
-      return
-    }
-
     // Create the order with the correct IDs
     const order = await upsertOrder({
       ...orderData,
-      clientId: userStore.user.id,  // Use the user ID as clientId
-      clientProfileId: profile.id   // Use the profile ID as clientProfileId
+      clientId: userStore.user.id,
+      clientProfileId: userStore.user.profile.id
     })
 
     if (order) {
-      orderStatus.value = 'Order created successfully!'
+      toast.success('Order created successfully!')
       await fetchOrders()
     }
   } catch (error) {
     console.error('Error creating order:', error)
-    orderStatus.value = 'Error creating order'
+    toast.error(error.message || 'Error creating order')
   }
 }
 
@@ -205,14 +212,5 @@ onMounted(() => {
 
 .list-item p {
   margin: 0.25rem 0;
-}
-
-.order-status {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: #4CAF50;
-  color: white;
-  border-radius: 4px;
-  text-align: center;
 }
 </style> 
