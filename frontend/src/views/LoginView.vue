@@ -51,8 +51,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
+import { loginOrRegister } from '../api/api'
+import { useUserStore } from '../stores/userStore'
 
 const router = useRouter()
+const userStore = useUserStore()
 const username = ref('')
 const password = ref('')
 const userType = ref('client')
@@ -69,18 +72,14 @@ const handleLogin = async () => {
   error.value = ''
 
   try {
-    // In a real app, you would make an API call to authenticate
-    // For now, we'll simulate a successful login
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const user = await loginOrRegister(username.value, password.value, userType.value)
     
-    // Store user info in localStorage or a state management system
-    const user = {
-      id: 'user-123',
-      username: username.value,
-      type: userType.value
+    if (!user) {
+      throw new Error('Login failed')
     }
     
-    localStorage.setItem('user', JSON.stringify(user))
+    // Store user info using the store
+    userStore.setUser(user)
     
     // Show success message
     toast.success(`Logged in successfully as ${userType.value}`)
@@ -98,7 +97,7 @@ const handleLogin = async () => {
         break
     }
   } catch (err) {
-    error.value = 'Login failed. Please check your credentials.'
+    error.value = 'Login failed. Please try again.'
     toast.error('Login failed')
   } finally {
     loading.value = false

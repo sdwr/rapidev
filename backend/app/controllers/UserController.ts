@@ -1,32 +1,28 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import Client from '#models/client'
 import Courier from '#models/courier'
 import { randomUUID } from 'node:crypto'
-import hash from '@adonisjs/core/hash'
-import CustomHttpException from '#exceptions/custom_http_exception'
 
 export default class UserController {
   /**
    * Create a new user with associated profile (client or courier)
    */
   async createUser({ request, response }: HttpContext) {
-    const { email, password, userType, profile } = request.body()
+    const { username, password, userType, profile } = request.body()
     
     try {
       // Check if email already exists
-      const existingUser = await User.findBy('email', email)
+      const existingUser = await User.findBy('username', username)
       if (existingUser) {
-        throw new CustomHttpException('Email already exists', 400, request.url())
+        return response.status(400).json({ 
+          error: 'Username already exists' 
+        })
       }
-      
-      // Hash the password
-      const hashedPassword = await hash.make(password)
       
       // Create the user with auto-generated ID
       const user = await User.create({
-        email,
-        password: hashedPassword,
+        username,
+        password,
         userType
       })
     
@@ -35,7 +31,7 @@ export default class UserController {
       const { password: _, ...userWithoutPassword } = user.toJSON()
       return response.status(201).json(userWithoutPassword)
     } catch (error) {
-      return response.status(error.status || 400).json({ 
+      return response.status(400).json({ 
         error: error.message 
       })
     }
@@ -65,20 +61,8 @@ export default class UserController {
     try {
       const user = await User.findOrFail(params.id)
       
-      if (user.userType !== 'client') {
-        return response.status(400).json({ 
-          error: 'User is not a client' 
-        })
-      }
       
-      const client = await Client.findBy('userId', user.id)
-      if (!client) {
-        return response.status(404).json({ 
-          error: 'Client profile not found' 
-        })
-      }
-      
-      return response.json(client)
+      return response.json(user)
     } catch (error) {
       return response.status(404).json({ 
         error: 'User not found' 
@@ -118,28 +102,63 @@ export default class UserController {
    * Authenticate a user
    */
   async login({ request, response }: HttpContext) {
-    const { email, password } = request.body()
+    const { username, password, userType } = request.body()
     
     try {
-      // Find user by email
-      const user = await User.findBy('email', email)
-      if (!user) {
-        throw new CustomHttpException('Invalid credentials', 401, request.url())
-      }
+      // Find user by username
+      let user = await User.findBy('username', username)
       
-      // Verify password
-      const isPasswordValid = await hash.verify(user.password, password)
-      if (!isPasswordValid) {
-        throw new CustomHttpException('Invalid credentials', 401, request.url())
+      // If user doesn't exist, create a new one
+      if (!user) {
+        // Create the user
+        user = await User.create({
+          id: randomUUID(),
+          username,
+          password,
+          userType,
+          email: `${username}@example.com` // Generate a dummy email
+        })
       }
       
       // Return user without password
       const { password: _, ...userWithoutPassword } = user.toJSON()
       return response.json(userWithoutPassword)
     } catch (error) {
-      return response.status(error.status || 401).json({ 
+      return response.status(400).json({ 
         error: error.message 
       })
     }
   }
+  
+  async register({ request, response }: HttpContext) {
+    const { username, password, userType } = request.body()
+    const user = await User.create({ username, password, userType })
+    return response.json(user)
+  }
+
+  async getAllUsers({ response }: HttpContext) {
+    const users = await User.all()
+    return response.json(users)
+  }
+
+  async getUser({ params, response }: HttpContext) {
+    const user = await User.findOrFail(params.id)
+    return response.json(user)
+  }
+
+  async updateUser({ params, request, response }: HttpContext) {
+    const { username, password, userType } = request.body()
+    const user = await User.findOrFail(params.id)
+    user.username = username
+    user.password = password
+    user.userType = userType
+    await user.save()
+    return response.json(user)
+  }
+
+  async deleteUser({ params, response }: HttpContext) {
+    const user = await User.findOrFail(params.id)
+    await user.delete()
+    return response.json({ message: 'User deleted' })
+  } 
 }

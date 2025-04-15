@@ -1,6 +1,15 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import { toast } from 'vue3-toastify'
+import UserProfile from './components/UserProfile.vue'
+import { useUserStore } from './stores/userStore'
+import { onMounted } from 'vue'
+
+const userStore = useUserStore()
+
+onMounted(() => {
+  userStore.loadUserFromStorage()
+})
 
 const showErrorToast = () => {
   toast.error('This is an error message!')
@@ -10,7 +19,10 @@ const showErrorToast = () => {
 <template>
   <div class="app-container">
     <header>
-      <div class="header-text">Rapid App</div>
+      <div class="header-content">
+        <div class="header-text">Rapid App</div>
+        <UserProfile />
+      </div>
       <div class="content-container">
         <nav>
           <RouterLink to="/login">Login</RouterLink>
@@ -60,24 +72,29 @@ const showErrorToast = () => {
   width: 100%;
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
 .header-text {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
 }
 
 .content-container {
   width: 100%;
-  max-width: 510px; /* Set your desired max width */
+  max-width: 510px;
   margin: 0 auto;
   justify-items: center;
 }
 
 main {
   flex: 1;
-  display: grid; /* Use grid for consistent child sizing */
-  align-items: start; /* Align content to the top */
+  display: grid;
+  align-items: start;
 }
 
 header {

@@ -1,11 +1,11 @@
 // app/Exceptions/CustomHttpException.js
-const { HttpException } = require('@adonisjs/generic-exceptions')
+import { HttpException } from '@adonisjs/generic-exceptions'
 
 export default class CustomHttpException extends Error {
   constructor(
     message: string,
-    public status: number,
-    public url: string
+    public status: number = 400,
+    public url?: string
   ) {
     super(message)
     this.name = 'CustomHttpException'
@@ -19,5 +19,3 @@ export default class CustomHttpException extends Error {
     })
   }
 }
-
-module.exports = CustomHttpException

@@ -11,12 +11,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getAllOrders, getAllOrderStatuses, getAllClients, getAllCouriers } from '../api/api'
+import { getAllOrders, getAllOrderStatuses, getAllClients, getAllCouriers, getAllUsers } from '../api/api'
 
 const tables = ref({})
 
 onMounted(async () => {
   tables.value = {
+    users: await getAllUsers(),
     clients: await getAllClients(),
     couriers: await getAllCouriers(),
     orders: await getAllOrders(),
