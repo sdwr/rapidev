@@ -46,7 +46,12 @@
             <p v-if="!orderHistory.length">No orders yet.</p>
             <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
               <h3>Order #{{ order.id }}</h3>
-              <p>Status: {{ order.status }}</p>
+              <div class="status-chip" :style="{
+                backgroundColor: orderStatusColors[order.status].background,
+                color: orderStatusColors[order.status].text
+              }">
+                {{ order.status }}
+              </div>
               <p>Delivery Address: {{ order.deliveryAddress }}</p>
               <p>Items: {{ order.items.length }}</p>
               <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
@@ -66,6 +71,7 @@ import type { Order as OrderType } from '@/models/Order'
 import { getClientOrders, upsertOrder, getProfileByUserId } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
+import { orderStatusColors } from '@/constants/orderStatusColors'
 
 const userStore = useUserStore()
 
@@ -212,5 +218,15 @@ onMounted(() => {
 
 .list-item p {
   margin: 0.25rem 0;
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0.5rem 0;
+  text-transform: capitalize;
 }
 </style> 

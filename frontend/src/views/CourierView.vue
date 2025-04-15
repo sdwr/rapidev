@@ -22,7 +22,12 @@
             <p v-if="!activeDeliveries.length">No active deliveries.</p>
             <div v-else v-for="delivery in activeDeliveries" :key="delivery.id" class="list-item">
               <h3>Order #{{ delivery.id }}</h3>
-              <p>Status: {{ delivery.status }}</p>
+              <div class="status-chip" :style="{
+                backgroundColor: orderStatusColors[delivery.status].background,
+                color: orderStatusColors[delivery.status].text
+              }">
+                {{ delivery.status }}
+              </div>
               <p>Pickup: {{ delivery.pickupAddress }}</p>
               <p>Delivery: {{ delivery.deliveryAddress }}</p>
               <div class="delivery-actions">
@@ -44,7 +49,12 @@
             <p v-if="!deliveryHistory.length">No completed deliveries.</p>
             <div v-else v-for="delivery in deliveryHistory" :key="delivery.id" class="list-item">
               <h3>Order #{{ delivery.id }}</h3>
-              <p>Status: {{ delivery.status }}</p>
+              <div class="status-chip" :style="{
+                backgroundColor: orderStatusColors[delivery.status].background,
+                color: orderStatusColors[delivery.status].text
+              }">
+                {{ delivery.status }}
+              </div>
               <p>Completed: {{ new Date(delivery.updatedAt).toLocaleString() }}</p>
             </div>
           </div>
@@ -58,6 +68,34 @@
             @profile-saved="handleProfileSave"
           />
         </div>
+
+        <!-- Active Orders Tab -->
+        <div v-if="currentTab === 'active'" class="tab-panel">
+          <h2>Active Orders</h2>
+          <div class="list-container">
+            <p v-if="!activeOrders.length">No active orders.</p>
+            <div v-else v-for="order in activeOrders" :key="order.id" class="list-item">
+              <h3>Order #{{ order.id }}</h3>
+              <div class="status-chip" :style="{
+                backgroundColor: orderStatusColors[order.status].background,
+                color: orderStatusColors[order.status].text
+              }">
+                {{ order.status }}
+              </div>
+              <p>Delivery Address: {{ order.deliveryAddress }}</p>
+              <p>Items: {{ order.items.length }}</p>
+              <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
+              <div class="delivery-actions">
+                <button @click="updateDeliveryStatus(order.id, 'PICKED_UP')" v-if="order.status === 'ACCEPTED'">
+                  Mark as Picked Up
+                </button>
+                <button @click="updateDeliveryStatus(order.id, 'DELIVERED')" v-if="order.status === 'PICKED_UP'">
+                  Mark as Delivered
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -66,8 +104,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import type { Order } from '@/models/Order'
-import { getClientOrders } from '../api/api'
+import { getClientOrders, getActiveOrders, updateOrderStatus } from '../api/api'
 import ProfileInfo from '../components/ProfileInfo.vue'
+import { useUserStore } from '../stores/userStore'
+import { toast } from 'vue3-toastify'
+import { orderStatusColors } from '@/constants/orderStatusColors'
 
 const tabs = [
   { id: 'active', label: 'Active Deliveries' },
@@ -79,6 +120,7 @@ const currentTab = ref('active')
 const activeDeliveries = ref<Order[]>([])
 const deliveryHistory = ref<Order[]>([])
 const loading = ref(false)
+const activeOrders = ref<Order[]>([])
 
 const handleProfileSave = (profileData) => {
   console.log('Profile saved:', profileData)
@@ -91,6 +133,7 @@ const fetchOrders = async () => {
     const orders = await getClientOrders('all')
     activeDeliveries.value = orders.filter(order => order.status === 'ACCEPTED')
     deliveryHistory.value = orders.filter(order => order.status !== 'ACCEPTED')
+    activeOrders.value = orders.filter(order => order.status === 'ACCEPTED')
   } catch (error) {
     console.error('Error fetching orders:', error)
   } finally {
@@ -196,5 +239,15 @@ onMounted(() => {
 
 .delivery-actions button:hover {
   opacity: 0.9;
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0.5rem 0;
+  text-transform: capitalize;
 }
 </style> 
