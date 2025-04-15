@@ -13,6 +13,14 @@ export const orderStatusColors: Record<OrderStatus, { background: string; text: 
     background: '#D4EDDA',
     text: '#155724'
   },
+  [OrderStatus.ASSIGNED_TO_COURIER]: {
+    background: '#CCE5FF',
+    text: '#004085'
+  },
+  [OrderStatus.CONFIRMED_BY_COURIER]: {
+    background: '#CCE5FF',
+    text: '#004085'
+  },
   [OrderStatus.PICKED_UP]: {
     background: '#CCE5FF',
     text: '#004085'
@@ -25,8 +33,16 @@ export const orderStatusColors: Record<OrderStatus, { background: string; text: 
     background: '#D4EDDA',
     text: '#155724'
   },
-  [OrderStatus.CANCELLED]: {
+  [OrderStatus.CANCELLED_BY_CLIENT]: {
     background: '#F8D7DA',
     text: '#721C24'
-  }
+  },
+  [OrderStatus.CANCELLED_BY_COURIER]: {
+    background: '#F8D7DA',
+    text: '#721C24'
+  },
+  [OrderStatus.CANCELLED_BY_ADMIN]: {
+    background: '#F8D7DA',
+    text: '#721C24'
+  } 
 } 

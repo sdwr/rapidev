@@ -17,11 +17,13 @@ export const ORDER_STATUS_DESCRIPTIONS = {
   DRAFT: 'Order created and is in draft state',
   PENDING: 'Order is pending acceptance',
   ACCEPTED: 'Order has been accepted by an admin',
-  ASSIGNED: 'Order has been assigned to a courier',
-  CONFIRMED: 'Order has been confirmed by the courier',
+  ASSIGNED_TO_COURIER: 'Order has been assigned to a courier',
+  CONFIRMED_BY_COURIER: 'Order has been confirmed by the courier',
   PICKED_UP: 'Order has been picked up by the courier',
   IN_TRANSIT: 'Order is in transit to delivery location',
   DELIVERED: 'Order has been delivered',
-  CANCELLED: 'Order has been cancelled'
+  CANCELLED_BY_CLIENT: 'Order has been cancelled by the client',
+  CANCELLED_BY_COURIER: 'Order has been cancelled by the courier',
+  CANCELLED_BY_ADMIN: 'Order has been cancelled by an admin'
 }
 

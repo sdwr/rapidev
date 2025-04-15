@@ -11,12 +11,14 @@ export default class extends BaseSchema {
         'DRAFT',
         'PENDING',
         'ACCEPTED',
-        'ASSIGNED',
-        'CONFIRMED',
+        'ASSIGNED_TO_COURIER',
+        'CONFIRMED_BY_COURIER',
         'PICKED_UP',
         'IN_TRANSIT',
         'DELIVERED',
-        'CANCELLED'
+        'CANCELLED_BY_CLIENT',
+        'CANCELLED_BY_COURIER',
+        'CANCELLED_BY_ADMIN'
       ]).notNullable()
       table.string('description').nullable()
       table.boolean('is_current').defaultTo(true)

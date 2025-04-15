@@ -80,12 +80,10 @@ const loadProfile = async () => {
   }
 
   try {
-    console.log('Loading profile for user:', userStore.user.id)
     const response = await getProfileByUserId(userStore.user.id)
     console.log('Profile response:', response)
     
     if (response?.profile) {
-      console.log('Setting form data with profile:', response.profile)
       formData.value = {
         name: response.profile.name || '',
         email: response.profile.email || '',

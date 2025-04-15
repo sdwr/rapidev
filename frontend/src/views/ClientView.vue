@@ -39,9 +39,9 @@
           </div>
         </div>
 
-        <!-- Order History Tab -->
+        <!-- My Order Tab -->
         <div v-if="currentTab === 'history'" class="tab-panel">
-          <h2>Order History</h2>
+          <h2>My Orders</h2>
           <div class="list-container">
             <p v-if="!orderHistory.length">No orders yet.</p>
             <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
@@ -78,7 +78,7 @@ const userStore = useUserStore()
 const tabs = [
   { id: 'profile', label: 'My Profile' },
   { id: 'order', label: 'Place Order' },
-  { id: 'history', label: 'Order History' }
+  { id: 'history', label: 'My Orders' }
 ]
 
 const currentTab = ref('order')
