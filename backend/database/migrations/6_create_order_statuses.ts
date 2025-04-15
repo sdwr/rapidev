@@ -11,12 +11,14 @@ export default class extends BaseSchema {
         'DRAFT',
         'PENDING',
         'ACCEPTED',
+        'ASSIGNED',
+        'CONFIRMED',
         'PICKED_UP',
         'IN_TRANSIT',
         'DELIVERED',
         'CANCELLED'
       ]).notNullable()
-      table.string('description').notNullable()
+      table.string('description').nullable()
       table.boolean('is_current').defaultTo(true)
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

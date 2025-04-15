@@ -38,8 +38,11 @@ router.delete('/api/profiles/:id', [ProfileController, 'deleteProfile'])
 router.get('/api/clients/all', [ClientController, 'getAllProfiles'])
 
 // Order routes
-router.post('/api/orders', [OrderController, 'createOrder'])
 router.get('/api/orders/all', [OrderController, 'getAllOrders'])
+router.get('/api/orders/all-with-history', [OrderController, 'getAllOrdersWithHistory'])
 router.get('/api/orders/client/:clientId', [OrderController, 'getClientOrders'])
+router.post('/api/orders', [OrderController, 'createOrder'])
+router.put('/api/orders/:id/status', [OrderController, 'updateStatus'])
+router.get('/api/orders/:id/statuses', [OrderController, 'getOrderStatuses'])
 router.get('/api/orderstatuses', [OrderController, 'getAllOrderStatuses'])
 router.delete('/api/orders/:id', [OrderController, 'deleteOrder'])

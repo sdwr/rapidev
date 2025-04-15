@@ -3,7 +3,7 @@ export interface ProfileInfo {
   name: string;
   phone: string;
   email: string;
-  pickupAddress: string;
+  address: string;
   createdAt?: Date;
   updatedAt?: Date;
 } 

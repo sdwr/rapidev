@@ -80,13 +80,13 @@ const loadProfile = async () => {
   }
 
   try {
-    const profile = await getProfileByUserId(userStore.user.id)
-    if (profile) {
+    const response = await getProfileByUserId(userStore.user.id)
+    if (response?.profile) {
       formData.value = {
-        name: profile.name || '',
-        email: profile.email || '',
-        phone: profile.phone || '',
-        address: profile.address || ''
+        name: response.profile.name || '',
+        email: response.profile.email || '',
+        phone: response.profile.phone || '',
+        address: response.profile.address || ''
       }
     }
   } catch (e) {

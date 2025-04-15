@@ -36,12 +36,7 @@ export class ProfileController {
     
     try {
       const profile = await Profile.findBy('userId', userId)
-      if (!profile) {
-        return response.status(404).json({ 
-          error: 'Profile not found' 
-        })
-      }
-      return response.json(profile)
+      return response.json({ profile })
     } catch (error) {
       return response.status(400).json({ 
         error: error.message 

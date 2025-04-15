@@ -125,9 +125,33 @@ export async function getAllOrders(): Promise<Order[]> {
   }
 }
 
+export async function getAllOrdersWithHistory(): Promise<Order[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/all-with-history`)
+    if (!response.ok) throw await response.json()
+    let orders = await response.json()
+    orders = mapOrderStatuses(orders)
+    return orders
+  } catch (error) {
+    handleApiError(error)
+    return []
+  }
+}
+
 export async function getAllOrderStatuses() {
   try {
     const response = await fetch(`${BASE_URL}/api/orderstatuses`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return []
+  }
+}
+
+export async function getOrderStatuses(orderId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/${orderId}/statuses`)
     if (!response.ok) throw await response.json()
     return response.json()
   } catch (error) {
@@ -204,4 +228,4 @@ export async function deleteOrder(orderId: string) {
     handleApiError(error)
     return null
   }
-} 
+}

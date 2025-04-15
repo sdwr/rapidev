@@ -97,6 +97,24 @@ export class OrderController {
     }
   }
 
+  async getAllOrdersWithHistory({ response }: HttpContext) {
+    try {
+      const orders = await Order.query()
+        .preload('client')
+        .preload('clientProfile')
+        .preload('items')
+        .preload('orderStatuses', (query) => {
+          query.orderBy('createdAt', 'desc')
+        })
+        .orderBy('createdAt', 'desc')
+      return response.json(orders)
+    } catch (error) {
+      return response.status(400).json({ 
+        error: error.message 
+      })
+    }
+  }
+
   async getClientOrders({ params, response }: HttpContext) {
     try {
       const orders = await Order.query()
@@ -137,7 +155,8 @@ export class OrderController {
         id: randomUUID(),
         orderId: id,
         status,
-        isCurrent: true
+        isCurrent: true,
+        description: ''
       })
 
       const order = await Order.findOrFail(id)
@@ -173,6 +192,20 @@ export class OrderController {
       return response.json(orderStatuses)
     } catch (error) {
       return response.status(400).json({ error: error.message })
+    }
+  }
+
+  async getOrderStatuses({ params, response }: HttpContext) {
+    try {
+      const order = await Order.findOrFail(params.id)
+      const statuses = await OrderStatus.query()
+        .where('orderId', order.id)
+        .orderBy('createdAt', 'desc')
+      return response.json(statuses)
+    } catch (error) {
+      return response.status(400).json({ 
+        error: error.message 
+      })
     }
   }
 
