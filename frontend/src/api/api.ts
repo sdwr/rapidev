@@ -1,16 +1,18 @@
 import type { ProfileInfo } from '../../../shared/models/ProfileInfo'
 import type { Order } from '../../../shared/models/Order'
+import type { User } from '../../../shared/models/User'
 import { OrderStatus } from '../../../shared/enums/OrderEnums'
 import type { Courier } from '../../../shared/models/Courier'
 import { getBaseUrl } from './config'
 import { handleApiError } from '../utils/errorHandler'
 import { mapOrderStatuses, mapOrderStatus } from '../utils'
+
 const BASE_URL = getBaseUrl()
 
-// Client API functions
-export async function getClientProfile(clientId: string): Promise<ProfileInfo> {
+// Profile API functions
+export async function getProfile(profileId: string): Promise<ProfileInfo> {
   try {
-    const response = await fetch(`${BASE_URL}/api/clients/${clientId}/profile`)
+    const response = await fetch(`${BASE_URL}/api/profiles/${profileId}`)
     if (!response.ok) throw await response.json()
     return response.json()
   } catch (error) {
@@ -19,22 +21,46 @@ export async function getClientProfile(clientId: string): Promise<ProfileInfo> {
   }
 }
 
-export async function upsertClientProfile(profile: ProfileInfo): Promise<ProfileInfo> {
-  const response = await fetch(`${BASE_URL}/api/clients/profile`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(profile),
-  })
-  if (!response.ok) {
-    const error = await response.json()
+export async function getProfileByUserId(userId: string): Promise<ProfileInfo> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/profiles/user/${userId}`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
     handleApiError(error)
     return null
   }
-  return response.json()
 }
 
+export async function upsertProfile(profile: ProfileInfo): Promise<ProfileInfo> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/profiles`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profile),
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function getAllProfiles(): Promise<ProfileInfo[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/profiles`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return []
+  }
+}
+
+// Order API functions
 export async function getClientOrders(clientId: string): Promise<Order[]> {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/client/${clientId}`)
@@ -86,17 +112,6 @@ export async function updateOrderState(orderId: string, status: OrderStatus): Pr
   }
 }
 
-// Admin API functions
-export async function getAllClients(): Promise<ProfileInfo[]> {
-  const response = await fetch(`${BASE_URL}/api/clients/all`)
-  if (!response.ok) {
-    const error = await response.json()
-    handleApiError(error)
-    return []
-  }
-  return response.json()
-}
-
 export async function getAllOrders(): Promise<Order[]> {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/all`)
@@ -107,111 +122,6 @@ export async function getAllOrders(): Promise<Order[]> {
   } catch (error) {
     handleApiError(error)
     return []
-  }
-}
-
-export async function getAllCouriers(): Promise<Courier[]> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/couriers/all`)
-    if (!response.ok) throw await response.json()
-    return response.json()
-  } catch (error) {
-    handleApiError(error)
-    return []
-  }
-}
-
-export async function getCourierProfile(courierId: string): Promise<ProfileInfo> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/couriers/${courierId}/profile`)
-    if (!response.ok) throw await response.json()
-    return response.json()
-  } catch (error) {
-    handleApiError(error)
-    return null
-  }
-}
-
-export async function upsertCourierProfile(profile: ProfileInfo): Promise<ProfileInfo> {
-  const response = await fetch(`${BASE_URL}/api/couriers/profile`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(profile),
-  })
-  if (!response.ok) {
-    const error = await response.json()
-    handleApiError(error)
-    return null 
-  }
-  return response.json()
-}
-
-export async function assignOrderToCourier(orderId: string, courierId: string): Promise<Order> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/orders/${orderId}/assign`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ courierId }),
-    })
-    if (!response.ok) throw await response.json()
-    let responseOrder = await response.json()
-    responseOrder = mapOrderStatus(responseOrder)
-    return responseOrder
-  } catch (error) {
-    handleApiError(error)
-    return null
-  }
-}
-
-export async function reorderOrders(orderIds: string[]): Promise<boolean> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/orders/reorder`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ orderIds }),
-    })
-    if (!response.ok) throw await response.json()
-    return response.json()
-  } catch (error) {
-    handleApiError(error)
-    return false
-  }
-}
-
-// Courier API functions
-export async function acceptOrder(orderId: string, courierId: string): Promise<Order> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/orders/${orderId}/accept`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ courierId }),
-    })
-    if (!response.ok) throw await response.json()
-    let responseOrder = await response.json()
-    responseOrder = mapOrderStatus(responseOrder)
-    return responseOrder
-  } catch (error) {
-    handleApiError(error)
-    return null
-  }
-}
-
-export const getDebugData = async () => {
-  try {
-    const response = await fetch(`${getBaseUrl()}/debug`)
-    if (!response.ok) throw await response.json()
-    return response.json()
-  } catch (error) {
-    handleApiError(error)
-    return null
   }
 }
 
@@ -226,6 +136,7 @@ export async function getAllOrderStatuses() {
   }
 }
 
+// User API functions
 export async function loginOrRegister(username: string, password: string, userType: string) {
   try {
     const response = await fetch(`${BASE_URL}/api/users/login`, {
@@ -243,13 +154,28 @@ export async function loginOrRegister(username: string, password: string, userTy
   }
 }
 
-export async function getAllUsers() {
+export async function getAllUsers(userType?: 'client' | 'courier' | 'admin'): Promise<User[]> {
   try {
-    const response = await fetch(`${BASE_URL}/api/users/all`)
+    const url = userType 
+      ? `${BASE_URL}/api/users/all?userType=${userType}`
+      : `${BASE_URL}/api/users/all`
+    const response = await fetch(url)
     if (!response.ok) throw await response.json()
     return response.json()
   } catch (error) {
     handleApiError(error)
     return []
+  }
+}
+
+// Debug API function
+export const getDebugData = async () => {
+  try {
+    const response = await fetch(`${getBaseUrl()}/debug`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
   }
 } 

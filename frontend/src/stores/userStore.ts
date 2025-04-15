@@ -5,6 +5,12 @@ interface User {
   id: string
   username: string
   userType: 'client' | 'courier' | 'admin'
+  profile?: {
+    name: string
+    email: string
+    phone: string
+    address: string
+  }
 }
 
 export const useUserStore = defineStore('user', () => {

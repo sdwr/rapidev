@@ -56,8 +56,10 @@ import { ref, onMounted } from 'vue'
 import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
-import { getClientOrders, upsertOrder, getAllClients } from '@/api/api'
-import { randomUUID } from 'node:crypto'
+import { getClientOrders, upsertOrder } from '../api/api'
+import { useUserStore } from '../stores/userStore'
+
+const userStore = useUserStore()
 
 const tabs = [
   { id: 'profile', label: 'My Profile' },
@@ -76,13 +78,14 @@ const handleProfileSave = (profileData) => {
 }
 
 const fetchOrders = async () => {
+  if (!userStore.user?.id) {
+    error.value = 'No user logged in'
+    return
+  }
+
   loadingOrders.value = true
   try {
-    // For now, using a hardcoded client ID until we have auth
-    let clientId = await getTestClientId()
-    orderHistory.value = await getClientOrders(clientId)
-    console.log('orderHistory')
-    console.log(orderHistory.value)
+    orderHistory.value = await getClientOrders(userStore.user.id)
   } catch (e) {
     error.value = e.message
   } finally {
@@ -90,17 +93,16 @@ const fetchOrders = async () => {
   }
 }
 
-const getTestClientId = async () => {
-  const response = await getAllClients()
-  return response[0]?.id || null
-}
-
 const handleOrderCreated = async (orderData) => {
+  if (!userStore.user?.id) {
+    orderStatus.value = 'Error: No user logged in'
+    return
+  }
+
   try {
-    let clientId = await getTestClientId()
     const savedOrder = await upsertOrder({
       ...orderData,
-      clientId: clientId
+      clientId: userStore.user.id
     })
     orderStatus.value = 'Order submitted successfully!'
     await fetchOrders()

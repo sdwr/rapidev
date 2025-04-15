@@ -9,19 +9,46 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getAllOrders, getAllOrderStatuses, getAllClients, getAllCouriers, getAllUsers } from '../api/api'
+import { getAllOrders, getAllOrderStatuses, getAllUsers } from '../api/api'
+import type { User } from '@/models/User'
+import type { Order } from '@/models/Order'
 
-const tables = ref({})
+const tables = ref<{
+  users: User[]
+  clients: User[]
+  couriers: User[]
+  admins: User[]
+  orders: Order[]
+  orderStatuses: any[]
+}>({
+  users: [],
+  clients: [],
+  couriers: [],
+  admins: [],
+  orders: [],
+  orderStatuses: []
+})
 
 onMounted(async () => {
-  tables.value = {
-    users: await getAllUsers(),
-    clients: await getAllClients(),
-    couriers: await getAllCouriers(),
-    orders: await getAllOrders(),
-    orderStatuses: await getAllOrderStatuses()
+  try {
+    const [users, orders, orderStatuses] = await Promise.all([
+      getAllUsers(),
+      getAllOrders(),
+      getAllOrderStatuses()
+    ])
+
+    tables.value = {
+      users,
+      clients: users.filter(user => user.userType === 'client'),
+      couriers: users.filter(user => user.userType === 'courier'),
+      admins: users.filter(user => user.userType === 'admin'),
+      orders,
+      orderStatuses
+    }
+  } catch (error) {
+    console.error('Error fetching debug data:', error)
   }
 })
 </script>

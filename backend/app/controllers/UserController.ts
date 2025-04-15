@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import Courier from '#models/courier'
+import Profile from '#models/profile'
 import { randomUUID } from 'node:crypto'
 
 export default class UserController {
@@ -136,14 +137,36 @@ export default class UserController {
     return response.json(user)
   }
 
-  async getAllUsers({ response }: HttpContext) {
-    const users = await User.all()
-    return response.json(users)
+  async getAllUsers({ request, response }: HttpContext) {
+    try {
+      const userType = request.input('userType')
+      const query = User.query().preload('profile')
+      
+      if (userType) {
+        query.where('userType', userType)
+      }
+      
+      const users = await query.exec()
+      return response.json(users)
+    } catch (error) {
+      return response.status(400).json({ 
+        error: error.message 
+      })
+    }
   }
 
   async getUser({ params, response }: HttpContext) {
-    const user = await User.findOrFail(params.id)
-    return response.json(user)
+    try {
+      const user = await User.query()
+        .where('id', params.id)
+        .preload('profile')
+        .firstOrFail()
+      return response.json(user)
+    } catch (error) {
+      return response.status(404).json({ 
+        error: 'User not found' 
+      })
+    }
   }
 
   async updateUser({ params, request, response }: HttpContext) {

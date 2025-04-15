@@ -1,17 +1,15 @@
 <template>
   <div class="profile-info">
     <h2>Profile Information</h2>
-    <form @submit.prevent="saveProfile">
-
+    <form @submit.prevent="handleSubmit" class="profile-form">
       <div class="form-group">
-        <label for="name">Full Name</label>
+        <label for="name">Name</label>
         <input 
           type="text" 
           id="name" 
-          v-model="profile.name" 
-          placeholder="Enter your full name"
+          v-model="formData.name" 
           required
-        >
+        />
       </div>
 
       <div class="form-group">
@@ -19,38 +17,32 @@
         <input 
           type="email" 
           id="email" 
-          v-model="profile.email" 
-          placeholder="Enter your email"
+          v-model="formData.email" 
           required
-        >
+        />
       </div>
 
       <div class="form-group">
-        <label for="phone">Phone Number</label>
+        <label for="phone">Phone</label>
         <input 
           type="tel" 
           id="phone" 
-          v-model="profile.phone"
-          placeholder="Enter your phone number"
+          v-model="formData.phone" 
           required
-          pattern="[0-9]{10}"
-          title="Please enter a valid 10-digit phone number"
-        >
+        />
       </div>
 
       <div class="form-group">
-        <label for="address">Pickup Address</label>
+        <label for="address">Address</label>
         <textarea 
           id="address" 
-          v-model="profile.pickupAddress"
-          placeholder="Enter your pickup address"
-          rows="3"
+          v-model="formData.address" 
           required
         ></textarea>
       </div>
 
-      <button type="submit" class="save-button" :disabled="saving">
-        {{ saving ? 'Saving...' : 'Save Profile' }}
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Saving...' : 'Save Profile' }}
       </button>
     </form>
   </div>
@@ -58,84 +50,61 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { ProfileInfo } from '@/models/ProfileInfo'
-import { getClientProfile, getCourierProfile, upsertClientProfile, upsertCourierProfile } from '@/api/api'
+import { upsertProfile } from '../api/api'
+import { useUserStore } from '../stores/userStore'
 
-const props = defineProps({
-  profileType: {
-    type: String,
-    default: 'client',
-    validator: (value) => ['client', 'courier'].includes(value)
-  }
-})
-
-const emit = defineEmits<{
-  (e: 'profile-saved', profile: ProfileInfo): void
+const props = defineProps<{
+  profileType: 'client' | 'courier'
 }>()
 
-const profile = ref<ProfileInfo>({
+const emit = defineEmits<{
+  (e: 'profile-saved', data: any): void
+}>()
+
+const userStore = useUserStore()
+
+const formData = ref({
   name: '',
+  email: '',
   phone: '',
-  pickupAddress: '',
-  email: ''
+  address: ''
 })
 
+const loading = ref(false)
 const error = ref('')
-const saving = ref(false)
-const success = ref(false)
 
-onMounted(async () => {
-  const testId = 'test-user-id'
-  
-  try {
-    saving.value = true
-    error.value = ''
-    success.value = false
-    
-    if (props.profileType === 'client') {
-      const data = await getClientProfile(testId)
-      if (data) {
-        profile.value = data
-      }
-    } else {
-      // For courier profile
-      const data = await getCourierProfile(testId)
-      if (data) {
-        profile.value = data
-      }
-    }
-  } catch (err) {
-    error.value = 'Failed to load profile'
-  } finally {
-    saving.value = false
+const handleSubmit = async () => {
+  if (!userStore.user?.id) {
+    error.value = 'No user logged in'
+    return
   }
-})
 
-const saveProfile = async () => {
+  loading.value = true
   try {
-    saving.value = true
-    error.value = ''
-    success.value = false
-    
-    let savedProfile
-    
-    if (props.profileType === 'client') {
-      savedProfile = await upsertClientProfile(profile.value)
-    } else {
-      // For courier profile
-      savedProfile = await upsertCourierProfile(profile.value)
+    const profileData = {
+      ...formData.value,
+      userId: userStore.user.id,
+      type: props.profileType
     }
-    
-    if (savedProfile) {
-      success.value = true
-      emit('profile-saved', savedProfile)
-    }
-  } catch (err) {
-    error.value = 'Failed to save profile'
+    const savedProfile = await upsertProfile(profileData)
+    emit('profile-saved', savedProfile)
+  } catch (e) {
+    error.value = e.message
   } finally {
-    saving.value = false
+    loading.value = false
   }
 }
+
+onMounted(() => {
+  if (userStore.user?.profile) {
+    formData.value = {
+      name: userStore.user.profile.name || '',
+      email: userStore.user.profile.email || '',
+      phone: userStore.user.profile.phone || '',
+      address: userStore.user.profile.address || ''
+    }
+  }
+})
 </script>
 
 <style scoped>
@@ -146,18 +115,23 @@ const saveProfile = async () => {
   margin-bottom: 1rem;
 }
 
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .form-group {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: bold;
 }
 
 input, textarea {
-  width: 100%;
   padding: 0.5rem;
   border: 1px solid var(--color-border);
   border-radius: 4px;
@@ -165,14 +139,19 @@ input, textarea {
   color: var(--color-text);
 }
 
-.save-button {
-  background: #4CAF50;
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+button {
+  padding: 0.75rem;
+  background-color: #4CAF50;
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: bold;
   font-size: 1rem;
   margin-top: 1rem;
   transition: background-color 0.2s;
@@ -180,11 +159,16 @@ input, textarea {
   width: 100%;
 }
 
-.save-button:hover {
-  background: #45a049;
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
-.save-button:active {
+button:hover {
+  background-color: #45a049;
+}
+
+button:active {
   transform: translateY(1px);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }

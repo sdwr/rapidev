@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import type { Order } from '@/models/Order'
-import { getClientOrders, acceptOrder, getAllCouriers } from '../api/api'
+import { getClientOrders } from '../api/api'
 import ProfileInfo from '../components/ProfileInfo.vue'
 
 const tabs = [
@@ -79,18 +79,6 @@ const currentTab = ref('active')
 const activeDeliveries = ref<Order[]>([])
 const deliveryHistory = ref<Order[]>([])
 const loading = ref(false)
-const profile = ref({
-  id: null,
-  name: '',
-  email: '',
-  phone: '',
-  address: ''
-})
-
-const getTestCourierId = async () => {
-  const response = await getAllCouriers()
-  return response[0]?.id || null
-}
 
 const handleProfileSave = (profileData) => {
   console.log('Profile saved:', profileData)
@@ -107,14 +95,6 @@ const fetchOrders = async () => {
     console.error('Error fetching orders:', error)
   } finally {
     loading.value = false
-  }
-}
-
-const handleAcceptOrder = async (orderId) => {
-  let courierId = await getTestCourierId()
-  const result = await acceptOrder(orderId, courierId)
-  if (result) {
-    await fetchOrders()
   }
 }
 

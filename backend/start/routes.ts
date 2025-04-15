@@ -10,6 +10,7 @@
 import router from '@adonisjs/core/services/router'
 import { ClientController } from '#controllers/ClientController'
 import { OrderController } from '#controllers/OrderController'
+import { ProfileController } from '#controllers/ProfileController'
 import UserController from '#controllers/UserController'
 
 router.get('/', async () => {
@@ -26,9 +27,16 @@ router.get('/api/users/:id', [UserController, 'getUser'])
 router.put('/api/users/:id', [UserController, 'updateUser'])
 router.delete('/api/users/:id', [UserController, 'deleteUser'])
 
-router.post('/api/clients/profile', [ClientController, 'upsertProfile'])
+// Profile routes
+router.post('/api/profiles', [ProfileController, 'upsertProfile'])
+router.get('/api/profiles', [ProfileController, 'getAllProfiles'])
+router.get('/api/profiles/:id', [ProfileController, 'getProfile'])
+router.get('/api/profiles/user/:userId', [ProfileController, 'getProfileByUserId'])
+router.delete('/api/profiles/:id', [ProfileController, 'deleteProfile'])
+
+// Client routes
 router.get('/api/clients/all', [ClientController, 'getAllProfiles'])
-router.get('/api/clients/:id/profile', [ClientController, 'getProfile'])
+
 // Order routes
 router.post('/api/orders', [OrderController, 'createOrder'])
 router.get('/api/orders/all', [OrderController, 'getAllOrders'])

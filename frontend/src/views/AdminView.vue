@@ -23,10 +23,11 @@
           <div class="list-container">
             <p v-if="!loadingClients && !clients.length">No clients registered yet.</p>
             <div v-else v-for="client in clients" :key="client.id" class="list-item">
-              <h3>{{ client.name }}</h3>
-              <p>Email: {{ client.email }}</p>
-              <p>Phone: {{ client.phone }}</p>
-              <p>Address: {{ client.pickupAddress }}</p>
+              <h3>{{ client.profile?.name || 'No name' }}</h3>
+              <p>Username: {{ client.username }}</p>
+              <p>Email: {{ client.profile?.email || 'No email' }}</p>
+              <p>Phone: {{ client.profile?.phone || 'No phone' }}</p>
+              <p>Address: {{ client.profile?.address || 'No address' }}</p>
             </div>
           </div>
         </div>
@@ -37,8 +38,11 @@
           <div class="list-container">
             <p v-if="!couriers.length">No couriers registered yet.</p>
             <div v-else v-for="courier in couriers" :key="courier.id" class="list-item">
-              <h3>{{ courier.name }}</h3>
-              <p>Status: {{ courier.status }}</p>
+              <h3>{{ courier.profile?.name || 'No name' }}</h3>
+              <p>Username: {{ courier.username }}</p>
+              <p>Email: {{ courier.profile?.email || 'No email' }}</p>
+              <p>Phone: {{ courier.profile?.phone || 'No phone' }}</p>
+              <p>Address: {{ courier.profile?.address || 'No address' }}</p>
             </div>
           </div>
         </div>
@@ -80,15 +84,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getAllClients, getAllOrders } from '@/api/api'
+import { getAllUsers, getAllOrders } from '../api/api'
 import type { Order } from '@/models/Order'
-import type { ProfileInfo } from '@/models/ProfileInfo'
+import type { User } from '@/models/User'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
-interface Courier {
-  id: string;
-  name: string;
-  status: 'AVAILABLE' | 'BUSY' | 'OFFLINE';
-}
 
 const tabs = [
   { id: 'active', label: 'Active Orders' },
@@ -98,8 +97,8 @@ const tabs = [
 ]
 
 const currentTab = ref('active')
-const clients = ref<ProfileInfo[]>([])
-const couriers = ref<Courier[]>([])
+const clients = ref<User[]>([])
+const couriers = ref<User[]>([])
 const orderHistory = ref<Order[]>([])
 const activeOrders = ref<Order[]>([])
 const loadingClients = ref(false)
@@ -109,11 +108,19 @@ const error = ref('')
 const fetchClients = async () => {
   loadingClients.value = true
   try {
-    clients.value = await getAllClients()
+    clients.value = await getAllUsers('client')
   } catch (e) {
     error.value = e.message
   } finally {
     loadingClients.value = false
+  }
+}
+
+const fetchCouriers = async () => {
+  try {
+    couriers.value = await getAllUsers('courier')
+  } catch (e) {
+    error.value = e.message
   }
 }
 
@@ -136,6 +143,7 @@ const fetchOrders = async () => {
 
 onMounted(() => {
   fetchClients()
+  fetchCouriers()
   fetchOrders()
 })
 
