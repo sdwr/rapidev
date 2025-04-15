@@ -20,7 +20,7 @@ const showErrorToast = () => {
   <div class="app-container">
     <header>
       <div class="header-content">
-        <div class="header-text">Rapid App</div>
+        <div class="header-text">Rapid Delivery</div>
         <UserProfile />
       </div>
       <div class="content-container">
