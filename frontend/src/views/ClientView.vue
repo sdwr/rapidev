@@ -27,7 +27,7 @@
         <div v-if="currentTab === 'order'" class="tab-panel">
           <div class="card">
             <h2>Place Your Order</h2>
-            <template v-if="userStore.user?.profile?.id">
+            <template v-if="userStore.user?.id && userStore.user?.profile?.id">
               <Order 
                 :clientId="userStore.user.id"
                 :clientProfileId="userStore.user.profile.id"
@@ -116,10 +116,11 @@ const handleOrderCreated = async (orderData: OrderType) => {
       return
     }
 
-    // Create the order with the profile's ID
+    // Create the order with the correct IDs
     const order = await upsertOrder({
       ...orderData,
-      clientId: profile.id
+      clientId: userStore.user.id,  // Use the user ID as clientId
+      clientProfileId: profile.id   // Use the profile ID as clientProfileId
     })
 
     if (order) {

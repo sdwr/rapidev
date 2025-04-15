@@ -13,6 +13,14 @@ export class OrderController {
     const data = request.body()
     
     try {
+      // Verify client user exists
+      const client = await User.findBy('id', data.clientId)
+      if (!client) {
+        return response.status(400).json({ 
+          error: 'Client user not found' 
+        })
+      }
+
       // Verify client profile exists
       const profile = await Profile.findBy('id', data.clientProfileId)
       if (!profile) {
@@ -21,11 +29,10 @@ export class OrderController {
         })
       }
 
-      // Verify client user exists
-      const client = await User.findBy('id', data.clientId)
-      if (!client) {
+      // Verify profile belongs to client
+      if (profile.userId !== client.id) {
         return response.status(400).json({ 
-          error: 'Client user not found' 
+          error: 'Profile does not belong to client' 
         })
       }
 
