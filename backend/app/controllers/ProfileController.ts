@@ -56,15 +56,17 @@ export class ProfileController {
     const data = request.body()
     
     try {
-      if (data.id) {
-        // Update
+      // First try to find an existing profile for this user
+      const existingProfile = await Profile.findBy('userId', data.userId)
+      
+      if (existingProfile) {
+        // Update existing profile
         await updateProfileValidator.validate(data)
-        const profile = await Profile.findOrFail(data.id)
-        profile.merge(data)
-        await profile.save()
-        return response.json(profile)
+        existingProfile.merge(data)
+        await existingProfile.save()
+        return response.json(existingProfile)
       } else {
-        // Create
+        // Create new profile
         await createProfileValidator.validate(data)
         const profile = await Profile.create({
           id: randomUUID(),

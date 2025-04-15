@@ -7,14 +7,36 @@
       <div class="section">
         <h2>Users</h2>
         <div class="list-container">
-          <div v-for="user in users" :key="user.id" class="list-item">
-            <div class="item-content">
-              <p><strong>ID:</strong> {{ user.id }}</p>
-              <p><strong>Username:</strong> {{ user.username }}</p>
-              <p><strong>Type:</strong> {{ user.userType }}</p>
-            </div>
-            <button @click="deleteUser(user.id)" class="delete-button">Delete</button>
-          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>User Type</th>
+                <th>Profile</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in users" :key="user.id">
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.userType }}</td>
+                <td>
+                  <template v-if="user.profile">
+                    <div>Name: {{ user.profile.name }}</div>
+                    <div>Email: {{ user.profile.email }}</div>
+                    <div>Phone: {{ user.profile.phone }}</div>
+                    <div>Address: {{ user.profile.address }}</div>
+                  </template>
+                  <span v-else>No profile</span>
+                </td>
+                <td>
+                  <button @click="deleteUser(user.id)" class="delete-button">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 

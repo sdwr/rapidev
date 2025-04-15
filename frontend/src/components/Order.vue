@@ -73,16 +73,29 @@
 import { ref } from 'vue'
 import { Size, OrderStatus } from '@/models/Order'
 
+const props = defineProps({
+  clientId: {
+    type: String,
+    required: true
+  },
+  clientProfileId: {
+    type: String,
+    required: true
+  }
+})
+
 const emit = defineEmits(['order-created'])
 
 const sizes = Object.values(Size)
 
 const orderData = ref({
+  clientId: props.clientId,
+  clientProfileId: props.clientProfileId,
   deliveryAddress: '',
   items: [{
     description: '',
     quantity: 1,
-    size: Size.SMALL
+    size: Size.MEDIUM
   }]
 })
 

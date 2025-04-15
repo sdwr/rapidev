@@ -4,6 +4,7 @@ import OrderStatus from '#models/order_status'
 import OrderItem from '#models/order_item'
 import { randomUUID } from 'node:crypto'
 import Profile from '#models/profile'
+import User from '#models/user'
 
 import { OrderStatus as Status } from '#shared/enums/OrderEnums'
 
@@ -13,10 +14,18 @@ export class OrderController {
     
     try {
       // Verify client profile exists
-      const profile = await Profile.findBy('id', data.clientId)
+      const profile = await Profile.findBy('id', data.clientProfileId)
       if (!profile) {
         return response.status(400).json({ 
           error: 'Client profile not found' 
+        })
+      }
+
+      // Verify client user exists
+      const client = await User.findBy('id', data.clientId)
+      if (!client) {
+        return response.status(400).json({ 
+          error: 'Client user not found' 
         })
       }
 
@@ -44,7 +53,7 @@ export class OrderController {
         orderId: order.id,
         status: Status.DRAFT,
         isCurrent: true,
-        description: '',
+        description: 'Order created and is in draft state'
       })
 
       // Load the relationships
@@ -52,6 +61,8 @@ export class OrderController {
       await order.load('orderStatuses', (query) => {
         query.where('isCurrent', true)
       })
+      await order.load('client')
+      await order.load('clientProfile')
 
       return response.json(order)
     } catch (error) {
@@ -65,6 +76,7 @@ export class OrderController {
     try {
       const orders = await Order.query()
         .preload('client')
+        .preload('clientProfile')
         .preload('items')
         .preload('orderStatuses', (query) => {
           query.where('isCurrent', true)
@@ -86,6 +98,8 @@ export class OrderController {
         .preload('orderStatuses', (query) => {
           query.where('isCurrent', true)
         })
+        .preload('client')
+        .preload('clientProfile')
         .orderBy('createdAt', 'desc')
       return response.json(orders)
     } catch (error) {

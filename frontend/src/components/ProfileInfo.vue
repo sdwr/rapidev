@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { upsertProfile } from '../api/api'
+import { upsertProfile, getProfileByUserId } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 
 const props = defineProps<{
@@ -72,6 +72,27 @@ const formData = ref({
 
 const loading = ref(false)
 const error = ref('')
+
+const loadProfile = async () => {
+  if (!userStore.user?.id) {
+    error.value = 'No user logged in'
+    return
+  }
+
+  try {
+    const profile = await getProfileByUserId(userStore.user.id)
+    if (profile) {
+      formData.value = {
+        name: profile.name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        address: profile.address || ''
+      }
+    }
+  } catch (e) {
+    console.error('Error loading profile:', e)
+  }
+}
 
 const handleSubmit = async () => {
   if (!userStore.user?.id) {
@@ -95,14 +116,7 @@ const handleSubmit = async () => {
 }
 
 onMounted(() => {
-  if (userStore.user?.profile) {
-    formData.value = {
-      name: userStore.user.profile.name || '',
-      email: userStore.user.profile.email || '',
-      phone: userStore.user.profile.phone || '',
-      address: userStore.user.profile.address || ''
-    }
-  }
+  loadProfile()
 })
 </script>
 

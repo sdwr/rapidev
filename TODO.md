@@ -9,3 +9,8 @@
 
 
 
+-- Potential issues
+
+1. order is attached to user profile
+- how does this work with multiple user locations?
+- attach to user as well/instead?

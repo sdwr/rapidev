@@ -6,8 +6,9 @@ export default class extends BaseSchema {
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary()
-      table.uuid('client_id').references('id').inTable('profiles').onDelete('CASCADE')
-      table.uuid('courier_id').references('id').inTable('couriers').nullable()
+      table.uuid('client_id').references('id').inTable('users').onDelete('SET NULL')
+      table.uuid('courier_id').references('id').inTable('users').nullable()
+      table.uuid('client_profile_id').references('id').inTable('profiles').onDelete('SET NULL')
       table.text('delivery_address').notNullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()

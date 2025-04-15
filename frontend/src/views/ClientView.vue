@@ -27,7 +27,16 @@
         <div v-if="currentTab === 'order'" class="tab-panel">
           <div class="card">
             <h2>Place Your Order</h2>
-            <Order @order-created="handleOrderCreated" />
+            <template v-if="userStore.user?.profile?.id">
+              <Order 
+                :clientId="userStore.user.id"
+                :clientProfileId="userStore.user.profile.id"
+                @order-created="handleOrderCreated" 
+              />
+            </template>
+            <div v-else class="error-message">
+              Please create a profile before placing an order.
+            </div>
             <div class="order-status" v-if="orderStatus">{{ orderStatus }}</div>
           </div>
         </div>
