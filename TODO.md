@@ -9,8 +9,8 @@
 
 
 3. accept/assign order flow
-- client creates (using profile location as pickup location, adds note)
     
+    - client creates (using profile location as pickup location, adds note)
     
     <STATUS = DRAFT>
     - created order
@@ -42,7 +42,7 @@
 
     <STATUS = CANCELLED_BY_COURIER>
         -admin can reassign to new courier?
-        
+
     <STATUS = CANCELLED_BY_ADMIN>
 
 
@@ -55,3 +55,7 @@
 - attach to user as well/instead?
 
 2. who sets pickup/delivery date / time?
+
+-- tech debt
+
+1. need human-readable errors from backend (ex. profile duplicate email)

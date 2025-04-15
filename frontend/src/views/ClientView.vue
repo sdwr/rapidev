@@ -39,11 +39,55 @@
           </div>
         </div>
 
-        <!-- My Order Tab -->
-        <div v-if="currentTab === 'history'" class="tab-panel">
+        <!-- My Orders Tab -->
+        <div v-if="currentTab === 'myOrders'" class="tab-panel">
           <h2>My Orders</h2>
           <div class="list-container">
-            <p v-if="!orderHistory.length">No orders yet.</p>
+            <p v-if="!myOrders.length">No active orders.</p>
+            <div v-else v-for="order in myOrders" :key="order.id" class="list-item">
+              <h3>Order #{{ order.id }}</h3>
+              <div class="status-chip" :style="{
+                backgroundColor: orderStatusColors[order.status].background,
+                color: orderStatusColors[order.status].text
+              }">
+                {{ order.status }}
+              </div>
+              <p>Delivery Address: {{ order.deliveryAddress }}</p>
+              <p>Items: {{ order.items.length }}</p>
+              <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
+              
+              <div class="order-actions">
+                <button 
+                  v-if="order.status === OrderStatus.DRAFT" 
+                  @click="handleCancelOrder(order.id)"
+                  class="action-button cancel"
+                >
+                  Cancel Order
+                </button>
+                <button 
+                  v-if="order.status === OrderStatus.DRAFT" 
+                  @click="handleEditOrder(order)"
+                  class="action-button edit"
+                >
+                  Edit Order
+                </button>
+                <button 
+                  v-if="order.status === OrderStatus.DRAFT" 
+                  @click="handlePayOrder(order.id)"
+                  class="action-button pay"
+                >
+                  Pay Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Tab -->
+        <div v-if="currentTab === 'history'" class="tab-panel">
+          <h2>Order History</h2>
+          <div class="list-container">
+            <p v-if="!orderHistory.length">No order history.</p>
             <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
               <h3>Order #{{ order.id }}</h3>
               <div class="status-chip" :style="{
@@ -55,6 +99,7 @@
               <p>Delivery Address: {{ order.deliveryAddress }}</p>
               <p>Items: {{ order.items.length }}</p>
               <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
+              <p>Completed: {{ new Date(order.updatedAt).toLocaleString() }}</p>
             </div>
           </div>
         </div>
@@ -68,20 +113,24 @@ import { ref, onMounted } from 'vue'
 import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
-import { getClientOrders, upsertOrder, getProfileByUserId } from '../api/api'
+import { getClientOrders, upsertOrder, getProfileByUserId, updateOrderState } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
 import { orderStatusColors } from '@/constants/orderStatusColors'
+import { OrderStatus } from '@/models/Order'
+import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
 
 const userStore = useUserStore()
 
 const tabs = [
   { id: 'profile', label: 'My Profile' },
   { id: 'order', label: 'Place Order' },
-  { id: 'history', label: 'My Orders' }
+  { id: 'myOrders', label: 'My Orders' },
+  { id: 'history', label: 'History' }
 ]
 
 const currentTab = ref('order')
+const myOrders = ref<OrderType[]>([])
 const orderHistory = ref<OrderType[]>([])
 const loadingOrders = ref(false)
 const error = ref('')
@@ -107,7 +156,9 @@ const fetchOrders = async () => {
 
   loadingOrders.value = true
   try {
-    orderHistory.value = await getClientOrders(userStore.user.id)
+    const orders = await getClientOrders(userStore.user.id)
+    myOrders.value = orders.filter(order => ACTIVE_ORDER_STATUSES.includes(order.status))
+    orderHistory.value = orders.filter(order => HISTORY_ORDER_STATUSES.includes(order.status))
   } catch (e) {
     error.value = e.message
   } finally {
@@ -144,6 +195,33 @@ const handleOrderCreated = async (orderData: OrderType) => {
     console.error('Error creating order:', error)
     toast.error(error.message || 'Error creating order')
   }
+}
+
+const handleCancelOrder = async (orderId: string) => {
+  try {
+    await updateOrderState(orderId, OrderStatus.CANCELLED_BY_CLIENT)
+    toast.success('Order cancelled successfully')
+    await fetchOrders()
+  } catch (error) {
+    console.error('Error cancelling order:', error)
+    toast.error('Failed to cancel order')
+  }
+}
+
+const handlePayOrder = async (orderId: string) => {
+  try {
+    // TODO: Implement payment integration
+    toast.success('Payment processed successfully')
+    await fetchOrders()
+  } catch (error) {
+    console.error('Error processing payment:', error)
+    toast.error('Failed to process payment')
+  }
+}
+
+const handleEditOrder = async (order: OrderType) => {
+  // TODO: Implement order editing
+  toast.info('Order editing coming soon')
 }
 
 onMounted(() => {
@@ -228,5 +306,39 @@ onMounted(() => {
   font-weight: 500;
   margin: 0.5rem 0;
   text-transform: capitalize;
+}
+
+.order-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.action-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.action-button:hover {
+  opacity: 0.9;
+}
+
+.action-button.cancel {
+  background-color: #f44336;
+  color: white;
+}
+
+.action-button.pay {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.action-button.edit {
+  background-color: #2196F3;
+  color: white;
 }
 </style> 
