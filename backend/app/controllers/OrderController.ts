@@ -3,6 +3,7 @@ import Order from '#models/order'
 import OrderStatus from '#models/order_status'
 import OrderItem from '#models/order_item'
 import { randomUUID } from 'node:crypto'
+import Profile from '#models/profile'
 
 import { OrderStatus as Status } from '#shared/enums/OrderEnums'
 
@@ -11,6 +12,14 @@ export class OrderController {
     const data = request.body()
     
     try {
+      // Verify client profile exists
+      const profile = await Profile.findBy('id', data.clientId)
+      if (!profile) {
+        return response.status(400).json({ 
+          error: 'Client profile not found' 
+        })
+      }
+
       // Remove status and items from incoming data
       const { status, items, ...orderData } = data
 
@@ -34,7 +43,8 @@ export class OrderController {
         id: randomUUID(),
         orderId: order.id,
         status: Status.DRAFT,
-        isCurrent: true
+        isCurrent: true,
+        description: '',
       })
 
       // Load the relationships
@@ -142,6 +152,31 @@ export class OrderController {
       return response.json(orderStatuses)
     } catch (error) {
       return response.status(400).json({ error: error.message })
+    }
+  }
+
+  async deleteOrder({ params, response }: HttpContext) {
+    try {
+      const order = await Order.findOrFail(params.id)
+      
+      // Delete associated order statuses
+      await OrderStatus.query()
+        .where('orderId', order.id)
+        .delete()
+      
+      // Delete associated order items
+      await OrderItem.query()
+        .where('orderId', order.id)
+        .delete()
+      
+      // Delete the order
+      await order.delete()
+      
+      return response.json({ message: 'Order and associated data deleted successfully' })
+    } catch (error) {
+      return response.status(404).json({ 
+        error: 'Order not found' 
+      })
     }
   }
 } 

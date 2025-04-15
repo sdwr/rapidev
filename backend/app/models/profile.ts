@@ -18,7 +18,7 @@ export default class Profile extends BaseModel {
   declare email: string
 
   @column()
-  declare pickupAddress: string
+  declare address: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

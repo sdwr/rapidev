@@ -83,8 +83,7 @@ const handleSubmit = async () => {
   try {
     const profileData = {
       ...formData.value,
-      userId: userStore.user.id,
-      type: props.profileType
+      userId: userStore.user.id
     }
     const savedProfile = await upsertProfile(profileData)
     emit('profile-saved', savedProfile)

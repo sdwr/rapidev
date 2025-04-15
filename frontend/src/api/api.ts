@@ -178,4 +178,30 @@ export const getDebugData = async () => {
     handleApiError(error)
     return null
   }
+}
+
+export async function deleteUser(userId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function deleteOrder(orderId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
 } 

@@ -56,7 +56,7 @@ import { ref, onMounted } from 'vue'
 import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import type { Order as OrderType } from '@/models/Order'
-import { getClientOrders, upsertOrder } from '../api/api'
+import { getClientOrders, upsertOrder, getProfileByUserId } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 
 const userStore = useUserStore()
@@ -93,21 +93,33 @@ const fetchOrders = async () => {
   }
 }
 
-const handleOrderCreated = async (orderData) => {
+const handleOrderCreated = async (orderData: OrderType) => {
   if (!userStore.user?.id) {
-    orderStatus.value = 'Error: No user logged in'
+    console.error('No user logged in')
     return
   }
 
   try {
-    const savedOrder = await upsertOrder({
+    // Get the user's profile
+    const profile = await getProfileByUserId(userStore.user.id)
+    if (!profile) {
+      console.error('No profile found for user')
+      return
+    }
+
+    // Create the order with the profile's ID
+    const order = await upsertOrder({
       ...orderData,
-      clientId: userStore.user.id
+      clientId: profile.id
     })
-    orderStatus.value = 'Order submitted successfully!'
-    await fetchOrders()
-  } catch (e) {
-    orderStatus.value = `Error: ${e.message}`
+
+    if (order) {
+      orderStatus.value = 'Order created successfully!'
+      await fetchOrders()
+    }
+  } catch (error) {
+    console.error('Error creating order:', error)
+    orderStatus.value = 'Error creating order'
   }
 }
 

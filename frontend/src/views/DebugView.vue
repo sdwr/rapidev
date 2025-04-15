@@ -1,69 +1,132 @@
 <template>
-  <div class="debug-view">
-    <h2>Debug Data</h2>
+  <div class="view debug-view">
+    <h1>Debug View</h1>
     
-    <div v-for="(table, name) in tables" :key="name" class="table-section">
-      <h3>{{ name }}</h3>
-      <pre>{{ JSON.stringify(table, null, 2) }}</pre>
+    <div class="debug-container">
+      <!-- Users Section -->
+      <div class="section">
+        <h2>Users</h2>
+        <div class="list-container">
+          <div v-for="user in users" :key="user.id" class="list-item">
+            <div class="item-content">
+              <p><strong>ID:</strong> {{ user.id }}</p>
+              <p><strong>Username:</strong> {{ user.username }}</p>
+              <p><strong>Type:</strong> {{ user.userType }}</p>
+            </div>
+            <button @click="deleteUser(user.id)" class="delete-button">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Section -->
+      <div class="section">
+        <h2>Orders</h2>
+        <div class="list-container">
+          <div v-for="order in orders" :key="order.id" class="list-item">
+            <div class="item-content">
+              <p><strong>ID:</strong> {{ order.id }}</p>
+              <p><strong>Client ID:</strong> {{ order.clientId }}</p>
+              <p><strong>Status:</strong> {{ order.status }}</p>
+            </div>
+            <button @click="deleteOrder(order.id)" class="delete-button">Delete</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getAllOrders, getAllOrderStatuses, getAllUsers } from '../api/api'
-import type { User } from '@/models/User'
-import type { Order } from '@/models/Order'
+import { getAllUsers, getAllOrders, deleteUser as deleteUserApi, deleteOrder as deleteOrderApi } from '../api/api'
+import { toast } from 'vue3-toastify'
 
-const tables = ref<{
-  users: User[]
-  clients: User[]
-  couriers: User[]
-  admins: User[]
-  orders: Order[]
-  orderStatuses: any[]
-}>({
-  users: [],
-  clients: [],
-  couriers: [],
-  admins: [],
-  orders: [],
-  orderStatuses: []
-})
+const users = ref([])
+const orders = ref([])
 
-onMounted(async () => {
+const loadData = async () => {
   try {
-    const [users, orders, orderStatuses] = await Promise.all([
-      getAllUsers(),
-      getAllOrders(),
-      getAllOrderStatuses()
-    ])
-
-    tables.value = {
-      users,
-      clients: users.filter(user => user.userType === 'client'),
-      couriers: users.filter(user => user.userType === 'courier'),
-      admins: users.filter(user => user.userType === 'admin'),
-      orders,
-      orderStatuses
-    }
+    users.value = await getAllUsers()
+    orders.value = await getAllOrders()
   } catch (error) {
-    console.error('Error fetching debug data:', error)
+    toast.error('Failed to load debug data')
   }
+}
+
+const deleteUser = async (userId: string) => {
+  try {
+    await deleteUserApi(userId)
+    toast.success('User deleted successfully')
+    loadData() // Reload the data
+  } catch (error) {
+    toast.error('Failed to delete user')
+  }
+}
+
+const deleteOrder = async (orderId: string) => {
+  try {
+    await deleteOrderApi(orderId)
+    toast.success('Order deleted successfully')
+    loadData() // Reload the data
+  } catch (error) {
+    toast.error('Failed to delete order')
+  }
+}
+
+onMounted(() => {
+  loadData()
 })
 </script>
 
 <style scoped>
 .debug-view {
-  padding: 20px;
+  padding: 2rem;
 }
-.table-section {
-  margin: 20px 0;
-  padding: 10px;
-  border: 1px solid #ddd;
+
+.debug-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
-pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
+
+.section {
+  background: var(--color-background-soft);
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--color-background);
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.item-content {
+  flex: 1;
+}
+
+.delete-button {
+  padding: 0.5rem 1rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.delete-button:hover {
+  background: #c82333;
 }
 </style> 

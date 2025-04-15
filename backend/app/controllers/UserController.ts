@@ -180,8 +180,23 @@ export default class UserController {
   }
 
   async deleteUser({ params, response }: HttpContext) {
-    const user = await User.findOrFail(params.id)
-    await user.delete()
-    return response.json({ message: 'User deleted' })
+    try {
+      const user = await User.findOrFail(params.id)
+      
+      // Delete associated profile if it exists
+      const profile = await Profile.findBy('userId', user.id)
+      if (profile) {
+        await profile.delete()
+      }
+      
+      // Delete the user
+      await user.delete()
+      
+      return response.json({ message: 'User and associated profile deleted successfully' })
+    } catch (error) {
+      return response.status(404).json({ 
+        error: 'User not found' 
+      })
+    }
   } 
 }
