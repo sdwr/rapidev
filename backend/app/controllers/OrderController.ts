@@ -120,7 +120,9 @@ export class OrderController {
       const orders = await Order.query()
         .where('clientId', params.clientId)
         .preload('items')
-        .preload('orderStatuses')
+        .preload('orderStatuses', (query) => {
+          query.orderBy('createdAt', 'asc')
+        })
         .preload('client')
         .preload('clientProfile')
         .orderBy('createdAt', 'asc')
@@ -128,6 +130,25 @@ export class OrderController {
     } catch (error) {
       return response.status(400).json({ 
         error: error.message 
+      })
+    }
+  }
+
+  async getCourierOrders({ params, response }: HttpContext) {
+    try {
+      const orders = await Order.query()
+        .where('courierId', params.courierId)
+        .preload('items')
+        .preload('orderStatuses', (query) => {
+          query.orderBy('createdAt', 'asc')
+        })
+        .preload('client')
+        .preload('clientProfile')
+        .orderBy('createdAt', 'asc')
+      return response.json(orders)
+    } catch (error) {
+      return response.status(400).json({ 
+        error: error.message
       })
     }
   }

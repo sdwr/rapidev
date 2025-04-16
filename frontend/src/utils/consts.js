@@ -22,6 +22,12 @@ export const ACCEPTABLE_ORDER_STATUSES = [
   OrderStatus.PENDING
 ] 
 
+export const COURIER_ACTIVE_ORDER_STATUSES = [
+  OrderStatus.CONFIRMED_BY_COURIER,
+  OrderStatus.PICKED_UP,
+  OrderStatus.IN_TRANSIT
+]
+
 export const ORDER_STATUS_DESCRIPTIONS = {
   DRAFT: 'Order created and is in draft state',
   PENDING: 'Order is pending acceptance',

@@ -48,6 +48,7 @@
             <div class="item-content">
               <p><strong>ID:</strong> {{ order.id }}</p>
               <p><strong>Client ID:</strong> {{ order.clientId }}</p>
+              <p><strong>Courier ID:</strong> {{ order.courierId }}</p>
               <p><strong>Status:</strong> {{ order.status }}</p>
             </div>
             <button @click="deleteOrder(order.id)" class="delete-button">Delete</button>

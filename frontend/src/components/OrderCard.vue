@@ -254,8 +254,8 @@ const confirmOrder = async () => {
 }
 
 .status-entry {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
+  margin-bottom: 0.1rem;
+  padding: 0.1rem;
   background: var(--color-background);
   border-radius: 4px;
 }

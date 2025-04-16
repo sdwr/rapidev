@@ -88,7 +88,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getAllUsers, getAllOrders, updateOrderState, getOrderStatuses, upsertOrder } from '../api/api'
+import { getAllUsers, getAllOrders, updateOrderState, upsertOrder } from '../api/api'
 import type { Order } from '@/models/Order'
 import type { User } from '@/models/User'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES, ACCEPTABLE_ORDER_STATUSES } from '../utils/consts'
@@ -148,7 +148,7 @@ const fetchOrders = async () => {
     
     // Fetch status history for each order
     for (const order of orders) {
-      const statuses = await getOrderStatuses(order.id)
+      const statuses = order.orderStatuses
       statusHistories.value[order.id] = statuses
       statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     }

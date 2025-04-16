@@ -83,7 +83,7 @@ import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import OrderCard from '@/components/OrderCard.vue'
 import type { Order as OrderType } from '@/models/Order'
-import { getClientOrders, upsertOrder, getOrderStatuses } from '../api/api'
+import { getClientOrders, upsertOrder } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
@@ -132,7 +132,7 @@ const fetchOrders = async () => {
     
     // Fetch status history for each order
     for (const order of orders) {
-      const statuses = await getOrderStatuses(order.id)
+      const statuses = order.orderStatuses
       statusHistories.value[order.id] = statuses
       statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     }

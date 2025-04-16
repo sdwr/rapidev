@@ -219,3 +219,19 @@ export async function deleteOrder(orderId: string) {
     return null
   }
 }
+
+export const getCourierOrders = async (courierId: string): Promise<Order[]> => {
+  const response = await fetch(`${BASE_URL}/api/orders/courier/${courierId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch courier orders')
+  }
+
+  return response.json()
+}
