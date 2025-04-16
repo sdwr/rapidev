@@ -1,19 +1,26 @@
+import { OrderStatus } from '../models/Order'
+
 export const ACTIVE_ORDER_STATUSES = [
-  'DRAFT',
-  'PENDING',
-  'ACCEPTED',
-  'ASSIGNED',
-  'CONFIRMED',
-  'PICKED_UP',
-  'IN_TRANSIT'
+  OrderStatus.DRAFT,
+  OrderStatus.PENDING,
+  OrderStatus.ACCEPTED,
+  OrderStatus.ASSIGNED_TO_COURIER,
+  OrderStatus.CONFIRMED_BY_COURIER,
+  OrderStatus.PICKED_UP,
+  OrderStatus.IN_TRANSIT
 ]
 
 export const HISTORY_ORDER_STATUSES = [
-  'DELIVERED',
-  'CANCELLED_BY_CLIENT',
-  'CANCELLED_BY_COURIER',
-  'CANCELLED_BY_ADMIN'
+  OrderStatus.DELIVERED,
+  OrderStatus.CANCELLED_BY_CLIENT,
+  OrderStatus.CANCELLED_BY_COURIER,
+  OrderStatus.CANCELLED_BY_ADMIN
 ]
+
+export const ACCEPTABLE_ORDER_STATUSES = [
+  OrderStatus.DRAFT,
+  OrderStatus.PENDING
+] 
 
 export const ORDER_STATUS_DESCRIPTIONS = {
   DRAFT: 'Order created and is in draft state',

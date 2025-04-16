@@ -85,7 +85,7 @@
                   <p class="description">{{ status.description }}</p>
                 </div>
               </div>
-              <div class="order-actions">
+              <div v-if="canAcceptOrder(order)" class="order-actions">
                 <button @click="updateOrderStatus(order.id, 'ACCEPTED')">Accept</button>
                 <button @click="updateOrderStatus(order.id, 'CANCELLED')">Cancel</button>
               </div>
@@ -102,9 +102,10 @@ import { ref, onMounted } from 'vue'
 import { getAllUsers, getAllOrders, updateOrderState, getOrderStatuses } from '../api/api'
 import type { Order } from '@/models/Order'
 import type { User } from '@/models/User'
-import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
+import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES, ACCEPTABLE_ORDER_STATUSES } from '../utils/consts'
 import { toast } from 'vue3-toastify'
-import { OrderStatus } from '../../../shared/enums/OrderEnums'
+import { OrderStatus } from '@/models/Order'
+
 const tabs = [
   { id: 'active', label: 'Active Orders' },
   { id: 'history', label: 'Order History' },
@@ -156,6 +157,7 @@ const fetchOrders = async () => {
     for (const order of orders) {
       const statuses = await getOrderStatuses(order.id)
       statusHistories.value[order.id] = statuses
+      statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) 
     }
   } catch (e) {
     error.value = e.message
@@ -181,6 +183,10 @@ const updateOrderStatus = async (orderId: string, status: string) => {
     toast.error('Failed to update order status')
     console.error('Error updating order status:', error)
   }
+}
+
+const canAcceptOrder = (order: Order) => {
+  return ACCEPTABLE_ORDER_STATUSES.includes(order.status)
 }
 </script>
 
