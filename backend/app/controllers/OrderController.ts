@@ -135,9 +135,38 @@ export class OrderController {
   }
 
   async upsertOrder({ request, response }: HttpContext) {
-    const order: Order = request.body() as Order
-    // TODO: Implement database upsert
-    return response.json(order)
+    const data = request.body()
+    
+    try {
+      let order: Order
+      
+      if (data.id) {
+        // Update existing order
+        order = await Order.findOrFail(data.id)
+        await order.merge(data).save()
+      } else {
+        // Create new order
+        order = await Order.create({
+          id: randomUUID(),
+          ...data
+        })
+      }
+
+      // Load relationships
+      await order.load('items')
+      await order.load('orderStatuses', (query) => {
+        query.where('isCurrent', true)
+      })
+      await order.load('client')
+      await order.load('clientProfile')
+      await order.load('courier')
+
+      return response.json(order)
+    } catch (error) {
+      return response.status(400).json({ 
+        error: error.message 
+      })
+    }
   }
 
   async updateStatus({ request, response }: HttpContext) {

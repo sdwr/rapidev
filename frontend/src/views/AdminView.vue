@@ -55,13 +55,23 @@
             <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
               <h3>Order #{{ order.id }}</h3>
               <p>Client: {{ order.clientId }}</p>
+              <p>Courier: {{ order.courierId }}</p>
               <p>Items: {{ order.items.length }}</p>
               <div class="status-history">
-                <h4>Status History</h4>
-                <div v-for="status in statusHistories[order.id]" :key="status.id" class="status-entry">
-                  <span class="status">{{ status.status }}</span>
-                  <span class="timestamp">{{ new Date(status.createdAt).toLocaleString() }}</span>
-                  <p class="description">{{ status.description }}</p>
+                <div class="status-header" @click="toggleStatusHistory(order.id)">
+                  <h4>Status History</h4>
+                  <span class="toggle-icon">{{ expandedStatusHistories[order.id] ? '▼' : '▶' }}</span>
+                </div>
+                <div v-if="expandedStatusHistories[order.id]" class="status-entries">
+                  <div v-for="status in statusHistories[order.id]" :key="status.id" class="status-entry">
+                    <span class="status">{{ status.status }}</span>
+                    <span class="timestamp">{{ new Date(status.createdAt).toLocaleString() }}</span>
+                    <p class="description">{{ status.description }}</p>
+                  </div>
+                </div>
+                <div v-else class="current-status">
+                  <span class="status">{{ getCurrentStatus(order.id) }}</span>
+                  <span class="timestamp">{{ getCurrentStatusTimestamp(order.id) }}</span>
                 </div>
               </div>
             </div>
@@ -77,17 +87,53 @@
               <h3>Order #{{ order.id }}</h3>
               <p>Status: {{ order.status }}</p>
               <p>Client: {{ order.clientId }}</p>
+              <p>Courier: {{ order.courierId }}</p>
               <div class="status-history">
-                <h4>Status History</h4>
-                <div v-for="status in statusHistories[order.id]" :key="status.id" class="status-entry">
-                  <span class="status">{{ status.status }}</span>
-                  <span class="timestamp">{{ new Date(status.createdAt).toLocaleString() }}</span>
-                  <p class="description">{{ status.description }}</p>
+                <div class="status-header" @click="toggleStatusHistory(order.id)">
+                  <h4>Status History</h4>
+                  <span class="toggle-icon">{{ expandedStatusHistories[order.id] ? '▼' : '▶' }}</span>
+                </div>
+                <div v-if="expandedStatusHistories[order.id]" class="status-entries">
+                  <div v-for="status in statusHistories[order.id]" :key="status.id" class="status-entry">
+                    <span class="status">{{ status.status }}</span>
+                    <span class="timestamp">{{ new Date(status.createdAt).toLocaleString() }}</span>
+                    <p class="description">{{ status.description }}</p>
+                  </div>
+                </div>
+                <div v-else class="current-status">
+                  <span class="status">{{ getCurrentStatus(order.id) }}</span>
+                  <span class="timestamp">{{ getCurrentStatusTimestamp(order.id) }}</span>
                 </div>
               </div>
               <div v-if="canAcceptOrder(order)" class="order-actions">
                 <button @click="updateOrderStatus(order.id, 'ACCEPTED')">Accept</button>
                 <button @click="updateOrderStatus(order.id, 'CANCELLED')">Cancel</button>
+              </div>
+              <div v-if="order.status === OrderStatus.ACCEPTED" class="courier-assignment">
+                <select v-model="selectedCouriers[order.id]" class="courier-select">
+                  <option value="" selected>Select a courier</option>
+                  <option v-for="courier in couriers" :key="courier.id" :value="courier.id">
+                    {{ courier.profile?.name || courier.username }}
+                  </option>
+                </select>
+                <button 
+                  @click="assignCourier(order.id)" 
+                  :disabled="!selectedCouriers[order.id] || selectedCouriers[order.id] === ''"
+                  class="assign-button"
+                >
+                  Assign
+                </button>
+              </div>
+              <div v-if="order.status === OrderStatus.ASSIGNED_TO_COURIER" class="courier-assignment">
+                <div class="assigned-courier">
+                  <span>Assigned to: {{ order.courier?.profile?.name || order.courier?.username }}</span>
+                  <button 
+                    @click="unassignCourier(order.id)" 
+                    class="unassign-button"
+                  >
+                    Unassign
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -99,7 +145,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getAllUsers, getAllOrders, updateOrderState, getOrderStatuses } from '../api/api'
+import { getAllUsers, getAllOrders, updateOrderState, getOrderStatuses, upsertOrder } from '../api/api'
 import type { Order } from '@/models/Order'
 import type { User } from '@/models/User'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES, ACCEPTABLE_ORDER_STATUSES } from '../utils/consts'
@@ -122,6 +168,8 @@ const statusHistories = ref<Record<string, any[]>>({})
 const loadingClients = ref(false)
 const loadingOrders = ref(false)
 const error = ref('')
+const selectedCouriers = ref<Record<string, string>>({})
+const expandedStatusHistories = ref<Record<string, boolean>>({})
 
 const fetchClients = async () => {
   loadingClients.value = true
@@ -187,6 +235,69 @@ const updateOrderStatus = async (orderId: string, status: string) => {
 
 const canAcceptOrder = (order: Order) => {
   return ACCEPTABLE_ORDER_STATUSES.includes(order.status)
+}
+
+const assignCourier = async (orderId: string) => {
+  const courierId = selectedCouriers.value[orderId]
+  if (!courierId) return
+
+  try {
+    // First update the order status
+    await updateOrderState(orderId, OrderStatus.ASSIGNED_TO_COURIER)
+    
+    // Then update the order with the courier ID
+    const order = activeOrders.value.find(o => o.id === orderId)
+    if (order) {
+      await upsertOrder({
+        ...order,
+        courierId,
+      })
+    }
+    
+    toast.success('Order assigned to courier')
+    await fetchOrders() // Refresh the orders list
+  } catch (error) {
+    toast.error('Failed to assign courier')
+    console.error('Error assigning courier:', error)
+  }
+}
+
+const unassignCourier = async (orderId: string) => {
+  try {
+    // First update the order status
+    await updateOrderState(orderId, OrderStatus.ACCEPTED)
+    
+    // Then update the order to remove the courier
+    const order = activeOrders.value.find(o => o.id === orderId)
+    if (order) {
+      await upsertOrder({
+        ...order,
+        courierId: null,
+      })
+    }
+    
+    toast.success('Courier unassigned')
+    await fetchOrders() // Refresh the orders list
+  } catch (error) {
+    toast.error('Failed to unassign courier')
+    console.error('Error unassigning courier:', error)
+  }
+}
+
+const toggleStatusHistory = (orderId: string) => {
+  expandedStatusHistories.value[orderId] = !expandedStatusHistories.value[orderId]
+}
+
+const getCurrentStatus = (orderId: string) => {
+  const statuses = statusHistories.value[orderId]
+  if (!statuses || !statuses.length) return 'No status history'
+  return statuses[statuses.length - 1].status
+}
+
+const getCurrentStatusTimestamp = (orderId: string) => {
+  const statuses = statusHistories.value[orderId]
+  if (!statuses || !statuses.length) return ''
+  return new Date(statuses[statuses.length - 1].createdAt).toLocaleString()
 }
 </script>
 
@@ -294,8 +405,48 @@ const canAcceptOrder = (order: Order) => {
   border-top: 1px solid var(--color-border);
 }
 
-.status-history h4 {
-  margin: 0 0 0.5rem 0;
+.status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.5rem;
+  background: var(--color-background);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.status-header h4 {
+  margin: 0;
+}
+
+.toggle-icon {
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.status-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.current-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  background: var(--color-background);
+  border-radius: 4px;
+}
+
+.current-status .status {
+  font-weight: 500;
+}
+
+.current-status .timestamp {
+  color: var(--color-text-soft);
+  font-size: 0.9rem;
 }
 
 .status-entry {
@@ -319,5 +470,71 @@ const canAcceptOrder = (order: Order) => {
   margin: 0.25rem 0 0 0;
   font-size: 0.9rem;
   color: var(--color-text-soft);
+}
+
+.courier-assignment {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.courier-select {
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-text);
+  flex: 1;
+}
+
+.courier-select:invalid {
+  color: var(--color-text-soft);
+}
+
+.assign-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: #2196F3;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.assign-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.assign-button:not(:disabled):hover {
+  opacity: 0.9;
+}
+
+.assigned-courier {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: var(--color-background-soft);
+  border-radius: 4px;
+  width: 100%;
+}
+
+.unassign-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: #f44336;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.unassign-button:hover {
+  opacity: 0.9;
 }
 </style> 
