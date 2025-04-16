@@ -1,7 +1,7 @@
 <template>
   <div class="list-item">
     <h3>Order #{{ order.id }}</h3>
-    <p>Status: {{ order.orderStatuses[0]?.status }}</p>
+    <p>Status: {{ getCurrentStatus(order) }}</p>
     <p>Client: {{ order.clientId }}</p>
     <p>Courier: {{ order.courierId }}</p>
     <p>Items: {{ order.items.length }}</p>

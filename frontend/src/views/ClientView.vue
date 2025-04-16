@@ -44,48 +44,15 @@
           <h2>My Orders</h2>
           <div class="list-container">
             <p v-if="!myOrders.length">No active orders.</p>
-            <div v-else v-for="order in myOrders" :key="order.id" class="list-item">
-              <div class="order-header" @click="toggleOrder(order.id)">
-                <h3>Order #{{ order.id }}</h3>
-                <div class="status-chip" :style="{
-                  backgroundColor: orderStatusColors[order.status].background,
-                  color: orderStatusColors[order.status].text
-                }">
-                  {{ order.status }}
-                </div>
-                <span class="toggle-icon">{{ expandedOrders[order.id] ? '▼' : '▶' }}</span>
-              </div>
-              
-              <div v-if="expandedOrders[order.id]" class="order-details">
-                <p>Delivery Address: {{ order.deliveryAddress }}</p>
-                <p>Items: {{ order.items.length }}</p>
-                <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
-                
-                <div class="order-actions">
-                  <button 
-                    v-if="order.status === OrderStatus.DRAFT" 
-                    @click="handleCancelOrder(order.id)"
-                    class="action-button cancel"
-                  >
-                    Cancel Order
-                  </button>
-                  <button 
-                    v-if="order.status === OrderStatus.DRAFT" 
-                    @click="handleEditOrder(order)"
-                    class="action-button edit"
-                  >
-                    Edit Order
-                  </button>
-                  <button 
-                    v-if="order.status === OrderStatus.DRAFT" 
-                    @click="handlePayOrder(order.id)"
-                    class="action-button pay"
-                  >
-                    Pay Now
-                  </button>
-                </div>
-              </div>
-            </div>
+            <OrderCard
+              v-else
+              v-for="order in myOrders"
+              :key="order.id"
+              :order="order"
+              :userType="'client'"
+              :statusHistory="statusHistories[order.id]"
+              @orderUpdated="fetchOrders"
+            />
           </div>
         </div>
 
@@ -94,25 +61,15 @@
           <h2>Order History</h2>
           <div class="list-container">
             <p v-if="!orderHistory.length">No order history.</p>
-            <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
-              <div class="order-header" @click="toggleOrder(order.id)">
-                <h3>Order #{{ order.id }}</h3>
-                <div class="status-chip" :style="{
-                  backgroundColor: orderStatusColors[order.status].background,
-                  color: orderStatusColors[order.status].text
-                }">
-                  {{ order.status }}
-                </div>
-                <span class="toggle-icon">{{ expandedOrders[order.id] ? '▼' : '▶' }}</span>
-              </div>
-              
-              <div v-if="expandedOrders[order.id]" class="order-details">
-                <p>Delivery Address: {{ order.deliveryAddress }}</p>
-                <p>Items: {{ order.items.length }}</p>
-                <p>Created: {{ new Date(order.createdAt).toLocaleString() }}</p>
-                <p>Completed: {{ new Date(order.updatedAt).toLocaleString() }}</p>
-              </div>
-            </div>
+            <OrderCard
+              v-else
+              v-for="order in orderHistory"
+              :key="order.id"
+              :order="order"
+              :userType="'client'"
+              :statusHistory="statusHistories[order.id]"
+              @orderUpdated="fetchOrders"
+            />
           </div>
         </div>
       </div>
@@ -124,13 +81,13 @@
 import { ref, onMounted } from 'vue'
 import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
+import OrderCard from '@/components/OrderCard.vue'
 import type { Order as OrderType } from '@/models/Order'
-import { getClientOrders, upsertOrder, getProfileByUserId, updateOrderState } from '../api/api'
+import { getClientOrders, upsertOrder, getOrderStatuses } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
-import { orderStatusColors } from '@/constants/orderStatusColors'
-import { OrderStatus } from '@/models/Order'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
+import { getCurrentStatus } from '@/utils'
 
 const userStore = useUserStore()
 
@@ -146,7 +103,7 @@ const myOrders = ref<OrderType[]>([])
 const orderHistory = ref<OrderType[]>([])
 const loadingOrders = ref(false)
 const error = ref('')
-const expandedOrders = ref<Record<string, boolean>>({})
+const statusHistories = ref<Record<string, any[]>>({})
 
 const handleProfileSave = async (profileData) => {
   try {
@@ -170,8 +127,15 @@ const fetchOrders = async () => {
   loadingOrders.value = true
   try {
     const orders = await getClientOrders(userStore.user.id)
-    myOrders.value = orders.filter(order => ACTIVE_ORDER_STATUSES.includes(order.status))
-    orderHistory.value = orders.filter(order => HISTORY_ORDER_STATUSES.includes(order.status))
+    myOrders.value = orders.filter(order => ACTIVE_ORDER_STATUSES.includes(getCurrentStatus(order)))
+    orderHistory.value = orders.filter(order => HISTORY_ORDER_STATUSES.includes(getCurrentStatus(order)))
+    
+    // Fetch status history for each order
+    for (const order of orders) {
+      const statuses = await getOrderStatuses(order.id)
+      statusHistories.value[order.id] = statuses
+      statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+    }
   } catch (e) {
     error.value = e.message
   } finally {
@@ -208,37 +172,6 @@ const handleOrderCreated = async (orderData: OrderType) => {
     console.error('Error creating order:', error)
     toast.error(error.message || 'Error creating order')
   }
-}
-
-const handleCancelOrder = async (orderId: string) => {
-  try {
-    await updateOrderState(orderId, OrderStatus.CANCELLED_BY_CLIENT)
-    toast.success('Order cancelled successfully')
-    await fetchOrders()
-  } catch (error) {
-    console.error('Error cancelling order:', error)
-    toast.error('Failed to cancel order')
-  }
-}
-
-const handlePayOrder = async (orderId: string) => {
-  try {
-    // TODO: Implement payment integration
-    toast.success('Payment processed successfully')
-    await fetchOrders()
-  } catch (error) {
-    console.error('Error processing payment:', error)
-    toast.error('Failed to process payment')
-  }
-}
-
-const handleEditOrder = async (order: OrderType) => {
-  // TODO: Implement order editing
-  toast.info('Order editing coming soon')
-}
-
-const toggleOrder = (orderId: string) => {
-  expandedOrders.value[orderId] = !expandedOrders.value[orderId]
 }
 
 onMounted(() => {

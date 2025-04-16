@@ -140,17 +140,17 @@ const fetchOrders = async () => {
   try {
     const orders = await getAllOrders()
     activeOrders.value = orders.filter(o => 
-      ACTIVE_ORDER_STATUSES.includes(o.orderStatuses[0]?.status)
+      ACTIVE_ORDER_STATUSES.includes(getCurrentStatus(o))
     )
     orderHistory.value = orders.filter(o => 
-      HISTORY_ORDER_STATUSES.includes(o.orderStatuses[0]?.status)
+      HISTORY_ORDER_STATUSES.includes(getCurrentStatus(o))
     )
     
     // Fetch status history for each order
     for (const order of orders) {
       const statuses = await getOrderStatuses(order.id)
       statusHistories.value[order.id] = statuses
-      statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) 
+      statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     }
   } catch (e) {
     error.value = e.message
