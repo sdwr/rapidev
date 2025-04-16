@@ -66,7 +66,7 @@ export class OrderController {
       // Load the relationships
       await order.load('items')
       await order.load('orderStatuses', (query) => {
-        query.where('isCurrent', true)
+        query.orderBy('createdAt', 'asc')
       })
       await order.load('client')
       await order.load('clientProfile')
@@ -86,9 +86,9 @@ export class OrderController {
         .preload('clientProfile')
         .preload('items')
         .preload('orderStatuses', (query) => {
-          query.where('isCurrent', true)
+          query.orderBy('createdAt', 'asc')
         })
-        .orderBy('createdAt', 'desc')
+        .orderBy('createdAt', 'asc')
       return response.json(orders)
     } catch (error) {
       return response.status(400).json({ 
@@ -104,9 +104,9 @@ export class OrderController {
         .preload('clientProfile')
         .preload('items')
         .preload('orderStatuses', (query) => {
-          query.orderBy('createdAt', 'desc')
+          query.orderBy('createdAt', 'asc')
         })
-        .orderBy('createdAt', 'desc')
+        .orderBy('createdAt', 'asc')
       return response.json(orders)
     } catch (error) {
       return response.status(400).json({ 
@@ -120,12 +120,10 @@ export class OrderController {
       const orders = await Order.query()
         .where('clientId', params.clientId)
         .preload('items')
-        .preload('orderStatuses', (query) => {
-          query.where('isCurrent', true)
-        })
+        .preload('orderStatuses')
         .preload('client')
         .preload('clientProfile')
-        .orderBy('createdAt', 'desc')
+        .orderBy('createdAt', 'asc')
       return response.json(orders)
     } catch (error) {
       return response.status(400).json({ 
@@ -154,9 +152,7 @@ export class OrderController {
 
       // Load relationships
       await order.load('items')
-      await order.load('orderStatuses', (query) => {
-        query.where('isCurrent', true)
-      })
+      await order.load('orderStatuses')
       await order.load('client')
       await order.load('clientProfile')
       await order.load('courier')
@@ -191,7 +187,7 @@ export class OrderController {
       const order = await Order.findOrFail(id)
       await order.load('items')
       await order.load('orderStatuses', (query) => {
-        query.where('isCurrent', true)
+        query.orderBy('createdAt', 'asc')
       })
 
       return response.json(order)
@@ -229,7 +225,7 @@ export class OrderController {
       const order = await Order.findOrFail(params.id)
       const statuses = await OrderStatus.query()
         .where('orderId', order.id)
-        .orderBy('createdAt', 'desc')
+        .orderBy('createdAt', 'asc')
       return response.json(statuses)
     } catch (error) {
       return response.status(400).json({ 

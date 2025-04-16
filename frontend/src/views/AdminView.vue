@@ -63,15 +63,15 @@
                   <span class="toggle-icon">{{ expandedStatusHistories[order.id] ? '▼' : '▶' }}</span>
                 </div>
                 <div v-if="expandedStatusHistories[order.id]" class="status-entries">
-                  <div v-for="status in statusHistories[order.id]" :key="status.id" class="status-entry">
+                  <div v-for="status in order.orderStatuses" :key="status.id" class="status-entry">
                     <span class="status">{{ status.status }}</span>
                     <span class="timestamp">{{ new Date(status.createdAt).toLocaleString() }}</span>
                     <p class="description">{{ status.description }}</p>
                   </div>
                 </div>
                 <div v-else class="current-status">
-                  <span class="status">{{ getCurrentStatus(order.id) }}</span>
-                  <span class="timestamp">{{ getCurrentStatusTimestamp(order.id) }}</span>
+                  <span class="status">{{ getCurrentStatus(order) }}</span>
+                  <span class="timestamp">{{ getCurrentStatusTimestamp(order)?.toLocaleString() }}</span>
                 </div>
               </div>
             </div>
@@ -85,7 +85,7 @@
             <p v-if="!activeOrders.length">No active orders.</p>
             <div v-else v-for="order in activeOrders" :key="order.id" class="list-item">
               <h3>Order #{{ order.id }}</h3>
-              <p>Status: {{ order.status }}</p>
+              <p>Status: {{ getCurrentStatus(order) }}</p>
               <p>Client: {{ order.clientId }}</p>
               <p>Courier: {{ order.courierId }}</p>
               <div class="status-history">
@@ -94,22 +94,22 @@
                   <span class="toggle-icon">{{ expandedStatusHistories[order.id] ? '▼' : '▶' }}</span>
                 </div>
                 <div v-if="expandedStatusHistories[order.id]" class="status-entries">
-                  <div v-for="status in statusHistories[order.id]" :key="status.id" class="status-entry">
+                  <div v-for="status in order.orderStatuses" :key="status.id" class="status-entry">
                     <span class="status">{{ status.status }}</span>
                     <span class="timestamp">{{ new Date(status.createdAt).toLocaleString() }}</span>
                     <p class="description">{{ status.description }}</p>
                   </div>
                 </div>
                 <div v-else class="current-status">
-                  <span class="status">{{ getCurrentStatus(order.id) }}</span>
-                  <span class="timestamp">{{ getCurrentStatusTimestamp(order.id) }}</span>
+                  <span class="status">{{ getCurrentStatus(order) }}</span>
+                  <span class="timestamp">{{ getCurrentStatusTimestamp(order)?.toLocaleString() }}</span>
                 </div>
               </div>
               <div v-if="canAcceptOrder(order)" class="order-actions">
                 <button @click="updateOrderStatus(order.id, 'ACCEPTED')">Accept</button>
                 <button @click="updateOrderStatus(order.id, 'CANCELLED')">Cancel</button>
               </div>
-              <div v-if="order.status === OrderStatus.ACCEPTED" class="courier-assignment">
+              <div v-if="order.orderStatuses[0]?.status === OrderStatus.ACCEPTED" class="courier-assignment">
                 <select v-model="selectedCouriers[order.id]" class="courier-select">
                   <option value="" selected>Select a courier</option>
                   <option v-for="courier in couriers" :key="courier.id" :value="courier.id">
@@ -124,7 +124,7 @@
                   Assign
                 </button>
               </div>
-              <div v-if="order.status === OrderStatus.ASSIGNED_TO_COURIER" class="courier-assignment">
+              <div v-if="order.orderStatuses[0]?.status === OrderStatus.ASSIGNED_TO_COURIER" class="courier-assignment">
                 <div class="assigned-courier">
                   <span>Assigned to: {{ order.courier?.profile?.name || order.courier?.username }}</span>
                   <button 
@@ -151,6 +151,7 @@ import type { User } from '@/models/User'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES, ACCEPTABLE_ORDER_STATUSES } from '../utils/consts'
 import { toast } from 'vue3-toastify'
 import { OrderStatus } from '@/models/Order'
+import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
 
 const tabs = [
   { id: 'active', label: 'Active Orders' },
@@ -195,18 +196,13 @@ const fetchOrders = async () => {
   try {
     const orders = await getAllOrders()
     activeOrders.value = orders.filter(o => 
-      ACTIVE_ORDER_STATUSES.includes(o.status)
+      ACTIVE_ORDER_STATUSES.includes(o.orderStatuses[0]?.status)
     )
     orderHistory.value = orders.filter(o => 
-      HISTORY_ORDER_STATUSES.includes(o.status)
+      HISTORY_ORDER_STATUSES.includes(o.orderStatuses[0]?.status)
     )
     
-    // Fetch status history for each order
-    for (const order of orders) {
-      const statuses = await getOrderStatuses(order.id)
-      statusHistories.value[order.id] = statuses
-      statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) 
-    }
+
   } catch (e) {
     error.value = e.message
   } finally {
@@ -234,7 +230,7 @@ const updateOrderStatus = async (orderId: string, status: string) => {
 }
 
 const canAcceptOrder = (order: Order) => {
-  return ACCEPTABLE_ORDER_STATUSES.includes(order.status)
+  return ACCEPTABLE_ORDER_STATUSES.includes(getCurrentStatus(order))
 }
 
 const assignCourier = async (orderId: string) => {
@@ -288,17 +284,6 @@ const toggleStatusHistory = (orderId: string) => {
   expandedStatusHistories.value[orderId] = !expandedStatusHistories.value[orderId]
 }
 
-const getCurrentStatus = (orderId: string) => {
-  const statuses = statusHistories.value[orderId]
-  if (!statuses || !statuses.length) return 'No status history'
-  return statuses[statuses.length - 1].status
-}
-
-const getCurrentStatusTimestamp = (orderId: string) => {
-  const statuses = statusHistories.value[orderId]
-  if (!statuses || !statuses.length) return ''
-  return new Date(statuses[statuses.length - 1].createdAt).toLocaleString()
-}
 </script>
 
 <style scoped>

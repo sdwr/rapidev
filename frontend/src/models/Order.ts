@@ -1,12 +1,27 @@
 import type { OrderItem } from './OrderItem'
+import { OrderStatus, Size } from '../enums/OrderEnums'
 
 export interface Order {
   id?: string;
   clientId: string;
-  status: OrderStatus;
+  clientProfileId?: string;
+  courierId?: string;
   pickupAddress: string;
   deliveryAddress: string;
   items: OrderItem[];
+  orderStatuses: OrderStatus[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface OrderItem {
+  id?: string;
+  orderId?: string;
+  name: string;
+  description?: string;
+  size: Size;
+  quantity: number;
+  price: number;
   createdAt?: Date;
   updatedAt?: Date;
 }

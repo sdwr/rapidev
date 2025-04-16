@@ -5,7 +5,6 @@ import { OrderStatus } from '../../../shared/enums/OrderEnums'
 import type { Courier } from '../../../shared/models/Courier'
 import { getBaseUrl } from './config'
 import { handleApiError } from '../utils/errorHandler'
-import { mapOrderStatuses, mapOrderStatus } from '../utils'
 
 const BASE_URL = getBaseUrl()
 
@@ -65,9 +64,7 @@ export async function getClientOrders(clientId: string): Promise<Order[]> {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/client/${clientId}`)
     if (!response.ok) throw await response.json()
-    let orders = await response.json()
-    orders = mapOrderStatuses(orders)
-    return orders
+    return await response.json()
   } catch (error) {
     handleApiError(error)
     return []
@@ -85,7 +82,6 @@ export async function upsertOrder(order: Order): Promise<Order> {
     })
     if (!response.ok) throw await response.json()
     let responseOrder = await response.json()
-    responseOrder = mapOrderStatus(responseOrder)
     return responseOrder
   } catch (error) {
     handleApiError(error)
@@ -103,9 +99,7 @@ export async function updateOrderState(orderId: string, status: OrderStatus): Pr
       body: JSON.stringify({ status }),
     })
     if (!response.ok) throw await response.json()
-    let responseOrder = await response.json()
-    responseOrder = mapOrderStatus(responseOrder)
-    return responseOrder
+    return await response.json()
   } catch (error) {
     handleApiError(error)
     return null
@@ -116,9 +110,7 @@ export async function getAllOrders(): Promise<Order[]> {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/all`)
     if (!response.ok) throw await response.json()
-    let orders = await response.json()
-    orders = mapOrderStatuses(orders)
-    return orders
+    return await response.json()
   } catch (error) {
     handleApiError(error)
     return []
@@ -129,9 +121,7 @@ export async function getAllOrdersWithHistory(): Promise<Order[]> {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/all-with-history`)
     if (!response.ok) throw await response.json()
-    let orders = await response.json()
-    orders = mapOrderStatuses(orders)
-    return orders
+    return await response.json()
   } catch (error) {
     handleApiError(error)
     return []
