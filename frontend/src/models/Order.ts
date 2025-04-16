@@ -9,7 +9,7 @@ export interface Order {
   pickupAddress: string;
   deliveryAddress: string;
   items: OrderItem[];
-  orderStatuses: OrderStatus[];
+  orderStatuses?: OrderStatus[];
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -52,29 +52,15 @@
           <h2>Order History</h2>
           <div class="list-container">
             <p v-if="!orderHistory.length">No completed orders.</p>
-            <div v-else v-for="order in orderHistory" :key="order.id" class="list-item">
-              <h3>Order #{{ order.id }}</h3>
-              <p>Client: {{ order.clientId }}</p>
-              <p>Courier: {{ order.courierId }}</p>
-              <p>Items: {{ order.items.length }}</p>
-              <div class="status-history">
-                <div class="status-header" @click="toggleStatusHistory(order.id)">
-                  <h4>Status History</h4>
-                  <span class="toggle-icon">{{ expandedStatusHistories[order.id] ? '▼' : '▶' }}</span>
-                </div>
-                <div v-if="expandedStatusHistories[order.id]" class="status-entries">
-                  <div v-for="status in order.orderStatuses" :key="status.id" class="status-entry">
-                    <span class="status">{{ status.status }}</span>
-                    <span class="timestamp">{{ new Date(status.createdAt).toLocaleString() }}</span>
-                    <p class="description">{{ status.description }}</p>
-                  </div>
-                </div>
-                <div v-else class="current-status">
-                  <span class="status">{{ getCurrentStatus(order) }}</span>
-                  <span class="timestamp">{{ getCurrentStatusTimestamp(order)?.toLocaleString() }}</span>
-                </div>
-              </div>
-            </div>
+            <OrderCard
+              v-else
+              v-for="order in orderHistory"
+              :key="order.id"
+              :order="order"
+              :userType="'admin'"
+              :statusHistory="statusHistories[order.id]"
+              @orderUpdated="fetchOrders"
+            />
           </div>
         </div>
 
@@ -83,59 +69,16 @@
           <h2>Active Orders</h2>
           <div class="list-container">
             <p v-if="!activeOrders.length">No active orders.</p>
-            <div v-else v-for="order in activeOrders" :key="order.id" class="list-item">
-              <h3>Order #{{ order.id }}</h3>
-              <p>Status: {{ getCurrentStatus(order) }}</p>
-              <p>Client: {{ order.clientId }}</p>
-              <p>Courier: {{ order.courierId }}</p>
-              <div class="status-history">
-                <div class="status-header" @click="toggleStatusHistory(order.id)">
-                  <h4>Status History</h4>
-                  <span class="toggle-icon">{{ expandedStatusHistories[order.id] ? '▼' : '▶' }}</span>
-                </div>
-                <div v-if="expandedStatusHistories[order.id]" class="status-entries">
-                  <div v-for="status in order.orderStatuses" :key="status.id" class="status-entry">
-                    <span class="status">{{ status.status }}</span>
-                    <span class="timestamp">{{ new Date(status.createdAt).toLocaleString() }}</span>
-                    <p class="description">{{ status.description }}</p>
-                  </div>
-                </div>
-                <div v-else class="current-status">
-                  <span class="status">{{ getCurrentStatus(order) }}</span>
-                  <span class="timestamp">{{ getCurrentStatusTimestamp(order)?.toLocaleString() }}</span>
-                </div>
-              </div>
-              <div v-if="canAcceptOrder(order)" class="order-actions">
-                <button @click="updateOrderStatus(order.id, 'ACCEPTED')">Accept</button>
-                <button @click="updateOrderStatus(order.id, 'CANCELLED')">Cancel</button>
-              </div>
-              <div v-if="order.orderStatuses[0]?.status === OrderStatus.ACCEPTED" class="courier-assignment">
-                <select v-model="selectedCouriers[order.id]" class="courier-select">
-                  <option value="" selected>Select a courier</option>
-                  <option v-for="courier in couriers" :key="courier.id" :value="courier.id">
-                    {{ courier.profile?.name || courier.username }}
-                  </option>
-                </select>
-                <button 
-                  @click="assignCourier(order.id)" 
-                  :disabled="!selectedCouriers[order.id] || selectedCouriers[order.id] === ''"
-                  class="assign-button"
-                >
-                  Assign
-                </button>
-              </div>
-              <div v-if="order.orderStatuses[0]?.status === OrderStatus.ASSIGNED_TO_COURIER" class="courier-assignment">
-                <div class="assigned-courier">
-                  <span>Assigned to: {{ order.courier?.profile?.name || order.courier?.username }}</span>
-                  <button 
-                    @click="unassignCourier(order.id)" 
-                    class="unassign-button"
-                  >
-                    Unassign
-                  </button>
-                </div>
-              </div>
-            </div>
+            <OrderCard
+              v-else
+              v-for="order in activeOrders"
+              :key="order.id"
+              :order="order"
+              :userType="'admin'"
+              :couriers="couriers"
+              :statusHistory="statusHistories[order.id]"
+              @orderUpdated="fetchOrders"
+            />
           </div>
         </div>
       </div>
@@ -152,6 +95,7 @@ import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES, ACCEPTABLE_ORDER_STATUSE
 import { toast } from 'vue3-toastify'
 import { OrderStatus } from '@/models/Order'
 import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
+import OrderCard from '../components/OrderCard.vue'
 
 const tabs = [
   { id: 'active', label: 'Active Orders' },
@@ -202,7 +146,12 @@ const fetchOrders = async () => {
       HISTORY_ORDER_STATUSES.includes(o.orderStatuses[0]?.status)
     )
     
-
+    // Fetch status history for each order
+    for (const order of orders) {
+      const statuses = await getOrderStatuses(order.id)
+      statusHistories.value[order.id] = statuses
+      statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) 
+    }
   } catch (e) {
     error.value = e.message
   } finally {
