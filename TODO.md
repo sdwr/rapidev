@@ -21,6 +21,11 @@
     <STATUS = PENDING>
     - after paying for order, waiting to be accepted by admin
 
+    <STATUS = PAYMENT_ADJUSTED>
+    - admin has to be able to adjust price
+    - customer can then confirm and pay difference
+    - or reject and get the original payment back
+
     <STATUS = ACCEPTED>
     - admin accepts order, confirms date
 
@@ -46,7 +51,34 @@
     <STATUS = CANCELLED_BY_ADMIN>
 
 
+2. text alerts
+    - ADMIN
+        <STATUS = DRAFT>
+        <STATUS = PENDING>
+        - order has been created
+        
+    - CLIENT
+        <STATUS = PICKED UP>
+        - order has been picked up
 
+        <STATUS = DELIVERED>
+        - order has been delivered
+
+        <STATUS = CANCELLED_BY_COURIER>
+        <STATUS = CANCLLED_BY_ADMIN>
+        <STATUS = CANCELLED_BY_CLIENT>
+        - order has been cancelled (reason?)
+
+    - COURIER
+        <STATUS = ASSIGNED_TO_COURIER>
+        - order has been assigned
+
+    - RECIPIENT
+        <STATUS = PICKED_UP>
+        - order has been picked up
+        
+        <STATUS = DELIVERED>
+        - order has been delivered
 
 -- Potential issues
 
@@ -56,6 +88,25 @@
 
 2. who sets pickup/delivery date / time?
 
+3. payment
+    - one payment for multiple deliveries
+    - booking fee is 2.99 or 3.99
+    - delivery fee is $10 / ($15 for new clients) fee anywhere in the city
+    - anything outside the perimeter is by drive time
+        - estimated before accepting
+        - roundtrip
+        - 0-15min $10
+        - 15-25   $15
+        - 25-35   $20
+
+    - batch deliveries, pay one booking fee (maximum of 3)
+        - but still pay each delivery fee
+
+
+- admin reports
+    -courier payment based on flat fee and time deliveries
+
 -- tech debt
 
 1. need human-readable errors from backend (ex. profile duplicate email)
+
