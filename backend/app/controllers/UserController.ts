@@ -1,41 +1,46 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import Courier from '#models/courier'
-import Profile from '#models/profile'
-import { randomUUID } from 'node:crypto'
 
 export default class UserController {
   /**
    * Create a new user with associated profile (client or courier)
    */
   async createUser({ request, response }: HttpContext) {
-    const { username, password, userType, profile } = request.body()
+    const { email, password, userType } = request.body()
     
     try {
       // Check if email already exists
-      const existingUser = await User.findBy('username', username)
+      const existingUser = await User.findBy('email', email)
       if (existingUser) {
-        return response.status(400).json({ 
-          error: 'Username already exists' 
-        })
+        throw new Error('Email already exists')
       }
+      
       
       // Create the user with auto-generated ID
       const user = await User.create({
-        username,
+        email,
         password,
         userType
       })
-    
       
       // Return user without password
       const { password: _, ...userWithoutPassword } = user.toJSON()
       return response.status(201).json(userWithoutPassword)
     } catch (error) {
-      return response.status(400).json({ 
+      return response.status(error.status || 400).json({ 
         error: error.message 
       })
     }
+  }
+
+  async getAllUsers({ response }: HttpContext) {
+    const users = await User.all()
+    return response.json(users)
+  }
+
+  async deleteAllUsers({ response }: HttpContext) {
+    await User.query().delete()
+    return response.json({ message: 'All users deleted' })
   }
   
   /**
@@ -54,125 +59,11 @@ export default class UserController {
       })
     }
   }
-  
-  /**
-   * Load user's client profile
-   */
-  async loadUserProfile({ params, response }: HttpContext) {
-    try {
-      const user = await User.findOrFail(params.id)
-      
-      
-      return response.json(user)
-    } catch (error) {
-      return response.status(404).json({ 
-        error: 'User not found' 
-      })
-    }
-  }
-  
-  /**
-   * Load user's courier profile
-   */
-  async loadUserCourier({ params, response }: HttpContext) {
-    try {
-      const user = await User.findOrFail(params.id)
-      
-      if (user.userType !== 'courier') {
-        return response.status(400).json({ 
-          error: 'User is not a courier' 
-        })
-      }
-      
-      const courier = await Courier.findBy('userId', user.id)
-      if (!courier) {
-        return response.status(404).json({ 
-          error: 'Courier profile not found' 
-        })
-      }
-      
-      return response.json(courier)
-    } catch (error) {
-      return response.status(404).json({ 
-        error: 'User not found' 
-      })
-    }
-  }
-  
-  /**
-   * Authenticate a user
-   */
-  async login({ request, response }: HttpContext) {
-    const { username, password, userType } = request.body()
-    
-    try {
-      // Find user by username
-      let user = await User.findBy('username', username)
-      
-      // If user doesn't exist, create a new one
-      if (!user) {
-        // Create the user
-        user = await User.create({
-          id: randomUUID(),
-          username,
-          password,
-          userType,
-          email: `${username}@example.com` // Generate a dummy email
-        })
-      }
-      
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user.toJSON()
-      return response.json(userWithoutPassword)
-    } catch (error) {
-      return response.status(400).json({ 
-        error: error.message 
-      })
-    }
-  }
-  
-  async register({ request, response }: HttpContext) {
-    const { username, password, userType } = request.body()
-    const user = await User.create({ username, password, userType })
-    return response.json(user)
-  }
-
-  async getAllUsers({ request, response }: HttpContext) {
-    try {
-      const userType = request.input('userType')
-      const query = User.query().preload('profile')
-      
-      if (userType) {
-        query.where('userType', userType)
-      }
-      
-      const users = await query.exec()
-      return response.json(users)
-    } catch (error) {
-      return response.status(400).json({ 
-        error: error.message 
-      })
-    }
-  }
-
-  async getUser({ params, response }: HttpContext) {
-    try {
-      const user = await User.query()
-        .where('id', params.id)
-        .preload('profile')
-        .firstOrFail()
-      return response.json(user)
-    } catch (error) {
-      return response.status(404).json({ 
-        error: 'User not found' 
-      })
-    }
-  }
 
   async updateUser({ params, request, response }: HttpContext) {
-    const { username, password, userType } = request.body()
+    const { email, password, userType } = request.body()
     const user = await User.findOrFail(params.id)
-    user.username = username
+    user.email = email
     user.password = password
     user.userType = userType
     await user.save()
@@ -180,23 +71,34 @@ export default class UserController {
   }
 
   async deleteUser({ params, response }: HttpContext) {
+    const user = await User.findOrFail(params.id)
+    await user.delete()
+    return response.json({ message: 'User deleted' })
+  }
+
+  async login({ request, response }: HttpContext) {
+    const { email, password } = request.body()
+    
     try {
-      const user = await User.findOrFail(params.id)
-      
-      // Delete associated profile if it exists
-      const profile = await Profile.findBy('userId', user.id)
-      if (profile) {
-        await profile.delete()
+      // Find user by email
+      const user = await User.findBy('email', email)
+      if (!user) {
+        throw new Error('Invalid credentials')
       }
       
-      // Delete the user
-      await user.delete()
+      // Verify password
+      const isPasswordValid = user.password === password
+      if (!isPasswordValid) {
+        throw new Error('Invalid credentials')
+      }
       
-      return response.json({ message: 'User and associated profile deleted successfully' })
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user.toJSON()
+      return response.json(userWithoutPassword)
     } catch (error) {
-      return response.status(404).json({ 
-        error: 'User not found' 
+      return response.status(error.status || 401).json({ 
+        error: error.message 
       })
     }
-  } 
+  }
 }
