@@ -39,7 +39,6 @@
         <!-- Place Order Tab -->
         <div v-if="currentTab === 'order'" class="tab-panel">
           <div class="card">
-            <h2>Place Your Order</h2>
             <template v-if="userStore.user?.id && userStore.user?.profile">
               <Order
                 v-if="currentTab === 'order'"
