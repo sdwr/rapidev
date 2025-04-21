@@ -13,16 +13,6 @@
       </div>
 
       <div class="form-group">
-        <label for="email">Email</label>
-        <input 
-          type="email" 
-          id="email" 
-          v-model="formData.email" 
-          required
-        />
-      </div>
-
-      <div class="form-group">
         <label for="phone">Phone</label>
         <input 
           type="tel" 
@@ -65,7 +55,6 @@ const userStore = useUserStore()
 
 const formData = ref({
   name: '',
-  email: '',
   phone: '',
   address: ''
 })
@@ -86,7 +75,6 @@ const loadProfile = async () => {
     if (response?.profile) {
       formData.value = {
         name: response.profile.name || '',
-        email: response.profile.email || '',
         phone: response.profile.phone || '',
         address: response.profile.address || ''
       }

@@ -68,10 +68,7 @@ export class ProfileController {
       } else {
         // Create new profile
         await createProfileValidator.validate(data)
-        const profile = await Profile.create({
-          id: randomUUID(),
-          ...data
-        })
+        const profile = await Profile.create(data)
         return response.json(profile)
       }
     } catch (error) {

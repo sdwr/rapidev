@@ -22,6 +22,8 @@ export default class UserController {
         password,
         userType
       })
+
+      await user.load('profile')
       
       // Return user without password
       const { password: _, ...userWithoutPassword } = user.toJSON()
@@ -34,7 +36,8 @@ export default class UserController {
   }
 
   async getAllUsers({ response }: HttpContext) {
-    const users = await User.all()
+    const users = await User.query()
+      .preload('profile')
     return response.json(users)
   }
 
@@ -49,6 +52,8 @@ export default class UserController {
   async loadUser({ params, response }: HttpContext) {
     try {
       const user = await User.findOrFail(params.id)
+
+      await user.load('profile')
       
       // Return user without password
       const { password: _, ...userWithoutPassword } = user.toJSON()

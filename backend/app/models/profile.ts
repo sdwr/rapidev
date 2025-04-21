@@ -6,16 +6,13 @@ export default class Profile extends BaseModel {
   declare id: number
 
   @column()
-  declare userId: string
+  declare userId: number
 
   @column()
   declare name: string
 
   @column()
   declare phone: string
-
-  @column()
-  declare email: string
 
   @column()
   declare address: string

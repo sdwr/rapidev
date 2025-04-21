@@ -9,7 +9,7 @@ const orderItemSchema = vine.object({
 
 export const createOrderValidator = vine.compile(
   vine.object({
-    clientId: vine.string().trim(),
+    clientId: vine.number(),
     pickupAddress: vine.string().trim().minLength(5),
     deliveryAddress: vine.string().trim().minLength(5),
     items: vine.array(orderItemSchema).minLength(1)

@@ -15,6 +15,6 @@ export const updateCourierStatusValidator = vine.compile(
 
 export const assignOrderValidator = vine.compile(
   vine.object({
-    courierId: vine.string().trim()
+    courierId: vine.number()
   })
 ) 

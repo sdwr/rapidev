@@ -20,12 +20,10 @@
             <tbody>
               <tr v-for="user in users" :key="user.id">
                 <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
                 <td>{{ user.userType }}</td>
                 <td>
                   <template v-if="user.profile">
                     <div>Name: {{ user.profile.name }}</div>
-                    <div>Email: {{ user.profile.email }}</div>
                     <div>Phone: {{ user.profile.phone }}</div>
                     <div>Address: {{ user.profile.address }}</div>
                   </template>
