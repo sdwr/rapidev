@@ -227,7 +227,7 @@ export class OrderController {
     const order = await Order.findOrFail(id)
     const courier = await User.findOrFail(courierId)
 
-    if (courier && courier.userType === 'courier') {
+    if (courier && courier.userType === 'COURIER') {
       order.courierId = courierId
 
       await order.save()

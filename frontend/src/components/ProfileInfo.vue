@@ -44,7 +44,7 @@ import { upsertProfile, getProfileByUserId } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 
 const props = defineProps<{
-  profileType: 'client' | 'courier'
+  profileType: ProfileType
 }>()
 
 const emit = defineEmits<{
@@ -76,7 +76,8 @@ const loadProfile = async () => {
       formData.value = {
         name: response.profile.name || '',
         phone: response.profile.phone || '',
-        address: response.profile.address || ''
+        address: response.profile.address || '',
+        profileType: response.profile.profileType || props.profileType
       }
     } else {
       console.log('No profile found in response')
@@ -97,7 +98,8 @@ const handleSubmit = async () => {
   try {
     const profileData = {
       ...formData.value,
-      userId: userStore.user.id
+      userId: userStore.user.id,
+      profileType: props.profileType
     }
     console.log('Saving profile data:', profileData)
     const savedProfile = await upsertProfile(profileData)

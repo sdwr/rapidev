@@ -19,7 +19,7 @@
         <div v-if="currentTab === 'profile'" class="tab-panel">
           <h2>My Profile</h2>
           <ProfileInfo 
-            profileType="courier"
+            profileType="PICKUP"
             @profile-saved="handleProfileSave" />
         </div>
 
@@ -33,7 +33,7 @@
               v-for="order in assignedDeliveries"
               :key="order.id"
               :order="order"
-              :userType="'courier'"
+              :userType="'COURIER'"
               :statusHistory="statusHistories[order.id]"
               @orderUpdated="fetchOrders"
             />
@@ -50,7 +50,7 @@
               v-for="order in activeDeliveries"
               :key="order.id"
               :order="order"
-              :userType="'courier'"
+              :userType="'COURIER'"
               :statusHistory="statusHistories[order.id]"
               @orderUpdated="fetchOrders"
             />
@@ -67,7 +67,7 @@
               v-for="order in deliveryHistory"
               :key="order.id"
               :order="order"
-              :userType="'courier'"
+              :userType="'COURIER'"
               :statusHistory="statusHistories[order.id]"
               @orderUpdated="fetchOrders"
             />

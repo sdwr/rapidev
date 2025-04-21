@@ -168,7 +168,7 @@ export async function loginOrRegister(email: string, password: string, userType:
   }
 }
 
-export async function getAllUsers(userType?: 'client' | 'courier' | 'admin'): Promise<User[]> {
+export async function getAllUsers(userType?: 'CLIENT' | 'COURIER' | 'ADMIN'): Promise<User[]> {
   try {
     const url = userType 
       ? `${BASE_URL}/api/users/all?userType=${userType}`

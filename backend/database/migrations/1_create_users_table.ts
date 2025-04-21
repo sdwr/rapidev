@@ -8,7 +8,7 @@ export default class extends BaseSchema {
       table.increments('id').primary()
       table.string('email').notNullable().unique()
       table.string('password').notNullable()
-      table.enum('user_type', ['admin', 'courier', 'client']).notNullable()
+      table.enum('user_type', ['ADMIN', 'COURIER', 'CLIENT']).notNullable()
       
       table.timestamp('created_at')
       table.timestamp('updated_at')

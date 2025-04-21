@@ -17,6 +17,8 @@ export default class Profile extends BaseModel {
   @column()
   declare address: string
 
+  @column()
+  declare profileType: ProfileType
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

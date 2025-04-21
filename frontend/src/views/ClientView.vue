@@ -17,9 +17,9 @@
       <div class="tab-content">
         <!-- Profile Tab -->
         <div v-if="currentTab === 'profile'" class="tab-panel">
-          <h2>My Profile</h2>
+          <h2>My Addresses</h2>
           <ProfileInfo 
-            profileType="client"
+            profileType="PICKUP"
             @profile-saved="handleProfileSave" />
         </div>
 
@@ -92,7 +92,7 @@ import { getCurrentStatus } from '@/utils'
 const userStore = useUserStore()
 
 const tabs = [
-  { id: 'profile', label: 'My Profile' },
+  { id: 'profile', label: 'My Addresses' },
   { id: 'order', label: 'Place Order' },
   { id: 'myOrders', label: 'My Orders' },
   { id: 'history', label: 'History' }

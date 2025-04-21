@@ -55,14 +55,14 @@
     </div>
 
     <!-- Client Actions -->
-    <div v-if="userType === 'client'" class="actions">
+    <div v-if="userType === 'CLIENT'" class="actions">
       <div v-if="canCancelOrder" class="action-buttons">
         <button @click="cancelOrder" class="cancel-button">Cancel Order</button>
       </div>
     </div>
 
     <!-- Courier Actions -->
-    <div v-if="userType === 'courier'" class="actions">
+    <div v-if="userType === 'COURIER'" class="actions">
       <div v-if="isAssigned" class="action-buttons">
         <button @click="confirmOrder" class="confirm-button">Confirm</button>
         <button @click="cancelOrder" class="cancel-button">Cancel</button>
@@ -81,7 +81,7 @@ import { toast } from 'vue3-toastify'
 import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
 const props = defineProps<{
   order: Order
-  userType: 'admin' | 'client' | 'courier'
+  userType: 'ADMIN' | 'CLIENT' | 'COURIER'
   couriers?: User[]
 }>()
 
@@ -129,9 +129,9 @@ const acceptOrder = async () => {
 
 const cancelOrder = async () => {
   try {
-    const status = props.userType === 'client' 
+    const status = props.userType === 'CLIENT' 
       ? OrderStatus.CANCELLED_BY_CLIENT 
-      : props.userType === 'courier'
+      : props.userType === 'COURIER'
         ? OrderStatus.CANCELLED_BY_COURIER
         : OrderStatus.CANCELLED_BY_ADMIN
     

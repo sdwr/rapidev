@@ -29,9 +29,9 @@
         <div class="form-group">
           <label for="userType">Login as</label>
           <select id="userType" v-model="userType">
-            <option value="client">Client</option>
-            <option value="courier">Courier</option>
-            <option value="admin">Admin</option>
+            <option value="CLIENT">Client</option>
+            <option value="COURIER">Courier</option>
+            <option value="ADMIN">Admin</option>
           </select>
         </div>
 

@@ -9,6 +9,7 @@ export default class extends BaseSchema {
       table.string('name').notNullable()
       table.string('phone', 10).notNullable()
       table.text('address').notNullable()
+      table.enum('profile_type', ['PICKUP', 'DELIVERY']).notNullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
 

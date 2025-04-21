@@ -1,7 +1,7 @@
 export interface User {
   id: string
   username: string
-  userType: 'client' | 'courier' | 'admin'
+  userType: 'CLIENT' | 'COURIER' | 'ADMIN'
   profile?: {
     id: string
     name: string
