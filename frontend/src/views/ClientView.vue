@@ -18,9 +18,15 @@
         <!-- Profile Tab -->
         <div v-if="currentTab === 'profile'" class="tab-panel">
           <h2>My Addresses</h2>
-          <ProfileInfo 
-            profileType="PICKUP"
-            @profile-saved="handleProfileSave" />
+          <div class="list-container">
+            <ProfileInfo 
+              v-for="address in addresses"
+              :key="address.id"
+              :profileData="address"
+              :profileType="'PICKUP'"
+              @profile-saved="handleProfileSave"
+            />
+          </div>
         </div>
 
         <!-- Place Order Tab -->
@@ -83,7 +89,9 @@ import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import OrderCard from '@/components/OrderCard.vue'
 import type { Order as OrderType } from '@/models/Order'
-import { getClientOrders, upsertOrder } from '../api/api'
+import type { Profile } from '@/models/Profile'
+import type { User } from '@/models/User'
+import { getClientOrders, upsertOrder, getUser } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
@@ -101,6 +109,7 @@ const tabs = [
 const currentTab = ref('order')
 const myOrders = ref<OrderType[]>([])
 const orderHistory = ref<OrderType[]>([])
+const addresses = ref<Profile[]>([])
 const loadingOrders = ref(false)
 const error = ref('')
 const statusHistories = ref<Record<string, any[]>>({})
@@ -116,6 +125,17 @@ const handleProfileSave = async (profileData) => {
     console.error('Error saving profile:', error)
     toast.error('Failed to save profile')
   }
+}
+
+const fetchUser = async () => {
+  if (!userStore.user?.id) {
+    error.value = 'No user logged in'
+    return
+  }
+
+  const user = await getUser(userStore.user.id)
+  console.log(user)
+  addresses.value = user.profiles
 }
 
 const fetchOrders = async () => {
@@ -176,6 +196,7 @@ const handleOrderCreated = async (orderData: OrderType) => {
 
 onMounted(() => {
   fetchOrders()
+  fetchUser()
 })
 </script>
 

@@ -8,6 +8,18 @@ import { handleApiError } from '../utils/errorHandler'
 
 const BASE_URL = getBaseUrl()
 
+// User API functions
+export async function getUser(userId: string): Promise<User> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users/${userId}`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
 // Profile API functions
 export async function getProfile(profileId: string): Promise<ProfileInfo> {
   try {
@@ -234,4 +246,17 @@ export const getCourierOrders = async (courierId: string): Promise<Order[]> => {
   }
 
   return response.json()
+}
+
+export async function deleteProfile(profileId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/profiles/${profileId}`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
 }

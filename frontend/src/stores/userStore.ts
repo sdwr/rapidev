@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { getProfileByUserId } from '../api/api'
 
 interface User {
   id: string
@@ -22,11 +21,7 @@ export const useUserStore = defineStore('user', () => {
   async function setUser(newUser: User | null) {
     if (newUser) {
       // Load profile data if user exists
-      const response = await getProfileByUserId(newUser.id)
-      user.value = {
-        ...newUser,
-        profile: response?.profile || null
-      }
+      user.value = newUser
       localStorage.setItem('user', JSON.stringify(user.value))
     } else {
       user.value = null
@@ -39,11 +34,7 @@ export const useUserStore = defineStore('user', () => {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser)
       // Reload profile data
-      const response = await getProfileByUserId(parsedUser.id)
-      user.value = {
-        ...parsedUser,
-        profile: response?.profile || null
-      }
+      user.value = parsedUser
     }
   }
 

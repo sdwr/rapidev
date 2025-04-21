@@ -1,6 +1,6 @@
 <template>
   <div class="profile-info">
-    <h2>Profile Information</h2>
+    <h2>{{ title || 'Profile Information' }}</h2>
     <form @submit.prevent="handleSubmit" class="profile-form">
       <div class="form-group">
         <label for="name">Name</label>
@@ -9,6 +9,7 @@
           id="name" 
           v-model="formData.name" 
           required
+          :disabled="!editable"
         />
       </div>
 
@@ -19,6 +20,7 @@
           id="phone" 
           v-model="formData.phone" 
           required
+          :disabled="!editable"
         />
       </div>
 
@@ -28,24 +30,43 @@
           id="address" 
           v-model="formData.address" 
           required
+          :disabled="!editable"
         ></textarea>
       </div>
 
-      <button type="submit" :disabled="loading">
+      <button v-if="editable" type="submit" :disabled="loading">
         {{ loading ? 'Saving...' : 'Save Profile' }}
       </button>
+      
+      <slot name="actions"></slot>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { upsertProfile, getProfileByUserId } from '../api/api'
+import { ref, onMounted, defineProps, defineEmits, watch } from 'vue'
+import { upsertProfile } from '../api/api'
 import { useUserStore } from '../stores/userStore'
+import type { ProfileType } from '../../../shared/enums/ProfileEnums'
 
-const props = defineProps<{
-  profileType: ProfileType
-}>()
+const props = defineProps({
+  profileType: {
+    type: String,
+    required: true
+  },
+  editable: {
+    type: Boolean,
+    default: true
+  },
+  profileData: {
+    type: Object,
+    default: null
+  },
+  title: {
+    type: String,
+    default: ''
+  }
+})
 
 const emit = defineEmits<{
   (e: 'profile-saved', data: any): void
@@ -56,37 +77,24 @@ const userStore = useUserStore()
 const formData = ref({
   name: '',
   phone: '',
-  address: ''
+  address: '',
+  profileType: props.profileType
 })
 
 const loading = ref(false)
 const error = ref('')
 
-const loadProfile = async () => {
-  if (!userStore.user?.id) {
-    error.value = 'No user logged in'
-    return
-  }
-
-  try {
-    const response = await getProfileByUserId(userStore.user.id)
-    console.log('Profile response:', response)
-    
-    if (response?.profile) {
-      formData.value = {
-        name: response.profile.name || '',
-        phone: response.profile.phone || '',
-        address: response.profile.address || '',
-        profileType: response.profile.profileType || props.profileType
-      }
-    } else {
-      console.log('No profile found in response')
+// Watch for changes in profileData prop
+watch(() => props.profileData, (newProfileData) => {
+  if (newProfileData) {
+    formData.value = {
+      name: newProfileData.name || '',
+      phone: newProfileData.phone || '',
+      address: newProfileData.address || '',
+      profileType: newProfileData.profileType || props.profileType
     }
-  } catch (e) {
-    console.error('Error loading profile:', e)
-    error.value = 'Failed to load profile'
   }
-}
+}, { immediate: true })
 
 const handleSubmit = async () => {
   if (!userStore.user?.id) {
@@ -101,9 +109,8 @@ const handleSubmit = async () => {
       userId: userStore.user.id,
       profileType: props.profileType
     }
-    console.log('Saving profile data:', profileData)
+    
     const savedProfile = await upsertProfile(profileData)
-    console.log('Saved profile response:', savedProfile)
     
     if (savedProfile) {
       // Update the user store with the new profile
@@ -122,7 +129,7 @@ const handleSubmit = async () => {
 }
 
 onMounted(() => {
-  loadProfile()
+  //pass
 })
 </script>
 
@@ -156,6 +163,12 @@ input, textarea {
   border-radius: 4px;
   background: var(--color-background);
   color: var(--color-text);
+}
+
+input:disabled, textarea:disabled {
+  background: var(--color-background-mute);
+  cursor: not-allowed;
+  opacity: 0.8;
 }
 
 textarea {
