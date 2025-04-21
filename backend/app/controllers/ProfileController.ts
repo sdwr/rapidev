@@ -28,6 +28,11 @@ export class ProfileController {
     return response.json(profiles)
   }
 
+  async deleteAllProfiles({ response }: HttpContext) {
+    await Profile.query().delete()
+    return response.json({ message: 'All profiles deleted' })
+  }
+
   /**
    * Get profile by user ID
    */

@@ -97,6 +97,11 @@ export class OrderController {
     }
   }
 
+  async deleteAllOrders({ response }: HttpContext) {
+    await Order.query().delete()
+    return response.json({ message: 'All orders deleted' })
+  }
+
   async getAllOrdersWithHistory({ response }: HttpContext) {
     try {
       const orders = await Order.query()
@@ -172,11 +177,7 @@ export class OrderController {
       }
 
       // Load relationships
-      await order.load('items')
-      await order.load('orderStatuses')
-      await order.load('client')
-      await order.load('clientProfile')
-      await order.load('courier')
+      await this.loadOrderRelationships(order)
 
       return response.json(order)
     } catch (error) {
@@ -222,14 +223,31 @@ export class OrderController {
   async assignCourier({ request, response }: HttpContext) {
     const id = request.param('id')
     const { courierId } = request.body()
-    // TODO: Implement courier assignment
-    return response.json({} as Order)
+    
+    const order = await Order.findOrFail(id)
+    const courier = await User.findOrFail(courierId)
+
+    if (courier && courier.userType === 'courier') {
+      order.courierId = courierId
+
+      await order.save()
+      await this.loadOrderRelationships(order)
+
+      return response.json(order)
+    } else {
+      return response.status(400).json({
+        error: 'Courier not found or is not a courier'
+      })
+    }
   }
 
-  async reorderOrders({ request, response }: HttpContext) {
-    const { orderIds } = request.body()
-    // TODO: Implement reordering
-    return response.json(true)
+  async unassignCourier({ request, response }: HttpContext) {
+    const id = request.param('id')
+    const order = await Order.findOrFail(id)
+    order.courierId = null
+    await order.save()
+    await this.loadOrderRelationships(order)
+    return response.json(order)
   }
 
   async getAllOrderStatuses({ response }: HttpContext) {
@@ -278,5 +296,16 @@ export class OrderController {
         error: 'Order not found' 
       })
     }
+  }
+
+  async loadOrderRelationships(order: Order) {
+    // Load relationships
+    await order.load('items')
+    await order.load('orderStatuses')
+    await order.load('client')
+    await order.load('clientProfile')
+    await order.load('courier')
+
+    return order
   }
 } 
