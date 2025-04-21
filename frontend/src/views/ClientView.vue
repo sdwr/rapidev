@@ -18,10 +18,17 @@
         <!-- Profile Tab -->
         <div v-if="currentTab === 'profile'" class="tab-panel">
           <h2>My Addresses</h2>
+          <ProfileInfo
+            :editable="true"
+            :profileType="'PICKUP'"
+            @profile-saved="handleProfileSave"
+          />
+
           <div class="list-container">
             <ProfileInfo 
               v-for="address in addresses"
               :key="address.id"
+              :editable="false"
               :profileData="address"
               :profileType="'PICKUP'"
               @profile-saved="handleProfileSave"
@@ -91,7 +98,7 @@ import OrderCard from '@/components/OrderCard.vue'
 import type { Order as OrderType } from '@/models/Order'
 import type { Profile } from '@/models/Profile'
 import type { User } from '@/models/User'
-import { getClientOrders, upsertOrder, getUser } from '../api/api'
+import { getClientOrders, upsertOrder, getUser, upsertProfile } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
@@ -114,12 +121,9 @@ const loadingOrders = ref(false)
 const error = ref('')
 const statusHistories = ref<Record<string, any[]>>({})
 
-const handleProfileSave = async (profileData) => {
+const handleProfileSave = async (profileData: Profile) => {
   try {
-    await userStore.setUser({
-      ...userStore.user,
-      profile: profileData
-    })
+    await upsertProfile(profileData)
     toast.success('Profile saved successfully!')
   } catch (error) {
     console.error('Error saving profile:', error)

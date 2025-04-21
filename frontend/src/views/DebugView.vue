@@ -38,6 +38,21 @@
         </div>
       </div>
 
+      <!-- Profiles Section -->
+      <div class="section">
+        <h2>Profiles</h2>
+        <div class="list-container">
+          <div v-for="profile in profiles" :key="profile.id" class="list-item">
+            <div class="item-content">
+              <p><strong>ID:</strong> {{ profile.id }}</p>
+              <p><strong>User ID:</strong> {{ profile.userId }}</p>
+              <p><strong>Profile Type:</strong> {{ profile.profileType }}</p>
+            </div>
+            <button @click="deleteProfile(profile.id)" class="delete-button">Delete</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Orders Section -->
       <div class="section">
         <h2>Orders</h2>
@@ -59,16 +74,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getAllUsers, getAllOrders, deleteUser as deleteUserApi, deleteOrder as deleteOrderApi } from '../api/api'
+import { getAllUsers, getAllProfiles, getAllOrders, deleteUser as deleteUserApi, deleteOrder as deleteOrderApi } from '../api/api'
 import { toast } from 'vue3-toastify'
 
 const users = ref([])
+const profiles = ref([])
 const orders = ref([])
 
 const loadData = async () => {
   try {
     users.value = await getAllUsers()
     orders.value = await getAllOrders()
+    profiles.value = await getAllProfiles()
   } catch (error) {
     toast.error('Failed to load debug data')
   }
