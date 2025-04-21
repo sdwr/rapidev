@@ -5,12 +5,12 @@
     <div class="login-container">
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label for="username">Username</label>
+          <label for="email">Email</label>
           <input 
             type="text" 
-            id="username" 
-            v-model="username" 
-            placeholder="Enter your username"
+            id="email" 
+            v-model="email" 
+            placeholder="Enter your email"
             required
           >
         </div>
@@ -56,15 +56,15 @@ import { useUserStore } from '../stores/userStore'
 
 const router = useRouter()
 const userStore = useUserStore()
-const username = ref('')
+const email = ref('')
 const password = ref('')
 const userType = ref('client')
 const loading = ref(false)
 const error = ref('')
 
 const handleLogin = async () => {
-  if (!username.value || !password.value) {
-    error.value = 'Please enter both username and password'
+  if (!email.value || !password.value) {
+    error.value = 'Please enter both email and password'
     return
   }
 
@@ -72,7 +72,7 @@ const handleLogin = async () => {
   error.value = ''
 
   try {
-    const user = await loginOrRegister(username.value, password.value, userType.value)
+    const user = await loginOrRegister(email.value, password.value, userType.value)
     
     if (!user) {
       throw new Error('Login failed')

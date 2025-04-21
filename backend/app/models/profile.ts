@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 
 export default class Profile extends BaseModel {
   @column({ isPrimary: true })
-  declare id: string
+  declare id: number
 
   @column()
   declare userId: string

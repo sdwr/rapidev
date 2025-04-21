@@ -1,15 +1,13 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasOne } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasOne, beforeCreate } from '@adonisjs/lucid/orm'
 import { UserType } from '#shared/enums/UserEnums'
 import Profile from './profile.js'
 import type { HasOne } from '@adonisjs/lucid/types/relations'
+import { randomUUID } from 'node:crypto'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
-  declare id: string
-
-  @column()
-  declare username: string | null
+  declare id: number
 
   @column()
   declare email: string
@@ -28,4 +26,5 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+
 }

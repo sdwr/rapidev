@@ -6,10 +6,11 @@ import { CourierStatus } from '#shared/enums/CourierEnums'
 
 export default class Courier extends BaseModel {
   @column({ isPrimary: true })
-  declare id: string
+  declare id: number
 
   @column()
-  declare userId: string
+  declare userId: number
+
   @column()
   declare name: string
 

@@ -8,16 +8,16 @@ import OrderItem from '#models/order_item'
 
 export default class Order extends BaseModel {
   @column({ isPrimary: true })
-  declare id: string
+  declare id: number
 
   @column()
-  declare clientId: string
+  declare clientId: number
 
   @column()
-  declare courierId: string | null
+  declare courierId: number | null
 
   @column()
-  declare clientProfileId: string
+  declare clientProfileId: number
 
   @column()
   declare deliveryAddress: string

@@ -6,10 +6,10 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 
 export default class OrderStatus extends BaseModel {
   @column({ isPrimary: true })
-  declare id: string
+  declare id: number
 
   @column()
-  declare orderId: string
+  declare orderId: number
 
   @column()
   declare status: Status
