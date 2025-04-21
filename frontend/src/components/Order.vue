@@ -2,7 +2,7 @@
   <div class="order-form">
     <!-- Pickup Address Selection -->
     <div class="form-group">
-      <label for="pickupAddress">Pickup Address</label>
+      <label class="form-label" for="pickupAddress">Pickup Address</label>
       <AddressSelector
         id="pickupAddress"
         label="Pickup"
@@ -18,7 +18,7 @@
 
     <!-- Delivery Items -->
     <div class="delivery-items-container">
-      <h3>Delivery Items</h3>
+      <label class="form-label" for="deliveries">Deliveries</label>
       
       <div 
         v-for="(item, index) in orderData.deliveryItems" 
@@ -38,7 +38,6 @@
         </div>
         
         <div class="form-group">
-          <label :for="`deliveryAddress-${index}`">Delivery Address</label>
           <AddressSelector
             :id="`deliveryAddress-${index}`"
             label="Delivery"
@@ -50,7 +49,6 @@
         </div>
         
         <div class="form-group">
-          <label :for="`deliveryPhone-${index}`">Delivery Phone</label>
           <input 
             :id="`deliveryPhone-${index}`" 
             v-model="item.deliveryPhone" 
@@ -60,7 +58,6 @@
         </div>
         
         <div class="form-group">
-          <label :for="`deliveryNotes-${index}`">Delivery Notes</label>
           <textarea 
             :id="`deliveryNotes-${index}`" 
             v-model="item.deliveryNotes" 
@@ -213,11 +210,14 @@ const submitOrder = async () => {
   margin: 0.5rem 0;
 }
 
+.form-label {
+  font-weight: normal;
+  font-size: 1.2rem;
+}
+
 .spacer {
   height: 20px;
-  background-color: #000;
-  margin: 1rem 0;
-  opacity: 0.1;
+  background-color: var(--color-background);
 }
 
 .delivery-items-container {
