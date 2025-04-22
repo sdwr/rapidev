@@ -32,14 +32,17 @@
       </select>
       
       <!-- Text input when creating a new address -->
-      <input
-        v-else
-        type="text"
-        v-model="addressValue"
-        :placeholder="`Enter new ${label.toLowerCase()} address`"
-        required
-        class="new-address-input"
-      />
+      <form @submit.prevent="confirmNewAddress" v-if="isCreatingNewAddress">
+        <input
+          ref="addressInput"
+          type="text"
+          v-model="addressValue"
+          :placeholder="`Enter new ${label.toLowerCase()} address`"
+          required
+          class="new-address-input"
+          @keydown.esc="cancelNewAddress"
+        />
+      </form>
       
       <!-- Confirm button for new address -->
       <button 
@@ -56,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 
 const props = defineProps({
   id: {
@@ -90,6 +93,7 @@ const emit = defineEmits(['update:modelValue', 'address-added', 'address-selecte
 const selectedOption = ref('')
 const isCreatingNewAddress = ref(false)
 const addressValue = ref('')
+const addressInput = ref(null)
 
 // Watch for changes to selectedOption
 watch(selectedOption, (newValue) => {
@@ -97,6 +101,13 @@ watch(selectedOption, (newValue) => {
     isCreatingNewAddress.value = true
     addressValue.value = ''
     emit('update:modelValue', '')
+    
+    // Focus the input field after the DOM updates
+    nextTick(() => {
+      if (addressInput.value) {
+        addressInput.value.focus()
+      }
+    })
   } else if (newValue) {
     isCreatingNewAddress.value = false
     const selectedAddress = props.addresses.find(a => a.id === newValue)
@@ -107,12 +118,51 @@ watch(selectedOption, (newValue) => {
   }
 })
 
+// Watch for changes to isCreatingNewAddress
+watch(isCreatingNewAddress, (newValue) => {
+  if (newValue) {
+    // Focus the input field after the DOM updates
+    nextTick(() => {
+      if (addressInput.value) {
+        addressInput.value.focus()
+      }
+    })
+  }
+})
+
 // Watch for external changes to modelValue
 watch(() => props.modelValue, (newValue) => {
   if (!isCreatingNewAddress.value) {
     addressValue.value = newValue
   }
 })
+
+// Watch for changes to selectedAddressId
+watch(() => props.selectedAddressId, (newValue) => {
+  if (newValue && !isCreatingNewAddress.value) {
+    selectedOption.value = newValue.toString()
+    
+    // Find the address and update the model value
+    const selectedAddress = props.addresses.find(a => a.id === newValue)
+    if (selectedAddress) {
+      emit('update:modelValue', selectedAddress.address)
+    }
+  }
+})
+
+// Watch for changes to addresses array
+watch(() => props.addresses, (newAddresses) => {
+  // If we have a selectedAddressId, make sure it's selected
+  if (props.selectedAddressId && !isCreatingNewAddress.value) {
+    selectedOption.value = props.selectedAddressId.toString()
+    
+    // Find the address and update the model value
+    const selectedAddress = newAddresses.find(a => a.id === props.selectedAddressId)
+    if (selectedAddress) {
+      emit('update:modelValue', selectedAddress.address)
+    }
+  }
+}, { deep: true })
 
 const cancelNewAddress = () => {
   isCreatingNewAddress.value = false
@@ -122,15 +172,29 @@ const cancelNewAddress = () => {
 }
 
 const confirmNewAddress = () => {
+  // Don't proceed if the address is empty
+  if (!addressValue.value.trim()) return
   
   // Emit event to add the address to the parent's list
   emit('address-added', addressValue.value, props.profileType)
 
   //the new address will be selected by the parent component once returned from the api
-  
   isCreatingNewAddress.value = false
   emit('update:modelValue', addressValue.value)
 }
+
+onMounted(() => {
+  // Initialize the selected option if we have a selectedAddressId
+  if (props.selectedAddressId && props.addresses.length > 0) {
+    selectedOption.value = props.selectedAddressId.toString()
+    
+    // Find the address and update the model value
+    const selectedAddress = props.addresses.find(a => a.id === props.selectedAddressId)
+    if (selectedAddress) {
+      emit('update:modelValue', selectedAddress.address)
+    }
+  }
+})
 </script>
 
 <style scoped>
@@ -142,6 +206,10 @@ const confirmNewAddress = () => {
   display: flex;
   align-items: center;
   position: relative;
+  width: 100%;
+}
+
+form {
   width: 100%;
 }
 

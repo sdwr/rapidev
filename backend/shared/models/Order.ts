@@ -6,10 +6,6 @@ export interface Order {
   pickupAddress: string;
   items: OrderItem[];
   status: OrderStatus;
-  deliveryPrice: number;
-  bookingFee: number;
-  discount: number;
-  total: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
