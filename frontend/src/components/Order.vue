@@ -103,7 +103,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '../stores/userStore'
 import AddressSelector from './AddressSelector.vue'
-import { createProfile, getProfilesForUserByProfileType } from '../api/api'
+import { createOrder, createProfile, getProfilesForUserByProfileType } from '../api/api'
 const emit = defineEmits(['order-created'])
 const userStore = useUserStore()
 
@@ -193,6 +193,7 @@ const submitOrder = async () => {
   
   try {
     
+    orderData.value.clientId = userStore.user.id
     const order = await createOrder(orderData.value)
     
     // Emit the created order

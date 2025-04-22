@@ -1,9 +1,8 @@
 import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import Order from '#models/order'
-import { Size } from '#shared/enums/OrderEnums'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
-import OrderStatus from '#models/order_status'
+import OrderItemStatus from '#models/order_item_status'
 
 export default class OrderItem extends BaseModel {
   @column({ isPrimary: true })
@@ -14,7 +13,9 @@ export default class OrderItem extends BaseModel {
 
   @column()
   declare courierId: number | null
-  
+
+  @column()
+  declare pickupAddress: string
   @column()
   declare deliveryAddress: string
 
@@ -22,17 +23,19 @@ export default class OrderItem extends BaseModel {
   declare deliveryPhone: string
 
   @column()
-  declare deliveryNotes: string
+  declare deliveryNotes: string | null
 
-  @hasMany(() => OrderStatus)
-  declare statuses: HasMany<typeof OrderStatus>
-  
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => Order)
+  @belongsTo(() => Order, {
+    foreignKey: 'orderId',
+  })
   declare order: BelongsTo<typeof Order>
+
+  @hasMany(() => OrderItemStatus)
+  declare orderItemStatuses: HasMany<typeof OrderItemStatus>
 } 

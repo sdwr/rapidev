@@ -19,18 +19,6 @@ export default class Order extends BaseModel {
   @hasMany(() => OrderItem)
   declare items: HasMany<typeof OrderItem>
 
-  @column()
-  declare deliveryPrice: number
-
-  @column()
-  declare bookingFee: number
-
-  @column()
-  declare discount: number
-
-  @column()
-  declare total: number
-
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

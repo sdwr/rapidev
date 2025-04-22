@@ -71,13 +71,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import ProfileInfo from '@/components/ProfileInfo.vue'
 import Order from '@/components/Order.vue'
 import OrderCard from '@/components/OrderCard.vue'
 import type { Order as OrderType } from '@/models/Order'
 import type { Profile } from '@/models/Profile'
-import type { User } from '@/models/User'
-import { getClientOrders, upsertOrder, getUser, upsertProfile } from '../api/api'
+import { getClientOrders, createOrder, getUser, upsertProfile } from '../api/api'
 import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
@@ -154,7 +152,7 @@ const handleOrderCreated = async (orderData: OrderType) => {
 
   try {
     // Create the order with the correct IDs
-    const order = await upsertOrder({
+    const order = await createOrder({
       ...orderData,
       clientId: userStore.user.id,
       clientProfileId: userStore.user.profile.id

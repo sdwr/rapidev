@@ -8,6 +8,7 @@ export default class extends BaseSchema {
       table.increments('id').primary()
       table.integer('order_id').references('id').inTable('orders').onDelete('CASCADE')
       table.integer('courier_id').references('id').inTable('users').nullable()
+      table.text('pickup_address').notNullable()
       table.text('delivery_address').notNullable()
       table.string('delivery_phone').notNullable()
       table.text('delivery_notes').nullable()

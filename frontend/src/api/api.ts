@@ -2,7 +2,6 @@ import type { ProfileInfo } from '../../../shared/models/ProfileInfo'
 import type { Order } from '../../../shared/models/Order'
 import type { User } from '../../../shared/models/User'
 import { OrderStatus } from '../../../shared/enums/OrderEnums'
-import type { Courier } from '../../../shared/models/Courier'
 import { getBaseUrl } from './config'
 import { handleApiError } from '../utils/errorHandler'
 
@@ -80,24 +79,6 @@ export async function getClientOrders(clientId: string): Promise<Order[]> {
   } catch (error) {
     handleApiError(error)
     return []
-  }
-}
-
-export async function upsertOrder(order: Order): Promise<Order> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/orders`, {
-      method: order.id ? 'PUT' : 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(order),
-    })
-    if (!response.ok) throw await response.json()
-    let responseOrder = await response.json()
-    return responseOrder
-  } catch (error) {
-    handleApiError(error)
-    return null
   }
 }
 
@@ -223,6 +204,23 @@ export async function createOrder(order: Order) {
   try {
     const response = await fetch(`${BASE_URL}/api/orders`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(order),
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function updateOrder(order: Order) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/${order.id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },

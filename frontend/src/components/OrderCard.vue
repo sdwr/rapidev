@@ -76,7 +76,7 @@ import { ref, computed } from 'vue'
 import { OrderStatus } from '../models/Order'
 import { Order } from '../models/Order'
 import { User } from '../models/User'
-import { updateOrderState, upsertOrder } from '../api/api'
+import { updateOrderState, updateOrder } from '../api/api'
 import { toast } from 'vue3-toastify'
 import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
 const props = defineProps<{
@@ -150,7 +150,7 @@ const assignCourier = async () => {
     await updateOrderState(props.order.id, OrderStatus.ASSIGNED_TO_COURIER)
     
     // Update order with courier ID
-    await upsertOrder({
+    await updateOrder({
       ...props.order,
       courierId: selectedCourier.value
     })

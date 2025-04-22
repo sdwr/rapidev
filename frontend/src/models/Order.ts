@@ -1,5 +1,5 @@
-import { OrderStatus, Size } from '../enums/OrderEnums'
 import Receipt from '../models/Receipt'
+
 export interface Order {
   id?: string;
   clientId: string;

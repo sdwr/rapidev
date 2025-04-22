@@ -44,12 +44,14 @@ router.get('/api/orders/client/:clientId', [OrderController, 'getClientOrders'])
 router.get('/api/orders/courier/:courierId', [OrderController, 'getCourierOrders'])
 router.get('/api/orders/:id/statuses', [OrderController, 'getOrderStatuses'])
 router.post('/api/orders', [OrderController, 'createOrder'])
-router.put('/api/orders', [OrderController, 'upsertOrder'])
+router.put('/api/orders/:id', [OrderController, 'updateOrder'])
+
+router.get('/api/orders/item/:id', [OrderController, 'getOrderItem'])
 
 //order status modifications
-router.put('/api/orders/:id/courier', [OrderController, 'assignCourier'])
-router.put('/api/orders/:id/unassign-courier', [OrderController, 'unassignCourier'])
-router.put('/api/orders/:id/status', [OrderController, 'updateStatus'])
+router.put('/api/orders/item/:id/courier', [OrderController, 'assignCourier'])
+router.put('/api/orders/item/:id/unassign-courier', [OrderController, 'unassignCourier'])
+router.put('/api/orders/item/:id/status', [OrderController, 'updateOrderItemStatus'])
 
 //order deletion
 router.delete('/api/orders/:id', [OrderController, 'deleteOrder'])
