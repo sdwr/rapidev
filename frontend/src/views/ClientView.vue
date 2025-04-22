@@ -15,38 +15,18 @@
       </div>
 
       <div class="tab-content">
-        <!-- Profile Tab -->
-        <div v-if="currentTab === 'profile'" class="tab-panel">
-          <h2>My Addresses</h2>
-          <ProfileInfo
-            :editable="true"
-            :profileType="'PICKUP'"
-            @profile-saved="handleProfileSave"
-          />
-
-          <div class="list-container">
-            <ProfileInfo 
-              v-for="address in addresses"
-              :key="address.id"
-              :editable="false"
-              :profileData="address"
-              :profileType="'PICKUP'"
-              @profile-saved="handleProfileSave"
-            />
-          </div>
-        </div>
 
         <!-- Place Order Tab -->
         <div v-if="currentTab === 'order'" class="tab-panel">
           <div class="card">
-            <template v-if="userStore.user?.id && userStore.user?.profile">
+            <template v-if="userStore.user?.id">
               <Order
                 v-if="currentTab === 'order'"
                 @order-created="handleOrderCreated"
               />
             </template>
             <div v-else class="error-message">
-              Please create a profile before placing an order.
+              You must be logged in to place an order.
             </div>
           </div>
         </div>
@@ -106,7 +86,6 @@ import { getCurrentStatus } from '@/utils'
 const userStore = useUserStore()
 
 const tabs = [
-  { id: 'profile', label: 'My Addresses' },
   { id: 'order', label: 'Place Order' },
   { id: 'myOrders', label: 'My Orders' },
   { id: 'history', label: 'History' }
@@ -170,12 +149,6 @@ const handleOrderCreated = async (orderData: OrderType) => {
   if (!userStore.user?.id) {
     console.error('No user logged in')
     toast.error('Please log in to create an order')
-    return
-  }
-
-  if (!userStore.user?.profile) {
-    console.error('No profile found for user')
-    toast.error('Please create a profile before placing an order')
     return
   }
 

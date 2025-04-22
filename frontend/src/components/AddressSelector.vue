@@ -27,7 +27,7 @@
           :key="address.id" 
           :value="address.id"
         >
-          {{ address.name }} - {{ address.address }}
+          {{ address.address }}
         </option>
       </select>
       
@@ -69,6 +69,14 @@ const props = defineProps({
   },
   addresses: {
     type: Array,
+    required: true
+  },
+  selectedAddressId: {
+    type: Number,
+    default: 0
+  },
+  profileType: {
+    type: String,
     required: true
   },
   modelValue: {
@@ -114,22 +122,14 @@ const cancelNewAddress = () => {
 }
 
 const confirmNewAddress = () => {
-  // Create a new address object
-  const newId = `new-${Date.now()}`
-  const newAddress = {
-    id: newId,
-    name: 'New Address',
-    address: addressValue.value
-  }
   
   // Emit event to add the address to the parent's list
-  emit('address-added', newAddress)
+  emit('address-added', addressValue.value, props.profileType)
+
+  //the new address will be selected by the parent component once returned from the api
   
-  // Select the new address
-  selectedOption.value = newId
   isCreatingNewAddress.value = false
   emit('update:modelValue', addressValue.value)
-  emit('address-selected', newAddress)
 }
 </script>
 

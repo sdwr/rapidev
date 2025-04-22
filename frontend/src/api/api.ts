@@ -219,6 +219,23 @@ export async function deleteUser(userId: string) {
   }
 }
 
+export async function createOrder(order: Order) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(order),
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
 export async function deleteOrder(orderId: string) {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
@@ -246,6 +263,34 @@ export const getCourierOrders = async (courierId: string): Promise<Order[]> => {
   }
 
   return response.json()
+}
+
+export async function createProfile(profile: ProfileInfo) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/profiles`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profile),
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function getProfilesForUserByProfileType(userId: string, profileType: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/profiles/user/${userId}/${profileType}`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return []
+  }
 }
 
 export async function deleteProfile(profileId: string) {

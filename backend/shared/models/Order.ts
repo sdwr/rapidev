@@ -4,14 +4,25 @@ export interface Order {
   id?: string;
   clientId: string;
   pickupAddress: string;
-  deliveryAddress: string;
   items: OrderItem[];
+  status: OrderStatus;
+  deliveryPrice: number;
+  bookingFee: number;
+  discount: number;
+  total: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export interface OrderItem {
-  description: string;
-  quantity: number;
-  size: Size;
+  id?: string;
+  orderId: string;
+  courierId: string;
+  pickupAddress: string;
+  deliveryAddress: string;
+  deliveryPhone: string;
+  deliveryNotes: string;
+  status: OrderStatus;
+  createdAt?: Date;
+  updatedAt?: Date;
 } 

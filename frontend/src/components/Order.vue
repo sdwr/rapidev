@@ -6,8 +6,10 @@
       <AddressSelector
         id="pickupAddress"
         label="Pickup"
-        :addresses="addresses"
+        :addresses="pickupAddresses"
         v-model="orderData.pickupAddress"
+        :selectedAddressId="selectedPickupAddressId"
+        :profileType="'PICKUP'"
         @address-added="addAddress"
         @address-selected="handlePickupAddressSelected"
       />
@@ -27,6 +29,7 @@
       >
         <div class="delivery-item-header">
           <h4>Item {{ index + 1 }}</h4>
+          <p>${{ deliveryPrice }}</p>
           <button 
             type="button" 
             @click="removeDeliveryItem(index)" 
@@ -41,7 +44,9 @@
           <AddressSelector
             :id="`deliveryAddress-${index}`"
             label="Delivery"
-            :addresses="addresses"
+            :addresses="deliveryAddresses"
+            :selectedAddressId="selectedDeliveryAddressId"
+            :profileType="'DELIVERY'"
             v-model="item.deliveryAddress"
             @address-added="addAddress"
             @address-selected="(address) => handleDeliveryAddressSelected(index, address)"
@@ -76,6 +81,12 @@
       </button>
     </div>
 
+    <div class="order-summary">
+      <p>Delivery Price: ${{ deliveryPrice * orderData.deliveryItems.length }}</p>
+      <p>Booking Fee: ${{ bookingFee }}</p>
+      <p>Total: ${{ total }}</p>
+    </div>
+
     <!-- Submit Button -->
     <button 
       type="submit" 
@@ -83,26 +94,22 @@
       class="submit-btn" 
       :disabled="!isFormValid || isSubmitting"
     >
-      {{ isSubmitting ? 'Placing Order...' : 'Place Order' }}
+      {{ isSubmitting ? 'Placing Order...' : 'Pay for Order' }}
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '../stores/userStore'
 import AddressSelector from './AddressSelector.vue'
-
+import { createProfile, getProfilesForUserByProfileType } from '../api/api'
 const emit = defineEmits(['order-created'])
 const userStore = useUserStore()
 
 // Mock addresses for the dropdown
-const addresses = ref([
-  { id: '1', name: 'Home', address: '123 Main St, Anytown, USA' },
-  { id: '2', name: 'Work', address: '456 Business Ave, Commerce City, USA' },
-  { id: '3', name: 'Gym', address: '789 Fitness Blvd, Healthville, USA' }
-])
-
+const pickupAddresses = ref([])
+const deliveryAddresses = ref([])
 const orderData = ref({
   pickupAddress: '',
   deliveryItems: [
@@ -115,10 +122,31 @@ const orderData = ref({
   ]
 })
 
+const selectedPickupAddressId = ref(0)
+const selectedDeliveryAddressId = ref(0)
+
+const deliveryPrice = 10
+const bookingFee = 3.99
+const total = computed(() => Math.round(deliveryPrice * orderData.value.deliveryItems.length + bookingFee, 2))
+
 const isSubmitting = ref(false)
 
-const addAddress = (newAddress) => {
-  addresses.value.push(newAddress)
+const addAddress = async (newAddress, profileType) => {
+  console.log('Adding address:', newAddress)
+  const addressData = {
+    address: newAddress,
+    userId: userStore.user.id,
+    profileType: profileType
+  }
+  const profile = await createProfile(addressData)
+  //reload the addresses
+  await loadAddresses()
+
+  if (profileType === 'PICKUP') {
+    selectedPickupAddressId.value = profile.id
+  } else if (profileType === 'DELIVERY') {
+    selectedDeliveryAddressId.value = profile.id
+  }
 }
 
 const handlePickupAddressSelected = (address) => {
@@ -164,11 +192,8 @@ const submitOrder = async () => {
   isSubmitting.value = true
   
   try {
-    // In a real implementation, we would call an API here
-    console.log('Submitting order:', orderData.value)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const order = await createOrder(orderData.value)
     
     // Emit the created order
     emit('order-created', orderData.value)
@@ -191,6 +216,17 @@ const submitOrder = async () => {
   } finally {
     isSubmitting.value = false
   }
+}
+
+onMounted(async () => {
+  await loadAddresses()
+})
+
+const loadAddresses = async () => {
+  const pickupProfiles = await getProfilesForUserByProfileType(userStore.user.id, 'PICKUP')
+  pickupAddresses.value = pickupProfiles
+  const deliveryProfiles = await getProfilesForUserByProfileType(userStore.user.id, 'DELIVERY')
+  deliveryAddresses.value = deliveryProfiles
 }
 </script>
 

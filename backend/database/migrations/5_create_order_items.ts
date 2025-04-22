@@ -7,9 +7,10 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
       table.integer('order_id').references('id').inTable('orders').onDelete('CASCADE')
-      table.string('description').notNullable()
-      table.integer('quantity').notNullable()
-      table.enum('size', ['SMALL', 'MEDIUM', 'LARGE', 'EXTRA_LARGE']).notNullable()
+      table.integer('courier_id').references('id').inTable('users').nullable()
+      table.text('delivery_address').notNullable()
+      table.string('delivery_phone').notNullable()
+      table.text('delivery_notes').nullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
     })

@@ -80,15 +80,7 @@
         <STATUS = DELIVERED>
         - order has been delivered
 
--- Potential issues
-
-1. order is attached to user profile
-- how does this work with multiple user locations?
-- attach to user as well/instead?
-
-2. who sets pickup/delivery date / time?
-
-3. payment
+payment
     - one payment for multiple deliveries
     - booking fee is 2.99 or 3.99
     - delivery fee is $10 / ($15 for new clients) fee anywhere in the city
@@ -102,9 +94,18 @@
     - batch deliveries, pay one booking fee (maximum of 3)
         - but still pay each delivery fee
 
-
 - admin reports
     -courier payment based on flat fee and time deliveries
+
+
+
+-- Potential issues
+
+
+1. how to attach phone number to pickup/delivery address?
+    - would be nice to save phone number on address
+
+2. modifying delivery location/order price after booking
 
 -- tech debt
 

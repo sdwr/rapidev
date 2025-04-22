@@ -1,10 +1,10 @@
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasMany, hasOne } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import User from '#models/user'
-import Profile from '#models/profile'
 import OrderStatus from '#models/order_status'
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import OrderItem from '#models/order_item'
+import Receipt from '#models/receipt'
+import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 
 export default class Order extends BaseModel {
   @column({ isPrimary: true })
@@ -14,16 +14,22 @@ export default class Order extends BaseModel {
   declare clientId: number
 
   @column()
-  declare courierId: number | null
-
-  @column()
-  declare clientProfileId: number
-
-  @column()
-  declare deliveryAddress: string
+  declare pickupAddress: string
 
   @hasMany(() => OrderItem)
   declare items: HasMany<typeof OrderItem>
+
+  @column()
+  declare deliveryPrice: number
+
+  @column()
+  declare bookingFee: number
+
+  @column()
+  declare discount: number
+
+  @column()
+  declare total: number
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -36,16 +42,9 @@ export default class Order extends BaseModel {
   })
   declare client: BelongsTo<typeof User>
 
-  @belongsTo(() => User, {
-    foreignKey: 'courierId',
-  })
-  declare courier: BelongsTo<typeof User>
-
-  @belongsTo(() => Profile, {
-    foreignKey: 'clientProfileId',
-  })
-  declare clientProfile: BelongsTo<typeof Profile>
-
   @hasMany(() => OrderStatus)
   declare orderStatuses: HasMany<typeof OrderStatus>
+
+  @hasOne(() => Receipt)
+  declare receipt: HasOne<typeof Receipt>
 } 

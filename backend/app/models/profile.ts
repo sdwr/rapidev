@@ -1,5 +1,6 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
+import { ProfileType } from '#shared/enums/ProfileType'
 
 export default class Profile extends BaseModel {
   @column({ isPrimary: true })
@@ -9,16 +10,11 @@ export default class Profile extends BaseModel {
   declare userId: number
 
   @column()
-  declare name: string
-
-  @column()
-  declare phone: string
-
-  @column()
   declare address: string
 
   @column()
   declare profileType: ProfileType
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

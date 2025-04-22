@@ -1,4 +1,4 @@
-import { OrderStatus, Size } from '../enums/OrderEnums'
+import { OrderStatus } from '../enums/OrderEnums'
 
 export interface Order {
   id?: string;
@@ -14,5 +14,4 @@ export interface Order {
 export interface OrderItem {
   description: string;
   quantity: number;
-  size: Size;
 } 

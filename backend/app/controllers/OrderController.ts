@@ -21,42 +21,28 @@ export class OrderController {
         })
       }
 
-      // Verify client profile exists
-      const profile = await Profile.findBy('id', data.clientProfileId)
-      if (!profile) {
-        return response.status(400).json({ 
-          error: 'Client profile not found' 
-        })
-      }
-
-      // Verify profile belongs to client
-      if (profile.userId !== client.id) {
-        return response.status(400).json({ 
-          error: 'Profile does not belong to client' 
-        })
-      }
-
       // Remove status and items from incoming data
-      const { status, items, ...orderData } = data
+      const { orderStatuses, items, ...orderData } = data
 
       // Create the order
       const order = await Order.create({
-        id: randomUUID(),
         ...orderData
       })
 
       // Create order items
       await Promise.all(items.map((item: any) => 
         OrderItem.create({
-          id: randomUUID(),
           orderId: order.id,
-          ...item
+          pickupAddress: order.pickupAddress,
+          deliveryAddress: item.deliveryAddress,
+          deliveryPhone: item.deliveryPhone,
+          deliveryNotes: item.deliveryNotes,
+          status: Status.DRAFT,
         })
       ))
 
       // Create initial order status
       await OrderStatus.create({
-        id: randomUUID(),
         orderId: order.id,
         status: Status.DRAFT,
         isCurrent: true,
@@ -129,7 +115,6 @@ export class OrderController {
           query.orderBy('createdAt', 'asc')
         })
         .preload('client')
-        .preload('clientProfile')
         .orderBy('createdAt', 'asc')
       return response.json(orders)
     } catch (error) {

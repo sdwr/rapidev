@@ -11,6 +11,7 @@ import router from '@adonisjs/core/services/router'
 import { OrderController } from '#controllers/OrderController'
 import { ProfileController } from '#controllers/ProfileController'
 import UserController from '#controllers/UserController'
+import { ReceiptController } from '#controllers/ReceiptController'
 
 router.get('/', async () => {
   return {
@@ -28,11 +29,11 @@ router.put('/api/users/:id', [UserController, 'updateUser'])
 router.delete('/api/users/:id', [UserController, 'deleteUser'])
 
 // Profile routes
-router.post('/api/profiles', [ProfileController, 'upsertProfile'])
+router.post('/api/profiles', [ProfileController, 'createProfile'])
 router.get('/api/profiles', [ProfileController, 'getAllProfiles'])
 router.delete('/api/profiles/all', [ProfileController, 'deleteAllProfiles'])
 router.get('/api/profiles/:id', [ProfileController, 'getProfile'])
-router.get('/api/profiles/user/:userId', [ProfileController, 'getProfileByUserId'])
+router.get('/api/profiles/user/:userId/:profileType', [ProfileController, 'getProfilesByUserIdAndProfileType'])
 router.delete('/api/profiles/:id', [ProfileController, 'deleteProfile'])
 
 // Order routes
@@ -52,3 +53,13 @@ router.put('/api/orders/:id/status', [OrderController, 'updateStatus'])
 
 //order deletion
 router.delete('/api/orders/:id', [OrderController, 'deleteOrder'])
+
+// Receipt routes
+router.get('/api/receipts', [ReceiptController, 'getAllReceipts'])
+router.delete('/api/receipts/all', [ReceiptController, 'deleteAllReceipts'])
+router.get('/api/receipts/:id', [ReceiptController, 'getReceipt'])
+router.get('/api/orders/:orderId/receipt', [ReceiptController, 'getReceiptByOrderId'])
+router.put('/api/receipts/:id', [ReceiptController, 'updateReceipt'])
+router.post('/api/receipts/:id/payment', [ReceiptController, 'payReceipt'])
+router.post('/api/receipts/:id/refund', [ReceiptController, 'refundReceipt'])
+router.post('/api/receipts/:id/cancel', [ReceiptController, 'cancelReceipt'])

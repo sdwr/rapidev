@@ -1,0 +1,7 @@
+export enum ReceiptStatus {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  PARTIALLY_PAID = 'PARTIALLY_PAID',
+  REFUNDED = 'REFUNDED',
+  CANCELLED = 'CANCELLED'
+} 

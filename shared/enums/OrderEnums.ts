@@ -11,10 +11,3 @@ export enum OrderStatus {
   CANCELLED_BY_COURIER = 'CANCELLED_BY_COURIER',
   CANCELLED_BY_ADMIN = 'CANCELLED_BY_ADMIN'
 }
-
-export enum Size {
-  SMALL = 'SMALL',
-  MEDIUM = 'MEDIUM',
-  LARGE = 'LARGE',
-  EXTRA_LARGE = 'EXTRA_LARGE'
-} 
