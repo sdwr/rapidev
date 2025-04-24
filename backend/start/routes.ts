@@ -23,6 +23,7 @@ router.get('/', async () => {
 router.post('/api/users/login', [UserController, 'login'])
 router.post('/api/users/register', [UserController, 'createUser'])
 router.get('/api/users/all', [UserController, 'getAllUsers'])
+router.get('/api/users/all/:type', [UserController, 'getAllUsersByType'])
 router.delete('/api/users/all', [UserController, 'deleteAllUsers'])
 router.get('/api/users/:id', [UserController, 'loadUser'])
 router.put('/api/users/:id', [UserController, 'updateUser'])

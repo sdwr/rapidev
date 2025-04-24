@@ -193,6 +193,17 @@ export async function getAllUsers(userType?: 'CLIENT' | 'COURIER' | 'ADMIN'): Pr
   }
 }
 
+export async function getAllUsersByType(userType: 'CLIENT' | 'COURIER' | 'ADMIN'): Promise<User[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users/all/${userType}`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return []
+  }
+}
+
 // Debug API function
 export const getDebugData = async () => {
   try {
@@ -439,6 +450,67 @@ export async function getReceipt(receiptId: string) {
 export async function getReceiptByOrderId(orderId: string) {
   try {
     const response = await fetch(`${BASE_URL}/api/receipts/order/${orderId}`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export const assignCourierToOrderItem = async (orderItemId: number, courierId: number) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/item/${orderItemId}/courier`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ courierId }),
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export const unassignCourierFromOrderItem = async (orderItemId: number) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/item/${orderItemId}/unassign-courier`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export const updateOrderItemStatus = async (orderItemId: number, data: { status: string, notes?: string }) => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/item/${orderItemId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export const getCouriers = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users?userType=COURIER`)
     if (!response.ok) throw await response.json()
     return response.json()
   } catch (error) {

@@ -45,6 +45,14 @@ export default class UserController {
     await User.query().delete()
     return response.json({ message: 'All users deleted' })
   }
+
+  async getAllUsersByType({ params, response }: HttpContext) {
+    const { type } = params
+    const users = await User.query()
+      .where('user_type', type)
+      .preload('profiles')
+    return response.json(users)
+  }
   
   /**
    * Load user by ID

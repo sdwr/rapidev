@@ -72,13 +72,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { OrderStatus } from '../models/Order'
 import { Order } from '../models/Order'
 import { User } from '../models/User'
-import { updateOrderState, updateOrder } from '../api/api'
+import { updateOrderState, updateOrder, getAllUsersByType } from '../api/api'
 import { toast } from 'vue3-toastify'
 import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
+
 const props = defineProps<{
   order: Order
   userType: 'ADMIN' | 'CLIENT' | 'COURIER'
@@ -91,6 +92,10 @@ const emit = defineEmits<{
 
 const isStatusHistoryExpanded = ref(false)
 const selectedCourier = ref('')
+const isOrderExpanded = ref(false)
+const isItemsExpanded = ref(false)
+const expandedItemId = ref(null)
+const availableCouriers = ref([])
 
 const toggleStatusHistory = () => {
   isStatusHistoryExpanded.value = !isStatusHistoryExpanded.value
@@ -169,7 +174,7 @@ const unassignCourier = async () => {
     await updateOrderState(props.order.id, OrderStatus.ACCEPTED)
     
     // Remove courier from order
-    await upsertOrder({
+    await updateOrder({
       ...props.order,
       courierId: null
     })
@@ -191,6 +196,41 @@ const confirmOrder = async () => {
     console.error('Error confirming order:', error)
     toast.error('Failed to confirm order')
   }
+}
+
+// Fetch available couriers for admin users
+onMounted(async () => {
+  if (props.userType === 'ADMIN') {
+    try {
+      const couriers = await getAllUsersByType('COURIER')
+      if (couriers) {
+        availableCouriers.value = couriers
+      }
+    } catch (error) {
+      console.error('Failed to fetch couriers:', error)
+      toast.error('Failed to load available couriers')
+    }
+  }
+})
+
+// Toggle order expansion
+const toggleOrder = () => {
+  isOrderExpanded.value = !isOrderExpanded.value
+  // Reset items expansion when collapsing the order
+  if (!isOrderExpanded.value) {
+    isItemsExpanded.value = false
+  }
+}
+
+// Toggle items expansion
+const toggleItems = () => {
+  isItemsExpanded.value = !isItemsExpanded.value
+}
+
+// Expand a specific item
+const expandItem = (itemId) => {
+  isItemsExpanded.value = true
+  expandedItemId.value = itemId
 }
 </script>
 
