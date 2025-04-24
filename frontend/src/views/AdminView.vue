@@ -53,7 +53,7 @@
               v-for="order in orderHistory"
               :key="order.id"
               :order="order"
-              :userType="'admin'"
+              :userType="'ADMIN'"
               :statusHistory="statusHistories[order.id]"
               @orderUpdated="fetchOrders"
             />
@@ -70,7 +70,7 @@
               v-for="order in activeOrders"
               :key="order.id"
               :order="order"
-              :userType="'admin'"
+              :userType="'ADMIN'"
               :couriers="couriers"
               :statusHistory="statusHistories[order.id]"
               @orderUpdated="fetchOrders"

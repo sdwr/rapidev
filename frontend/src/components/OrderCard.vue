@@ -4,7 +4,24 @@
     <p>Status: {{ getCurrentStatus(order) }}</p>
     <p>Client: {{ order.clientId }}</p>
     <p>Courier: {{ order.courierId }}</p>
-    <p>Items: {{ order.items.length }}</p>
+    <div class="order-items">
+      <div class="order-item-header"  @click="toggleItems" >
+        <h4>Items</h4>
+        <span class="toggle-icon">{{ isItemsExpanded ? '▼' : '▶' }}</span>
+      </div>
+      <div v-if="isItemsExpanded" class="order-item-entries">
+        <OrderItemCard v-for="item in order.items" 
+          :key="item.id" 
+          :order-item="item" 
+          :userType="userType"
+          :available-couriers="couriers" />
+      </div>
+      <div v-else class="order-items-collapsed">
+        <div class="order-item" v-for="item in order.items" :key="item.id">
+          <p>{{ item.deliveryAddress }}</p>
+        </div>
+      </div>
+    </div>
     <div class="status-history">
       <div class="status-header" @click="toggleStatusHistory">
         <h4>Status History</h4>
@@ -24,7 +41,7 @@
     </div>
 
     <!-- Admin Actions -->
-    <div v-if="userType === 'admin'" class="actions">
+    <div v-if="userType === 'ADMIN'" class="actions">
       <div v-if="canAcceptOrder" class="action-buttons">
         <button @click="acceptOrder" class="accept-button">Accept</button>
         <button @click="cancelOrder" class="cancel-button">Cancel</button>
@@ -79,7 +96,7 @@ import { User } from '../models/User'
 import { updateOrderState, updateOrder, getAllUsersByType } from '../api/api'
 import { toast } from 'vue3-toastify'
 import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
-
+import OrderItemCard from './OrderItemCard.vue'
 const props = defineProps<{
   order: Order
   userType: 'ADMIN' | 'CLIENT' | 'COURIER'
@@ -241,6 +258,23 @@ const expandItem = (itemId) => {
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
+}
+
+.order-items {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.order-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.5rem;
+  background: var(--color-background);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
 }
 
 .status-history {

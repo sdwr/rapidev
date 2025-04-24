@@ -2,7 +2,7 @@
   <div class="order-item-card" :class="{ expanded: isExpanded }">
     <div class="order-item-header" @click="toggleExpand">
       <div class="status-badge" :class="statusClass">{{ getCurrentStatus() }}</div>
-      <div class="order-item-id">Item #{{ orderItem.id }}</div>
+      <div class="order-item-id">{{ orderItem.deliveryAddress }}</div>
       <div class="toggle-icon">{{ isExpanded ? '▼' : '▶' }}</div>
     </div>
 
