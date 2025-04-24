@@ -3,7 +3,6 @@ import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import { UserType } from '#shared/enums/UserEnums'
 import Profile from './profile.js'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
-import { randomUUID } from 'node:crypto'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -14,6 +13,12 @@ export default class User extends BaseModel {
 
   @column({ serializeAs: null })
   declare password: string
+
+  @column()
+  declare name: string
+
+  @column()
+  declare phone: string
 
   @column()
   declare userType: UserType

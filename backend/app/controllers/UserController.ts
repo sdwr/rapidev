@@ -66,11 +66,13 @@ export default class UserController {
   }
 
   async updateUser({ params, request, response }: HttpContext) {
-    const { email, password, userType } = request.body()
+    const { email, password, userType, name, phone } = request.body()
     const user = await User.findOrFail(params.id)
     user.email = email
     user.password = password
     user.userType = userType
+    user.name = name
+    user.phone = phone
     await user.save()
     return response.json(user)
   }
