@@ -39,7 +39,6 @@
             <p v-if="!couriers.length">No couriers registered yet.</p>
             <div v-else v-for="courier in couriers" :key="courier.id" class="list-item">
               <h3>{{ courier.profile?.name || 'No name' }}</h3>
-              <p>Username: {{ courier.username }}</p>
               <p>Email: {{ courier.profile?.email || 'No email' }}</p>
               <p>Phone: {{ courier.profile?.phone || 'No phone' }}</p>
               <p>Address: {{ courier.profile?.address || 'No address' }}</p>
@@ -88,13 +87,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getAllUsers, getAllOrders, updateOrderState, upsertOrder } from '../api/api'
+import { getAllUsers, getAllOrders, updateOrderState, assignCourier, unassignCourier } from '../api/api'
 import type { Order } from '@/models/Order'
 import type { User } from '@/models/User'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES, ACCEPTABLE_ORDER_STATUSES } from '../utils/consts'
 import { toast } from 'vue3-toastify'
 import { OrderStatus } from '@/models/Order'
-import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
+import { getCurrentStatus } from '../utils'
 import OrderCard from '../components/OrderCard.vue'
 
 const tabs = [
@@ -182,22 +181,14 @@ const canAcceptOrder = (order: Order) => {
   return ACCEPTABLE_ORDER_STATUSES.includes(getCurrentStatus(order))
 }
 
-const assignCourier = async (orderId: string) => {
+const assignCourierToOrder = async (orderId: string) => {
   const courierId = selectedCouriers.value[orderId]
   if (!courierId) return
 
   try {
     // First update the order status
     await updateOrderState(orderId, OrderStatus.ASSIGNED_TO_COURIER)
-    
-    // Then update the order with the courier ID
-    const order = activeOrders.value.find(o => o.id === orderId)
-    if (order) {
-      await upsertOrder({
-        ...order,
-        courierId,
-      })
-    }
+    await assignCourier(orderId, courierId)
     
     toast.success('Order assigned to courier')
     await fetchOrders() // Refresh the orders list
@@ -207,19 +198,11 @@ const assignCourier = async (orderId: string) => {
   }
 }
 
-const unassignCourier = async (orderId: string) => {
+const unassignCourierToOrder = async (orderId: string) => {
   try {
     // First update the order status
     await updateOrderState(orderId, OrderStatus.ACCEPTED)
-    
-    // Then update the order to remove the courier
-    const order = activeOrders.value.find(o => o.id === orderId)
-    if (order) {
-      await upsertOrder({
-        ...order,
-        courierId: null,
-      })
-    }
+    await unassignCourier(orderId)
     
     toast.success('Courier unassigned')
     await fetchOrders() // Refresh the orders list

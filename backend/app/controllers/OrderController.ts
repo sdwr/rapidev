@@ -9,6 +9,13 @@ import { OrderStatus as Status } from '#shared/enums/OrderEnums'
 
 export class OrderController {
   //order endpoints
+  async getOrder({ params, response }: HttpContext) {
+    const order = await Order.findOrFail(params.id)
+    await this.loadOrderRelationships(order)
+
+    return response.json(order)
+  }
+
   async createOrder({ request, response }: HttpContext) {
     const data = request.body()
     
@@ -194,7 +201,7 @@ export class OrderController {
     await order.load('items')
     await order.load('orderStatuses')
     await order.load('client')
-
+    await order.load('receipt')
     return order
   }
 

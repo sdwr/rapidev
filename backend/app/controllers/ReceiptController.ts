@@ -5,13 +5,32 @@ import { createReceiptValidator, updateReceiptValidator } from '#validators/Rece
 import { ReceiptStatus } from '#shared/enums/ReceiptEnums'
 
 export class ReceiptController {
+  async getAllReceipts({ response }: HttpContext) {
+    try {
+      const receipts = await Receipt.all()
+      return response.json(receipts)
+    } catch (error) {
+      return response.status(400).json({ error: error.message })
+    }
+  }
+
+  async deleteAllReceipts({ response }: HttpContext) {
+    try {
+      await Receipt.query().delete()
+      return response.json({ message: 'All receipts deleted successfully' })
+    } catch (error) {
+      return response.status(400).json({ error: error.message })
+    }
+  }
+
   /**
    * Create a new receipt for an order
    */
   async createReceipt({ request, response }: HttpContext) {
     try {
       // Validate request data
-      const data = await request.validateUsing(createReceiptValidator)
+      const data = request.body()
+      await createReceiptValidator.validate(data)
       
       // Check if order exists
       const order = await Order.find(data.orderId)
@@ -89,14 +108,14 @@ export class ReceiptController {
    */
   async updateReceipt({ params, request, response }: HttpContext) {
     try {
+      const data = request.body()
+      await updateReceiptValidator.validate(data)
       const receipt = await Receipt.find(params.id)
       
       if (!receipt) {
         return response.status(404).json({ error: 'Receipt not found' })
       }
-      
-      const data = await request.validateUsing(updateReceiptValidator)
-      
+
       // Update receipt
       receipt.merge(data)
       await receipt.save()

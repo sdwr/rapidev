@@ -4,6 +4,7 @@ import type { User } from '../../../shared/models/User'
 import { OrderStatus } from '../../../shared/enums/OrderEnums'
 import { getBaseUrl } from './config'
 import { handleApiError } from '../utils/errorHandler'
+import { Receipt } from '../models/Receipt'
 
 const BASE_URL = getBaseUrl()
 
@@ -200,6 +201,17 @@ export async function deleteUser(userId: string) {
   }
 }
 
+export async function getOrder(orderId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/${orderId}`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
 export async function createOrder(order: Order) {
   try {
     const response = await fetch(`${BASE_URL}/api/orders`, {
@@ -238,6 +250,39 @@ export async function deleteOrder(orderId: string) {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/${orderId}`, {
       method: 'DELETE',
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function assignCourier(orderId: string, courierId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/${orderId}/courier`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ courierId }),
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function unassignCourier(orderId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/${orderId}/unassign-courier`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
     if (!response.ok) throw await response.json()
     return response.json()
@@ -296,6 +341,87 @@ export async function deleteProfile(profileId: string) {
     const response = await fetch(`${BASE_URL}/api/profiles/${profileId}`, {
       method: 'DELETE',
     })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+// Receipt API functions
+export async function getAllReceipts() {
+  try {
+    const response = await fetch(`${BASE_URL}/api/receipts`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return []
+  }
+}
+
+export async function deleteAllReceipts() {
+  try {
+    const response = await fetch(`${BASE_URL}/api/receipts`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function createReceipt(receipt: Receipt) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/receipts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(receipt),
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function updateReceipt(receipt: Receipt) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/receipts/${receipt.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(receipt),
+    })
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function getReceipt(receiptId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/receipts/${receiptId}`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function getReceiptByOrderId(orderId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/receipts/order/${orderId}`)
     if (!response.ok) throw await response.json()
     return response.json()
   } catch (error) {

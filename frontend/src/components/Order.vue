@@ -29,7 +29,7 @@
       >
         <div class="delivery-item-header">
           <h4>Item {{ index + 1 }}</h4>
-          <p>${{ deliveryPrice }}</p>
+          <p>${{ deliveryFee }}</p>
           <button 
             type="button" 
             @click="removeDeliveryItem(index)" 
@@ -82,7 +82,7 @@
     </div>
 
     <div class="order-summary">
-      <p>Delivery Price: ${{ deliveryPrice * orderData.deliveryItems.length }}</p>
+      <p>Delivery Price: ${{ deliveryFee * orderData.deliveryItems.length }}</p>
       <p>Booking Fee: ${{ bookingFee }}</p>
       <p>Total: ${{ total }}</p>
     </div>
@@ -103,7 +103,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '../stores/userStore'
 import AddressSelector from './AddressSelector.vue'
-import { createOrder, createProfile, getProfilesForUserByProfileType } from '../api/api'
+import { getOrder,createOrder, createProfile, getProfilesForUserByProfileType, createReceipt } from '../api/api'
+import { ReceiptStatus } from '../models/Receipt'
 const emit = defineEmits(['order-created'])
 const userStore = useUserStore()
 
@@ -125,9 +126,9 @@ const orderData = ref({
 const selectedPickupAddressId = ref(0)
 const selectedDeliveryAddressId = ref(0)
 
-const deliveryPrice = 10
+const deliveryFee = 10
 const bookingFee = 3.99
-const total = computed(() => Math.round(deliveryPrice * orderData.value.deliveryItems.length + bookingFee, 2))
+const total = computed(() => Math.round(deliveryFee * orderData.value.deliveryItems.length + bookingFee, 2))
 
 const isSubmitting = ref(false)
 
@@ -195,7 +196,23 @@ const submitOrder = async () => {
     
     orderData.value.clientId = userStore.user.id
     const order = await createOrder(orderData.value)
-    
+    const receiptData = {
+      orderId: order.id,
+      deliveryFee,
+      bookingFee,
+      discount: 0,
+      total: total.value,
+      amountPaid: total.value,
+      receiptStatus: ReceiptStatus.PAID
+    }
+
+    const receipt = await createReceipt(receiptData)
+    console.log('Receipt created:', receipt)
+
+    //reload the order
+    const updatedOrder = await getOrder(order.id)
+    orderData.value = updatedOrder
+
     // Emit the created order
     emit('order-created', orderData.value)
     
