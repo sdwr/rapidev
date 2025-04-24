@@ -23,11 +23,9 @@
           <div class="list-container">
             <p v-if="!loadingClients && !clients.length">No clients registered yet.</p>
             <div v-else v-for="client in clients" :key="client.id" class="list-item">
-              <h3>{{ client.profile?.name || 'No name' }}</h3>
-              <p>Username: {{ client.username }}</p>
-              <p>Email: {{ client.profile?.email || 'No email' }}</p>
-              <p>Phone: {{ client.profile?.phone || 'No phone' }}</p>
-              <p>Address: {{ client.profile?.address || 'No address' }}</p>
+              <h3>Name: {{ client.name }}</h3>
+              <p>Email: {{ client.email || 'No email' }}</p>
+              <p>Phone: {{ client.phone || 'No phone' }}</p>
             </div>
           </div>
         </div>
@@ -38,10 +36,9 @@
           <div class="list-container">
             <p v-if="!couriers.length">No couriers registered yet.</p>
             <div v-else v-for="courier in couriers" :key="courier.id" class="list-item">
-              <h3>{{ courier.profile?.name || 'No name' }}</h3>
-              <p>Email: {{ courier.profile?.email || 'No email' }}</p>
-              <p>Phone: {{ courier.profile?.phone || 'No phone' }}</p>
-              <p>Address: {{ courier.profile?.address || 'No address' }}</p>
+              <h3>Name: {{ courier.name }}</h3>
+              <p>Email: {{ courier.email || 'No email' }}</p>
+              <p>Phone: {{ courier.phone || 'No phone' }}</p>
             </div>
           </div>
         </div>

@@ -2,20 +2,37 @@
 import { RouterLink, RouterView } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import UserProfile from './components/UserProfile.vue'
+import AboutMe from './components/AboutMe.vue'
 import { useUserStore } from './stores/userStore'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 
 const userStore = useUserStore()
+
+// Check if user profile is complete
+const isProfileComplete = computed(() => {
+  return userStore.user && 
+         userStore.user.name && 
+         userStore.user.name.trim() !== '' && 
+         userStore.user.phone && 
+         userStore.user.phone.trim() !== '';
+})
+
+// Check if user is logged in but profile is incomplete
+const showAboutMe = computed(() => {
+  return userStore.user && !isProfileComplete.value;
+})
 
 onMounted(() => {
   userStore.loadUserFromStorage()
 })
-
-
 </script>
 
 <template>
-  <div class="app-container">
+  <!-- Show About Me if user is logged in but profile is incomplete -->
+  <AboutMe v-if="showAboutMe" />
+
+  <!-- Show main app otherwise -->
+  <div v-else class="app-container">
     <header>
       <div class="header-content">
         <div class="header-text">Rapid Delivery</div>

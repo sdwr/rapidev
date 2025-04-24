@@ -34,7 +34,7 @@
         <select v-model="selectedCourier" class="courier-select">
           <option value="" selected>Select a courier</option>
           <option v-for="courier in couriers" :key="courier.id" :value="courier.id">
-            {{ courier.profile?.name || courier.username }}
+            {{ courier.name }}
           </option>
         </select>
         <button 
@@ -48,7 +48,7 @@
 
       <div v-if="isAssigned" class="courier-assignment">
         <div class="assigned-courier">
-          <span>Assigned to: {{ order.courier?.profile?.name || order.courier?.username || order.courierId }}</span>
+          <span>Assigned to: {{ order.courier?.name || order.courierId }}</span>
           <button @click="unassignCourier" class="unassign-button">Unassign</button>
         </div>
       </div>

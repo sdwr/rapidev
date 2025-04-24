@@ -1,7 +1,8 @@
 <template>
   <div class="user-profile" v-if="isLoggedIn">
     <div class="profile-info">
-      <span class="username">{{ user?.username }}</span>
+      <span class="name">{{ user?.name }}</span>
+      <span class="phone">{{ user?.phone }}</span>
       <span class="user-type">{{ user?.userType }}</span>
     </div>
     <button @click="handleLogout" class="logout-button">Logout</button>
