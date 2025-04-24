@@ -22,9 +22,15 @@
             type="tel" 
             id="phone" 
             v-model="formData.phone" 
-            placeholder="Enter your phone number"
+            placeholder="Enter your phone number (10 digits)"
+            :class="{ 'input-error': phoneError }"
+            maxlength="10"
+            @input="formatPhoneNumber"
             required
           />
+          <small v-if="phoneError" class="validation-message">
+            Please enter a valid 10-digit phone number
+          </small>
         </div>
 
         <div v-if="error" class="error-message">
@@ -55,11 +61,30 @@ const formData = ref({
   phone: userStore.user?.phone || '',
 })
 
+// Format and limit phone number as user types
+const formatPhoneNumber = () => {
+  // Remove any non-digit characters
+  const digitsOnly = formData.value.phone.replace(/\D/g, '');
+  
+  // Limit to 10 digits
+  formData.value.phone = digitsOnly.substring(0, 10);
+}
+
+// Phone validation
+const isPhoneValid = computed(() => {
+  const phoneRegex = /^\d{10}$/; // Requires exactly 10 digits
+  return phoneRegex.test(formData.value.phone);
+});
+
+const phoneError = computed(() => {
+  // Only show error when user has entered something but it's not valid
+  return formData.value.phone.trim() !== '' && !isPhoneValid.value;
+});
+
 // Validate form
 const isFormValid = computed(() => {
-  return formData.value.name.trim() !== '' && 
-         formData.value.phone.trim() !== '';
-})
+  return formData.value.name.trim() !== '' && isPhoneValid.value;
+});
 
 const saveProfile = async () => {
   if (!userStore.user?.id) {
@@ -77,7 +102,7 @@ const saveProfile = async () => {
       {
         ...userStore.user,
         name: formData.value.name.trim(),
-        phone: formData.value.phone.trim()
+        phone: formData.value.phone
       }
     )
     
@@ -149,6 +174,16 @@ input {
   background: var(--color-background);
   color: var(--color-text);
   font-size: 1rem;
+}
+
+.input-error {
+  border-color: #f44336;
+}
+
+.validation-message {
+  color: #f44336;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
 }
 
 .error-message {

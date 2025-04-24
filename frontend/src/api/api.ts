@@ -164,7 +164,7 @@ export async function loginOrRegister(email: string, password: string, userType:
 
 export const updateUser = async (userId: number, userData: any) => {
   try {
-    const response = await fetch(`${BASE_URL}/users/${userId}`, {
+    const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -178,7 +178,6 @@ export const updateUser = async (userId: number, userData: any) => {
     return null
   }
 }
-
 
 export async function getAllUsers(userType?: 'CLIENT' | 'COURIER' | 'ADMIN'): Promise<User[]> {
   try {
