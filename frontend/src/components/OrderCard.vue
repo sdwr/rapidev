@@ -13,7 +13,7 @@
           :key="item.id" 
           :order-item="item" 
           :userType="userType"
-          :available-couriers="couriers" />
+          :available-couriers="availableCouriers" />
       </div>
     </div>
     <div class="status-history">
@@ -151,7 +151,7 @@ const confirmOrder = async () => {
 
 // Fetch available couriers for admin users
 onMounted(async () => {
-  if (props.userType === 'ADMIN') {
+  if (props.userType === UserTypeEnum.ADMIN) {
     try {
       const couriers = await getAllUsersByType(UserTypeEnum.COURIER)
       if (couriers) {

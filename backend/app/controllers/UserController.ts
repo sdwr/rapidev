@@ -78,7 +78,7 @@ export default class UserController {
   }
 
   async loginOrRegister({ request, response }: HttpContext) {
-    const { email, password } = request.body()
+    const { email, password, userType } = request.body()
     
     try {
       // Find user by email
@@ -87,7 +87,7 @@ export default class UserController {
         user = await User.create({
           email,
           password,
-          userType: UserTypeEnum.CLIENT
+          userType: userType as UserTypeEnum
         })
       }
       
