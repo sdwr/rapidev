@@ -55,7 +55,7 @@
               :order="order"
               :userType="'ADMIN'"
               :statusHistory="statusHistories[order.id]"
-              @orderUpdated="fetchOrders"
+              @orderUpdated="orderStore.fetchAllOrders"
             />
           </div>
         </div>
@@ -73,7 +73,7 @@
               :userType="'ADMIN'"
               :couriers="couriers"
               :statusHistory="statusHistories[order.id]"
-              @orderUpdated="fetchOrders"
+              @orderUpdated="orderStore.fetchAllOrders"
             />
           </div>
         </div>
@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getAllUsers, getAllOrders, updateOrderState, assignCourier, unassignCourier } from '../api/api'
 import type { Order } from '../shared/models/Order'
 import type { User } from '../shared/models/User'
@@ -92,6 +92,8 @@ import { toast } from 'vue3-toastify'
 import { OrderStatusEnum } from '../shared/enums/OrderEnums'
 import { getCurrentStatus } from '../utils'
 import OrderCard from '../components/OrderCard.vue'
+import { useOrderStore } from '../stores/orderStore'
+import { useUserStore } from '../stores/userStore'
 
 const tabs = [
   { id: 'active', label: 'Active Orders' },
@@ -103,8 +105,6 @@ const tabs = [
 const currentTab = ref('active')
 const clients = ref<User[]>([])
 const couriers = ref<User[]>([])
-const orderHistory = ref<Order[]>([])
-const activeOrders = ref<Order[]>([])
 const statusHistories = ref<Record<string, any[]>>({})
 const loadingClients = ref(false)
 const loadingOrders = ref(false)
@@ -112,10 +112,13 @@ const error = ref('')
 const selectedCouriers = ref<Record<string, string>>({})
 const expandedStatusHistories = ref<Record<string, boolean>>({})
 
+const orderStore = useOrderStore()
+const userStore = useUserStore()
+
 const fetchClients = async () => {
   loadingClients.value = true
   try {
-    clients.value = await getAllUsers('CLIENT')
+    clients.value = await getAllUsers(UserTypeEnum.CLIENT)
   } catch (e) {
     error.value = e.message
   } finally {
@@ -125,54 +128,16 @@ const fetchClients = async () => {
 
 const fetchCouriers = async () => {
   try {
-    couriers.value = await getAllUsers('COURIER')
+    couriers.value = await getAllUsers(UserTypeEnum.COURIER)
   } catch (e) {
     error.value = e.message
-  }
-}
-
-const fetchOrders = async () => {
-  loadingOrders.value = true
-  try {
-    const orders = await getAllOrders()
-    activeOrders.value = orders.filter(o => 
-      ACTIVE_ORDER_STATUSES.includes(getCurrentStatus(o))
-    )
-    orderHistory.value = orders.filter(o => 
-      HISTORY_ORDER_STATUSES.includes(getCurrentStatus(o))
-    )
-    
-    // Fetch status history for each order
-    for (const order of orders) {
-      const statuses = order.orderStatuses
-      statusHistories.value[order.id] = statuses
-      statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    }
-  } catch (e) {
-    error.value = e.message
-  } finally {
-    loadingOrders.value = false
   }
 }
 
 onMounted(() => {
   fetchClients()
   fetchCouriers()
-  fetchOrders()
 })
-
-const updateOrderStatus = async (orderId: string, status: string) => {
-  try {
-    const updatedOrder = await updateOrderState(orderId, status as OrderStatusEnum)
-    if (updatedOrder) {
-      toast.success(`Order status updated to ${status}`)
-      await fetchOrders() // Refresh the orders list
-    }
-  } catch (error) {
-    toast.error('Failed to update order status')
-    console.error('Error updating order status:', error)
-  }
-}
 
 const canAcceptOrder = (order: Order) => {
   return ACCEPTABLE_ORDER_STATUSES.includes(getCurrentStatus(order))
@@ -188,7 +153,7 @@ const assignCourierToOrder = async (orderId: string) => {
     await assignCourier(orderId, courierId)
     
     toast.success('Order assigned to courier')
-    await fetchOrders() // Refresh the orders list
+    await orderStore.fetchAllOrders() // Refresh the orders list
   } catch (error) {
     toast.error('Failed to assign courier')
     console.error('Error assigning courier:', error)
@@ -202,7 +167,7 @@ const unassignCourierToOrder = async (orderId: string) => {
     await unassignCourier(orderId)
     
     toast.success('Courier unassigned')
-    await fetchOrders() // Refresh the orders list
+    await orderStore.fetchAllOrders() // Refresh the orders list
   } catch (error) {
     toast.error('Failed to unassign courier')
     console.error('Error unassigning courier:', error)
@@ -212,6 +177,17 @@ const unassignCourierToOrder = async (orderId: string) => {
 const toggleStatusHistory = (orderId: string) => {
   expandedStatusHistories.value[orderId] = !expandedStatusHistories.value[orderId]
 }
+
+// Load orders when the component mounts
+onMounted(async () => {
+  if (userStore.user?.id) {
+    await orderStore.fetchAllOrders()
+  }
+})
+
+// Use computed properties from the store
+const activeOrders = computed(() => orderStore.activeOrders)
+const orderHistory = computed(() => orderStore.orderHistory)
 
 </script>
 

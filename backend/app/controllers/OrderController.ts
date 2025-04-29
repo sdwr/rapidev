@@ -323,7 +323,7 @@ export class OrderController {
 
   async unassignCourier({ params, response }: HttpContext) {
     try {
-      const { id } = params
+      const { id, updatedBy } = params
       
       // Find the order item
       const orderItem = await OrderItem.find(id)
@@ -331,25 +331,22 @@ export class OrderController {
         return response.status(404).json({ error: 'Order item not found' })
       }
       
-      // Find the order
-      const order = await Order.find(orderItem.orderId)
-      if (!order) {
-        return response.status(404).json({ error: 'Order not found' })
-      }
-      
       // Keep track of the courier that was unassigned
       const previousCourierId = orderItem.courierId
       
+      // Create a status for the unassignment
+      await OrderItemStatusService.createStatus(
+        orderItem.id,
+        OrderItemStatusEnum.ACCEPTED,
+        `Unassigned from courier #${previousCourierId}`,
+        updatedBy
+      )
+
       // Unassign courier
       orderItem.courierId = null
       await orderItem.save()
       
-      // Create a status for the unassignment
-      await OrderStatusService.createStatus(
-        order.id,
-        Status.ACCEPTED,
-        `Courier #${previousCourierId} unassigned from order item #${orderItem.id}`
-      )
+
       
       return response.json(orderItem)
     } catch (error) {

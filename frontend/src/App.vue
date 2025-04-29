@@ -5,8 +5,10 @@ import UserProfile from './components/UserProfile.vue'
 import AboutMe from './components/AboutMe.vue'
 import { useUserStore } from './stores/userStore'
 import { onMounted, computed } from 'vue'
+import { useOrderStore } from './stores/orderStore'
 
 const userStore = useUserStore()
+const orderStore = useOrderStore()
 
 // Check if user profile is complete
 const isProfileComplete = computed(() => {
@@ -24,6 +26,7 @@ const showAboutMe = computed(() => {
 
 onMounted(() => {
   userStore.loadUserFromStorage()
+  orderStore.fetchAllOrders()
 })
 </script>
 

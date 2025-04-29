@@ -149,9 +149,10 @@ import { toast } from 'vue3-toastify'
 import { 
   assignCourierToOrderItem, 
   unassignCourierFromOrderItem, 
-  updateOrderItemStatus
+  updateOrderItemStatus 
 } from '../api/api'
 import { UserTypeEnum } from '../shared/enums/UserEnums'
+import { useOrderStore } from '../stores/orderStore'
 
 const props = defineProps({
   orderItem: {
@@ -170,7 +171,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['item-updated'])
-
+const orderStore = useOrderStore()
 // UI state
 const isExpanded = ref(false)
 const isUpdating = ref(false)
@@ -303,6 +304,7 @@ const assignCourier = async () => {
   isUpdating.value = true
   try {
     await assignCourierToOrderItem(props.orderItem.id, parseInt(selectedCourierId.value))
+    await orderStore.fetchAllOrders()
     toast.success('Courier assigned successfully')
     emit('item-updated')
   } catch (error) {
@@ -317,6 +319,7 @@ const unassignCourier = async () => {
   isUpdating.value = true
   try {
     await unassignCourierFromOrderItem(props.orderItem.id)
+    await orderStore.fetchAllOrders()
     selectedCourierId.value = ''
     toast.success('Courier unassigned successfully')
     emit('item-updated')
