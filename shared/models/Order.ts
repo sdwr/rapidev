@@ -1,17 +1,13 @@
-import { OrderStatus } from '../enums/OrderEnums'
+import { OrderStatusEnum } from '../enums/OrderEnums'
+import { OrderItem } from './OrderItem'
 
 export interface Order {
   id?: string;
   clientId: string;
-  status: OrderStatus;
+  status: OrderStatusEnum;
   pickupAddress: string;
   deliveryAddress: string;
   items: OrderItem[];
   createdAt?: Date;
   updatedAt?: Date;
 }
-
-export interface OrderItem {
-  description: string;
-  quantity: number;
-} 

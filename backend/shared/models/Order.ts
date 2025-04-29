@@ -1,24 +1,18 @@
-import { Size } from '#shared/enums/OrderEnums'
+import { User } from './User'
+import { OrderItem } from './OrderItem'
+import { OrderStatus } from './OrderStatus'
+import { Receipt } from './Receipt'
 
 export interface Order {
-  id?: string;
-  clientId: string;
-  pickupAddress: string;
-  items: OrderItem[];
-  status: OrderStatus;
-  createdAt?: Date;
-  updatedAt?: Date;
+  id: number
+  clientId: number
+  pickupAddress: string
+  createdAt: string
+  updatedAt: string
+  
+  // Related entities
+  client?: User
+  items?: OrderItem[]
+  orderStatuses?: OrderStatus[]
+  receipt?: Receipt
 }
-
-export interface OrderItem {
-  id?: string;
-  orderId: string;
-  courierId: string;
-  pickupAddress: string;
-  deliveryAddress: string;
-  deliveryPhone: string;
-  deliveryNotes: string;
-  status: OrderStatus;
-  createdAt?: Date;
-  updatedAt?: Date;
-} 
