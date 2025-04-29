@@ -84,9 +84,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { OrderStatus } from '../models/Order'
-import { Order } from '../models/Order'
-import { User } from '../models/User'
+import { OrderStatusEnum } from '../shared/enums/OrderEnums'
+import { Order } from '../shared/models/Order'
+import { User } from '../shared/models/User'
 import { updateOrderState, updateOrder, getAllUsersByType } from '../api/api'
 import { toast } from 'vue3-toastify'
 import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
@@ -113,27 +113,27 @@ const toggleStatusHistory = () => {
 
 const canAcceptOrder = computed(() => {
   const currentStatus = getCurrentStatus(props.order)
-  return currentStatus === OrderStatus.PENDING || currentStatus === OrderStatus.DRAFT
+  return currentStatus === OrderStatusEnum.PENDING || currentStatus === OrderStatusEnum.DRAFT
 })
 
 const isAccepted = computed(() => {
   const currentStatus = getCurrentStatus(props.order)
-  return currentStatus === OrderStatus.ACCEPTED
+  return currentStatus === OrderStatusEnum.ACCEPTED
 })
 
 const isAssigned = computed(() => {
   const currentStatus = getCurrentStatus(props.order)
-  return currentStatus === OrderStatus.ASSIGNED_TO_COURIER
+  return currentStatus === OrderStatusEnum.ASSIGNED_TO_COURIER
 })
 
 const canCancelOrder = computed(() => {
   const currentStatus = getCurrentStatus(props.order)
-  return [OrderStatus.DRAFT, OrderStatus.PENDING, OrderStatus.ACCEPTED].includes(currentStatus)
+  return [OrderStatusEnum.DRAFT, OrderStatusEnum.PENDING, OrderStatusEnum.ACCEPTED].includes(currentStatus)
 })
 
 const acceptOrder = async () => {
   try {
-    await updateOrderState(props.order.id, OrderStatus.ACCEPTED)
+    await updateOrderState(props.order.id, OrderStatusEnum.ACCEPTED)
     toast.success('Order accepted successfully')
     emit('orderUpdated')
   } catch (error) {
@@ -145,10 +145,10 @@ const acceptOrder = async () => {
 const cancelOrder = async () => {
   try {
     const status = props.userType === 'CLIENT' 
-      ? OrderStatus.CANCELLED_BY_CLIENT 
+      ? OrderStatusEnum.CANCELLED_BY_CLIENT 
       : props.userType === 'COURIER'
-        ? OrderStatus.CANCELLED_BY_COURIER
-        : OrderStatus.CANCELLED_BY_ADMIN
+        ? OrderStatusEnum.CANCELLED_BY_COURIER
+        : OrderStatusEnum.CANCELLED_BY_ADMIN
     
     await updateOrderState(props.order.id, status)
     toast.success('Order cancelled successfully')
@@ -162,7 +162,7 @@ const cancelOrder = async () => {
 const assignCourier = async () => {
   try {
     // Update order status
-    await updateOrderState(props.order.id, OrderStatus.ASSIGNED_TO_COURIER)
+    await updateOrderState(props.order.id, OrderStatusEnum.ASSIGNED_TO_COURIER)
     
     // Update order with courier ID
     await updateOrder({
@@ -181,7 +181,7 @@ const assignCourier = async () => {
 const unassignCourier = async () => {
   try {
     // Update order status back to accepted
-    await updateOrderState(props.order.id, OrderStatus.ACCEPTED)
+    await updateOrderState(props.order.id, OrderStatusEnum.ACCEPTED)
     
     // Remove courier from order
     await updateOrder({
@@ -199,7 +199,7 @@ const unassignCourier = async () => {
 
 const confirmOrder = async () => {
   try {
-    await updateOrderState(props.order.id, OrderStatus.CONFIRMED_BY_COURIER)
+    await updateOrderState(props.order.id, OrderStatusEnum.CONFIRMED_BY_COURIER)
     toast.success('Order confirmed successfully')
     emit('orderUpdated')
   } catch (error) {
@@ -232,7 +232,6 @@ const toggleOrder = () => {
 
 // Expand a specific item
 const expandItem = (itemId) => {
-  isItemsExpanded.value = true
   expandedItemId.value = itemId
 }
 </script>

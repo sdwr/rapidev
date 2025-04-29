@@ -85,11 +85,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getAllUsers, getAllOrders, updateOrderState, assignCourier, unassignCourier } from '../api/api'
-import type { Order } from '@/models/Order'
-import type { User } from '@/models/User'
+import type { Order } from '../shared/models/Order'
+import type { User } from '../shared/models/User'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES, ACCEPTABLE_ORDER_STATUSES } from '../utils/consts'
 import { toast } from 'vue3-toastify'
-import { OrderStatus } from '@/models/Order'
+import { OrderStatusEnum } from '../shared/enums/OrderEnums'
 import { getCurrentStatus } from '../utils'
 import OrderCard from '../components/OrderCard.vue'
 
@@ -163,7 +163,7 @@ onMounted(() => {
 
 const updateOrderStatus = async (orderId: string, status: string) => {
   try {
-    const updatedOrder = await updateOrderState(orderId, status as OrderStatus)
+    const updatedOrder = await updateOrderState(orderId, status as OrderStatusEnum)
     if (updatedOrder) {
       toast.success(`Order status updated to ${status}`)
       await fetchOrders() // Refresh the orders list
@@ -184,7 +184,7 @@ const assignCourierToOrder = async (orderId: string) => {
 
   try {
     // First update the order status
-    await updateOrderState(orderId, OrderStatus.ASSIGNED_TO_COURIER)
+    await updateOrderState(orderId, OrderStatusEnum.ASSIGNED_TO_COURIER)
     await assignCourier(orderId, courierId)
     
     toast.success('Order assigned to courier')
@@ -198,7 +198,7 @@ const assignCourierToOrder = async (orderId: string) => {
 const unassignCourierToOrder = async (orderId: string) => {
   try {
     // First update the order status
-    await updateOrderState(orderId, OrderStatus.ACCEPTED)
+    await updateOrderState(orderId, OrderStatusEnum.ACCEPTED)
     await unassignCourier(orderId)
     
     toast.success('Courier unassigned')

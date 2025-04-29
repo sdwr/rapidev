@@ -106,7 +106,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '../stores/userStore'
 import AddressSelector from './AddressSelector.vue'
 import { getOrder,createOrder, createProfile, getProfilesForUserByProfileType, createReceipt } from '../api/api'
-import { ReceiptStatus } from '../models/Receipt'
+import { ReceiptStatusEnum } from '../shared/enums/ReceiptEnums'
 import { formatPhoneNumber } from '../utils'
 const emit = defineEmits(['order-created'])
 const userStore = useUserStore()
@@ -213,7 +213,7 @@ const submitOrder = async () => {
       discount: 0,
       total: total.value,
       amountPaid: total.value,
-      receiptStatus: ReceiptStatus.PAID
+      receiptStatus: ReceiptStatusEnum.PAID
     }
 
     const receipt = await createReceipt(receiptData)

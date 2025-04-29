@@ -1,31 +1,31 @@
-import { OrderStatus } from '../models/Order'
+import { OrderStatusEnum } from '../shared/enums/OrderEnums'
 
 export const ACTIVE_ORDER_STATUSES = [
-  OrderStatus.DRAFT,
-  OrderStatus.PENDING,
-  OrderStatus.ACCEPTED,
-  OrderStatus.ASSIGNED_TO_COURIER,
-  OrderStatus.CONFIRMED_BY_COURIER,
-  OrderStatus.PICKED_UP,
-  OrderStatus.IN_TRANSIT
+  OrderStatusEnum.DRAFT,
+  OrderStatusEnum.PENDING,
+  OrderStatusEnum.ACCEPTED,
+  OrderStatusEnum.ASSIGNED_TO_COURIER,
+  OrderStatusEnum.CONFIRMED_BY_COURIER,
+  OrderStatusEnum.PICKED_UP,
+  OrderStatusEnum.IN_TRANSIT
 ]
 
 export const HISTORY_ORDER_STATUSES = [
-  OrderStatus.DELIVERED,
-  OrderStatus.CANCELLED_BY_CLIENT,
-  OrderStatus.CANCELLED_BY_COURIER,
-  OrderStatus.CANCELLED_BY_ADMIN
+  OrderStatusEnum.DELIVERED,
+  OrderStatusEnum.CANCELLED_BY_CLIENT,
+  OrderStatusEnum.CANCELLED_BY_COURIER,
+  OrderStatusEnum.CANCELLED_BY_ADMIN
 ]
 
 export const ACCEPTABLE_ORDER_STATUSES = [
-  OrderStatus.DRAFT,
-  OrderStatus.PENDING
+  OrderStatusEnum.DRAFT,
+  OrderStatusEnum.PENDING
 ] 
 
 export const COURIER_ACTIVE_ORDER_STATUSES = [
-  OrderStatus.CONFIRMED_BY_COURIER,
-  OrderStatus.PICKED_UP,
-  OrderStatus.IN_TRANSIT
+  OrderStatusEnum.CONFIRMED_BY_COURIER,
+  OrderStatusEnum.PICKED_UP,
+  OrderStatusEnum.IN_TRANSIT
 ]
 
 export const ORDER_STATUS_DESCRIPTIONS = {
