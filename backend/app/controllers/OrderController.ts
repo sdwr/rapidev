@@ -282,7 +282,6 @@ export class OrderController {
   async getAllOrderItems({ response }: HttpContext) {
     const orderItems = await OrderItem.query()
       .preload('orderItemStatuses')
-      .orderBy('createdAt', 'asc')
     return response.json(orderItems)
   }
 

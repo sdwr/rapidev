@@ -28,14 +28,12 @@
           <h2>Assigned Deliveries</h2>
           <div class="list-container">
             <p v-if="!assignedDeliveries.length">No assigned deliveries.</p>
-            <OrderCard
+            <OrderItemCard
               v-else
-              v-for="order in assignedDeliveries"
-              :key="order.id"
-              :order="order"
+              v-for="orderItem in assignedDeliveries"
+              :key="orderItem.id"
+              :orderItem="orderItem"
               :userType="'COURIER'"
-              :statusHistory="statusHistories[order.id]"
-              @orderUpdated="fetchOrders"
             />
           </div>
         </div>
@@ -45,14 +43,12 @@
           <h2>Active Deliveries</h2>
           <div class="list-container">
             <p v-if="!activeDeliveries.length">No active deliveries.</p>
-            <OrderCard
+            <OrderItemCard
               v-else
-              v-for="order in activeDeliveries"
-              :key="order.id"
-              :order="order"
+              v-for="orderItem in activeDeliveries"
+              :key="orderItem.id"
+              :orderItem="orderItem"
               :userType="'COURIER'"
-              :statusHistory="statusHistories[order.id]"
-              @orderUpdated="fetchOrders"
             />
           </div>
         </div>
@@ -62,14 +58,12 @@
           <h2>Delivery History</h2>
           <div class="list-container">
             <p v-if="!deliveryHistory.length">No delivery history.</p>
-            <OrderCard
+            <OrderItemCard
               v-else
-              v-for="order in deliveryHistory"
-              :key="order.id"
-              :order="order"
+              v-for="orderItem in deliveryHistory"
+              :key="orderItem.id"
+              :orderItem="orderItem"
               :userType="'COURIER'"
-              :statusHistory="statusHistories[order.id]"
-              @orderUpdated="fetchOrders"
             />
           </div>
         </div>
@@ -79,18 +73,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import ProfileInfo from '@/components/ProfileInfo.vue'
-import OrderCard from '@/components/OrderCard.vue'
-import type { Order } from '@/models/Order'
-import { getCourierOrders, getOrderStatuses } from '../api/api'
+import OrderItemCard from '@/components/OrderItemCard.vue'
 import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
-import { HISTORY_ORDER_STATUSES, COURIER_ACTIVE_ORDER_STATUSES } from '@/utils/consts'
-import { getCurrentStatus } from '@/utils'
+import { useOrderItemStore } from '../stores/orderItemStore'
 
 const userStore = useUserStore()
-
+const orderItemStore = useOrderItemStore()
 const tabs = [
   { id: 'assigned', label: 'Assigned Deliveries' },
   { id: 'active', label: 'Active Deliveries' },
@@ -99,12 +90,9 @@ const tabs = [
 ]
 
 const currentTab = ref('assigned')
-const assignedDeliveries = ref<Order[]>([])
-const activeDeliveries = ref<Order[]>([])
-const deliveryHistory = ref<Order[]>([])
-const loadingOrders = ref(false)
-const error = ref('')
-const statusHistories = ref<Record<string, any[]>>({})
+const assignedDeliveries = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id))
+const activeDeliveries = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id && item.status === 'ACTIVE'))
+const deliveryHistory = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id && item.status === 'DELIVERED'))
 
 const handleProfileSave = async (profileData) => {
   try {
@@ -119,38 +107,8 @@ const handleProfileSave = async (profileData) => {
   }
 }
 
-const fetchOrders = async () => {
-  if (!userStore.user?.id) {
-    error.value = 'No user logged in'
-    return
-  }
-
-  loadingOrders.value = true
-  try {
-    const orders = await getCourierOrders(userStore.user.id)
-    
-    console.log(orders)
-    // Filter orders into their respective categories
-    console.log(getCurrentStatus(orders[0]))
-    assignedDeliveries.value = orders.filter(order => getCurrentStatus(order) === 'ASSIGNED_TO_COURIER')
-    activeDeliveries.value = orders.filter(order => COURIER_ACTIVE_ORDER_STATUSES.includes(getCurrentStatus(order)))
-    deliveryHistory.value = orders.filter(order => HISTORY_ORDER_STATUSES.includes(getCurrentStatus(order)))
-    
-    // Fetch status history for each order
-    for (const order of orders) {
-      const statuses = await getOrderStatuses(order.id)
-      statusHistories.value[order.id] = statuses
-      statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    }
-  } catch (e) {
-    error.value = e.message
-  } finally {
-    loadingOrders.value = false
-  }
-}
-
-onMounted(() => {
-  fetchOrders()
+onMounted(async () => {
+  await orderItemStore.fetchAllOrderItems()
 })
 </script>
 

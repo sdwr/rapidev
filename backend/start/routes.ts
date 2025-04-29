@@ -37,20 +37,19 @@ router.get('/api/profiles/:id', [ProfileController, 'getProfile'])
 router.get('/api/profiles/user/:userId/:profileType', [ProfileController, 'getProfilesByUserIdAndProfileType'])
 router.delete('/api/profiles/:id', [ProfileController, 'deleteProfile'])
 
-// Order routes
+// More specific routes first
+router.get('/api/orders/items', [OrderController, 'getAllOrderItems'])
+router.get('/api/orders/item/:id', [OrderController, 'getOrderItem'])
 router.get('/api/orders/all', [OrderController, 'getAllOrders'])
-router.delete('/api/orders/all', [OrderController, 'deleteAllOrders'])
 router.get('/api/orders/all-with-history', [OrderController, 'getAllOrdersWithHistory'])
 router.get('/api/orders/client/:clientId', [OrderController, 'getClientOrders'])
 router.get('/api/orders/courier/:courierId', [OrderController, 'getCourierOrders'])
+
+// More generic routes with parameters last
 router.get('/api/orders/:id/statuses', [OrderController, 'getOrderStatuses'])
 router.get('/api/orders/:id', [OrderController, 'getOrder'])
 router.post('/api/orders', [OrderController, 'createOrder'])
 router.put('/api/orders/:id', [OrderController, 'updateOrder'])
-
-router.get('/api/orders/items', [OrderController, 'getAllOrderItems'])
-router.get('/api/orders/item/:id', [OrderController, 'getOrderItem'])
-router.put('/api/orders/item/:id', [OrderController, 'updateOrderItem'])
 
 //order status modifications
 router.put('/api/orders/item/:id/courier', [OrderController, 'assignCourier'])

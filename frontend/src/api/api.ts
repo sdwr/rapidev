@@ -6,6 +6,7 @@ import { getBaseUrl } from './config'
 import { handleApiError } from '../utils/errorHandler'
 import { Receipt } from '../shared/models/Receipt'
 import { UserTypeEnum } from '../shared/enums/UserEnums'
+import type { OrderItem } from '../shared/models/OrderItem'
 
 const BASE_URL = getBaseUrl()
 
@@ -512,6 +513,47 @@ export const updateOrderItemStatus = async (orderItemId: number, data: { status:
 export const getCouriers = async () => {
   try {
     const response = await fetch(`${BASE_URL}/api/users?userType=COURIER`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function getAllOrderItems(): Promise<OrderItem[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/items`)
+    if (!response.ok) {
+      throw new Error('Failed to fetch order items')
+    }
+    return await response.json()
+  } catch (error) {
+    console.error('Error fetching all order items:', error)
+    throw error
+  }
+}
+
+export async function getOrderItem(orderItemId: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/item/${orderItemId}`)
+    if (!response.ok) throw await response.json()
+    return response.json()
+  } catch (error) {
+    handleApiError(error)
+    return null
+  }
+}
+
+export async function updateOrderItem(orderItem: OrderItem) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/item/${orderItem.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderItem),
+    })
     if (!response.ok) throw await response.json()
     return response.json()
   } catch (error) {
