@@ -1,5 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-import { ReceiptStatus } from '#shared/enums/ReceiptEnums'
+import { ReceiptStatusEnum } from '#shared/enums/ReceiptEnums'
 
 export default class extends BaseSchema {
   protected tableName = 'receipts'
@@ -13,7 +13,7 @@ export default class extends BaseSchema {
       table.decimal('discount', 10, 2).notNullable().defaultTo(0)
       table.decimal('total', 10, 2).notNullable()
       table.decimal('amount_paid', 10, 2).notNullable().defaultTo(0)
-      table.enum('receipt_status', Object.values(ReceiptStatus)).notNullable().defaultTo(ReceiptStatus.PENDING)
+      table.enum('receipt_status', Object.values(ReceiptStatusEnum)).notNullable().defaultTo(ReceiptStatusEnum.PENDING)
 
       table.timestamp('created_at')
       table.timestamp('updated_at')

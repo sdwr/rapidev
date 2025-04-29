@@ -1,5 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-
+import { ProfileTypeEnum } from '#shared/enums/ProfileEnums'
 export default class extends BaseSchema {
   protected tableName = 'profiles'
 
@@ -7,7 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
       table.text('address').notNullable()
-      table.enum('profile_type', ['PICKUP', 'DELIVERY']).notNullable()
+      table.enum('profile_type', Object.values(ProfileTypeEnum)).notNullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
 

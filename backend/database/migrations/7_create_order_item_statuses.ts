@@ -1,5 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-import { OrderItemStatus as OrderItemStatusEnum } from '#shared/enums/OrderItemEnums'
+import { OrderItemStatusEnum } from '#shared/enums/OrderItemEnums'
 
 export default class extends BaseSchema {
   protected tableName = 'order_item_statuses'

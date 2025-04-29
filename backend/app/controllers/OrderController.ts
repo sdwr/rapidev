@@ -288,7 +288,7 @@ export class OrderController {
       // Create a status for the assignment
       await OrderItemStatusService.createStatus(
         orderItem.id,
-        OrderItemStatus.ASSIGNED,
+        OrderItemStatusEnum.ASSIGNED,
         `Assigned to courier #${courierId}`,
         updatedBy
       )

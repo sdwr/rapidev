@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import Order from '#models/order'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import OrderItemStatus from '#models/order_item_status'
+import User from './user.js'
 
 export default class OrderItem extends BaseModel {
   @column({ isPrimary: true })
@@ -38,4 +39,9 @@ export default class OrderItem extends BaseModel {
 
   @hasMany(() => OrderItemStatus)
   declare orderItemStatuses: HasMany<typeof OrderItemStatus>
+
+  @belongsTo(() => User, {
+    foreignKey: 'courierId',
+  })
+  declare courier: BelongsTo<typeof User>
 } 
