@@ -111,3 +111,5 @@ payment
 
 1. need human-readable errors from backend (ex. profile duplicate email)
 
+2. enums and models are duplicated in backend and shared
+
