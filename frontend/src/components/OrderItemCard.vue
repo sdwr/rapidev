@@ -91,6 +91,7 @@
               Unassign
             </button>
             <button 
+              v-else
               @click="assignCourier" 
               class="assign-btn"
               :disabled="!selectedCourierId || isUpdating"
