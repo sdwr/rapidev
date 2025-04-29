@@ -1,5 +1,5 @@
 <template>
-  <div class="user-profile" v-if="isLoggedIn">
+  <div class="user-profile" v-if="isLoggedIn && user">
     <div class="profile-info">
       <span class="name">{{ user?.name }}</span>
       <span class="phone">{{ user?.phone }}</span>

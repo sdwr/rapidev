@@ -4,7 +4,7 @@ import Order from '#models/order'
 import { createReceiptValidator, updateReceiptValidator } from '#validators/ReceiptValidator'
 import { ReceiptStatus } from '#shared/enums/ReceiptEnums'
 import { OrderStatus as OrderStatusEnum } from '#shared/enums/OrderEnums'
-import { OrderStatusService } from '#services/OrderStatusService'
+import OrderStatusService from '#services/OrderStatusService'
 
 export class ReceiptController {
   async getAllReceipts({ response }: HttpContext) {

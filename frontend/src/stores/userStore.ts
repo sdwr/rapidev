@@ -1,18 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-
-interface User {
-  id: string
-  username: string
-  userType: 'CLIENT' | 'COURIER' | 'ADMIN'
-  profile?: {
-    id: string
-    name: string
-    email: string
-    phone: string
-    address: string
-  }
-}
+import { getUser } from '../api/api'
+import type { User } from '../../../shared/models/User'
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)
@@ -34,7 +23,12 @@ export const useUserStore = defineStore('user', () => {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser)
       // Reload profile data
-      user.value = parsedUser
+      const user = await getUser(parsedUser.id)
+      if (user) {
+        setUser(user)
+      } else {
+        setUser(null)
+      }
     }
   }
 

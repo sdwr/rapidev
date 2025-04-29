@@ -35,6 +35,11 @@ export default class UserController {
     }
   }
 
+  async getUser({ params, response }: HttpContext) {
+    const user = await User.findOrFail(params.id)
+    return response.json(user)
+  }
+
   async getAllUsers({ response }: HttpContext) {
     const users = await User.query()
       .preload('profiles')
@@ -52,25 +57,6 @@ export default class UserController {
       .where('user_type', type)
       .preload('profiles')
     return response.json(users)
-  }
-  
-  /**
-   * Load user by ID
-   */
-  async loadUser({ params, response }: HttpContext) {
-    try {
-      const user = await User.findOrFail(params.id)
-
-      await user.load('profiles')
-      
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user.toJSON()
-      return response.json(userWithoutPassword)
-    } catch (error) {
-      return response.status(404).json({ 
-        error: 'User not found' 
-      })
-    }
   }
 
   async updateUser({ params, request, response }: HttpContext) {

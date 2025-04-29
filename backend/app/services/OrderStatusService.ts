@@ -9,8 +9,7 @@ export class OrderStatusService {
    */
   async createStatus(
     orderId: number,
-    status: OrderStatusEnum,
-    notes?: string
+    status: OrderStatusEnum
   ): Promise<OrderStatus> {
     // Find the order
     const order = await Order.find(orderId)
@@ -27,7 +26,6 @@ export class OrderStatusService {
     const orderStatus = await OrderStatus.create({
       orderId,
       status,
-      notes,
       isCurrent: true
     })
 
