@@ -41,28 +41,6 @@
         <button @click="cancelOrder" class="cancel-button">Cancel</button>
       </div>
 
-      <div v-if="isAccepted" class="courier-assignment">
-        <select v-model="selectedCourier" class="courier-select">
-          <option value="" selected>Select a courier</option>
-          <option v-for="courier in couriers" :key="courier.id" :value="courier.id">
-            {{ courier.name }}
-          </option>
-        </select>
-        <button 
-          @click="assignCourier" 
-          class="assign-button"
-          :disabled="!selectedCourier"
-        >
-          Assign
-        </button>
-      </div>
-
-      <div v-if="isAssigned" class="courier-assignment">
-        <div class="assigned-courier">
-          <span>Assigned to: {{ order.courier?.name || order.courierId }}</span>
-          <button @click="unassignCourier" class="unassign-button">Unassign</button>
-        </div>
-      </div>
     </div>
 
     <!-- Client Actions -->
@@ -87,10 +65,11 @@ import { ref, computed, onMounted } from 'vue'
 import { OrderStatusEnum } from '../shared/enums/OrderEnums'
 import { Order } from '../shared/models/Order'
 import { User } from '../shared/models/User'
-import { updateOrderState, updateOrder, getAllUsersByType } from '../api/api'
+import { updateOrderState, getAllUsersByType } from '../api/api'
 import { toast } from 'vue3-toastify'
 import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
 import OrderItemCard from './OrderItemCard.vue'
+import { UserTypeEnum } from '../shared/enums/UserEnums'
 const props = defineProps<{
   order: Order
   userType: 'ADMIN' | 'CLIENT' | 'COURIER'
@@ -159,44 +138,6 @@ const cancelOrder = async () => {
   }
 }
 
-const assignCourier = async () => {
-  try {
-    // Update order status
-    await updateOrderState(props.order.id, OrderStatusEnum.ASSIGNED_TO_COURIER)
-    
-    // Update order with courier ID
-    await updateOrder({
-      ...props.order,
-      courierId: selectedCourier.value
-    })
-    
-    toast.success('Courier assigned successfully')
-    emit('orderUpdated')
-  } catch (error) {
-    console.error('Error assigning courier:', error)
-    toast.error('Failed to assign courier')
-  }
-}
-
-const unassignCourier = async () => {
-  try {
-    // Update order status back to accepted
-    await updateOrderState(props.order.id, OrderStatusEnum.ACCEPTED)
-    
-    // Remove courier from order
-    await updateOrder({
-      ...props.order,
-      courierId: null
-    })
-    
-    toast.success('Courier unassigned successfully')
-    emit('orderUpdated')
-  } catch (error) {
-    console.error('Error unassigning courier:', error)
-    toast.error('Failed to unassign courier')
-  }
-}
-
 const confirmOrder = async () => {
   try {
     await updateOrderState(props.order.id, OrderStatusEnum.CONFIRMED_BY_COURIER)
@@ -212,8 +153,7 @@ const confirmOrder = async () => {
 onMounted(async () => {
   if (props.userType === 'ADMIN') {
     try {
-      const couriers = await getAllUsersByType('COURIER')
-      console.log('Couriers:', couriers)
+      const couriers = await getAllUsersByType(UserTypeEnum.COURIER)
       if (couriers) {
         availableCouriers.value = couriers
       }

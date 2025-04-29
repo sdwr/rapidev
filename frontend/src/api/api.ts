@@ -1,10 +1,11 @@
-import type { ProfileInfo } from '../../../shared/models/ProfileInfo'
-import type { Order } from '../../../shared/models/Order'
-import type { User } from '../../../shared/models/User'
-import { OrderStatus } from '../../../shared/enums/OrderEnums'
+import type { Profile } from '../shared/models/Profile'
+import type { Order } from '../shared/models/Order'
+import type { User } from '../shared/models/User'
+import { OrderStatusEnum } from '../shared/enums/OrderEnums'
 import { getBaseUrl } from './config'
 import { handleApiError } from '../utils/errorHandler'
-import { Receipt } from '../models/Receipt'
+import { Receipt } from '../shared/models/Receipt'
+import { UserTypeEnum } from '../shared/enums/UserEnums'
 
 const BASE_URL = getBaseUrl()
 
@@ -21,7 +22,7 @@ export async function getUser(userId: string): Promise<User> {
 }
 
 // Profile API functions
-export async function getProfile(profileId: string): Promise<ProfileInfo> {
+export async function getProfile(profileId: string): Promise<Profile> {
   try {
     const response = await fetch(`${BASE_URL}/api/profiles/${profileId}`)
     if (!response.ok) throw await response.json()
@@ -32,7 +33,7 @@ export async function getProfile(profileId: string): Promise<ProfileInfo> {
   }
 }
 
-export async function getProfileByUserId(userId: string): Promise<ProfileInfo> {
+export async function getProfileByUserId(userId: string): Promise<Profile> {
   try {
     const response = await fetch(`${BASE_URL}/api/profiles/user/${userId}`)
     if (!response.ok) throw await response.json()
@@ -43,7 +44,7 @@ export async function getProfileByUserId(userId: string): Promise<ProfileInfo> {
   }
 }
 
-export async function upsertProfile(profile: ProfileInfo): Promise<ProfileInfo> {
+export async function upsertProfile(profile: Profile): Promise<Profile> {
   try {
     const response = await fetch(`${BASE_URL}/api/profiles`, {
       method: 'POST',
@@ -60,7 +61,7 @@ export async function upsertProfile(profile: ProfileInfo): Promise<ProfileInfo> 
   }
 }
 
-export async function getAllProfiles(): Promise<ProfileInfo[]> {
+export async function getAllProfiles(): Promise<Profile[]> {
   try {
     const response = await fetch(`${BASE_URL}/api/profiles`)
     if (!response.ok) throw await response.json()
@@ -179,7 +180,7 @@ export const updateUser = async (userId: number, userData: any) => {
   }
 }
 
-export async function getAllUsers(userType?: 'CLIENT' | 'COURIER' | 'ADMIN'): Promise<User[]> {
+export async function getAllUsers(userType?: UserTypeEnum): Promise<User[]> {
   try {
     const url = userType 
       ? `${BASE_URL}/api/users/all?userType=${userType}`
@@ -193,7 +194,7 @@ export async function getAllUsers(userType?: 'CLIENT' | 'COURIER' | 'ADMIN'): Pr
   }
 }
 
-export async function getAllUsersByType(userType: 'CLIENT' | 'COURIER' | 'ADMIN'): Promise<User[]> {
+export async function getAllUsersByType(userType: UserTypeEnum): Promise<User[]> {
   try {
     const response = await fetch(`${BASE_URL}/api/users/all/${userType}`)
     if (!response.ok) throw await response.json()
