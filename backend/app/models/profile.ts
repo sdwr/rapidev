@@ -1,6 +1,6 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
-import { ProfileTypeEnum } from '#shared/enums/ProfileType'
+import { ProfileTypeEnum } from '#shared/enums/ProfileEnums'
 
 export default class Profile extends BaseModel {
   @column({ isPrimary: true })

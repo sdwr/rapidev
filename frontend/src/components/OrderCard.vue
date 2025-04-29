@@ -213,6 +213,7 @@ onMounted(async () => {
   if (props.userType === 'ADMIN') {
     try {
       const couriers = await getAllUsersByType('COURIER')
+      console.log('Couriers:', couriers)
       if (couriers) {
         availableCouriers.value = couriers
       }

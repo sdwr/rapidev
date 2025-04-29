@@ -143,7 +143,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { OrderStatus } from '../../../shared/enums/OrderEnums'
+import { OrderStatusEnum } from '../shared/enums/OrderEnums'
 import { toast } from 'vue3-toastify'
 import { 
   assignCourierToOrderItem, 
@@ -191,17 +191,17 @@ const isCourierAssigned = computed(() => {
 const statusClass = computed(() => {
   const currentStatus = getCurrentStatus()
   switch (currentStatus) {
-    case OrderStatus.DRAFT:
-    case OrderStatus.PENDING:
+    case OrderStatusEnum.DRAFT:
+    case OrderStatusEnum.PENDING:
       return 'status-pending'
-    case OrderStatus.ACCEPTED:
+    case OrderStatusEnum.ACCEPTED:
       return 'status-confirmed'
-    case OrderStatus.PICKED_UP:
-    case OrderStatus.IN_TRANSIT:
+    case OrderStatusEnum.PICKED_UP:
+    case OrderStatusEnum.IN_TRANSIT:
       return 'status-in-progress'
-    case OrderStatus.DELIVERED:
+    case OrderStatusEnum.DELIVERED:
       return 'status-delivered'
-    case OrderStatus.CANCELLED_BY_ADMIN:
+    case OrderStatusEnum.CANCELLED_BY_ADMIN:
       return 'status-cancelled'
     default:
       return ''
@@ -213,14 +213,14 @@ const availableStatuses = computed(() => {
   
   // Define logical status progressions based on current status
   switch (currentStatus) {
-    case OrderStatus.ACCEPTED:
-      return [OrderStatus.PICKED_UP]
-    case OrderStatus.PICKED_UP:
-      return [OrderStatus.IN_TRANSIT]
-    case OrderStatus.IN_TRANSIT:
-      return [OrderStatus.DELIVERED]
+    case OrderStatusEnum.ACCEPTED:
+      return [OrderStatusEnum.PICKED_UP]
+    case OrderStatusEnum.PICKED_UP:
+      return [OrderStatusEnum.IN_TRANSIT]
+    case OrderStatusEnum.IN_TRANSIT:
+      return [OrderStatusEnum.DELIVERED]
     default:
-      return Object.values(OrderStatus)
+      return Object.values(OrderStatusEnum)
   }
 })
 
@@ -246,22 +246,22 @@ const getCurrentStatus = () => {
   }
   
   // Fallback to a default status if no history
-  return OrderStatus.DRAFT
+  return OrderStatusEnum.DRAFT
 }
 
 const getStatusClass = (status) => {
   switch (status) {
-    case OrderStatus.DRAFT:
-    case OrderStatus.PENDING:
+    case OrderStatusEnum.DRAFT:
+    case OrderStatusEnum.PENDING:
       return 'status-pending'
-    case OrderStatus.ACCEPTED:
+    case OrderStatusEnum.ACCEPTED:
       return 'status-confirmed'
-    case OrderStatus.PICKED_UP:
-    case OrderStatus.IN_TRANSIT:
+    case OrderStatusEnum.PICKED_UP:
+    case OrderStatusEnum.IN_TRANSIT:
       return 'status-in-progress'
-    case OrderStatus.DELIVERED:
+    case OrderStatusEnum.DELIVERED:
       return 'status-delivered'
-    case OrderStatus.CANCELLED_BY_ADMIN:
+    case OrderStatusEnum.CANCELLED_BY_ADMIN:
       return 'status-cancelled'
     default:
       return ''
