@@ -18,7 +18,6 @@ export const useOrderStore = defineStore('order', () => {
   const orders = ref<Order[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-  const statusHistories = ref<Record<string, any[]>>({})
 
   // Getters
   const activeOrders = computed(() => {
@@ -45,9 +44,6 @@ export const useOrderStore = defineStore('order', () => {
     try {
       const response = await getAllOrders()
       orders.value = response
-      
-      // Fetch status histories for each order
-      await fetchOrderStatusHistories()
     } catch (err) {
       console.error('Error fetching orders:', err)
       error.value = 'Failed to fetch orders'
@@ -61,11 +57,8 @@ export const useOrderStore = defineStore('order', () => {
     error.value = null
     
     try {
-      const response = await getClientOrders(clientId)
+      const response = await getClientOrders(clientId.toString())
       orders.value = response
-      
-      // Fetch status histories for each order
-      await fetchOrderStatusHistories()
     } catch (err) {
       console.error('Error fetching client orders:', err)
       error.value = 'Failed to fetch client orders'
@@ -79,7 +72,7 @@ export const useOrderStore = defineStore('order', () => {
     error.value = null
     
     try {
-      const response = await getOrder(id)
+      const response = await getOrder(id.toString())
       
       // Update the order in the store if it exists
       const index = orders.value.findIndex(order => order.id === id)
@@ -104,7 +97,7 @@ export const useOrderStore = defineStore('order', () => {
     error.value = null
     
     try {
-      const response = await createOrder(orderData)
+      const response = await createOrder(orderData as Order)
       orders.value.unshift(response) // Add to beginning of array
       return response
     } catch (err) {
@@ -152,9 +145,6 @@ export const useOrderStore = defineStore('order', () => {
         orders.value[index] = response
       }
       
-      // Refresh status histories
-      await fetchOrderStatusHistories()
-      
       return response
     } catch (err) {
       console.error('Error updating order status:', err)
@@ -165,23 +155,11 @@ export const useOrderStore = defineStore('order', () => {
     }
   }
 
-  const fetchOrderStatusHistories = async () => {
-    // This method would fetch status histories for all orders
-    // You would need to implement this based on your API
-    // For now, we'll just populate with current data
-    for (const order of orders.value) {
-      if (order.orderStatuses) {
-        statusHistories.value[order.id] = order.orderStatuses
-      }
-    }
-  }
-
   return {
     // State
     orders,
     isLoading,
     error,
-    statusHistories,
     
     // Getters
     activeOrders,

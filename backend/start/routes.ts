@@ -48,6 +48,7 @@ router.get('/api/orders/:id', [OrderController, 'getOrder'])
 router.post('/api/orders', [OrderController, 'createOrder'])
 router.put('/api/orders/:id', [OrderController, 'updateOrder'])
 
+router.get('/api/orders/items', [OrderController, 'getAllOrderItems'])
 router.get('/api/orders/item/:id', [OrderController, 'getOrderItem'])
 router.put('/api/orders/item/:id', [OrderController, 'updateOrderItem'])
 

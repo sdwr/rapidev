@@ -279,6 +279,13 @@ export class OrderController {
 
   //order item endpoints
 
+  async getAllOrderItems({ response }: HttpContext) {
+    const orderItems = await OrderItem.query()
+      .preload('orderItemStatuses')
+      .orderBy('createdAt', 'asc')
+    return response.json(orderItems)
+  }
+
   async getOrderItem({ params, response }: HttpContext) {
     const orderItem = await OrderItem.findOrFail(params.id)
     await orderItem.load('orderItemStatuses')
