@@ -147,7 +147,7 @@ export async function getOrderStatuses(orderId: string) {
 // User API functions
 export async function loginOrRegister(email: string, password: string, userType: string) {
   try {
-    const response = await fetch(`${BASE_URL}/api/users/register`, {
+    const response = await fetch(`${BASE_URL}/api/users/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

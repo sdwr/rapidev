@@ -20,7 +20,7 @@ router.get('/', async () => {
 })
 
 // User routes
-router.post('/api/users/login', [UserController, 'login'])
+router.post('/api/users/login', [UserController, 'loginOrRegister'])
 router.post('/api/users/register', [UserController, 'createUser'])
 router.get('/api/users/all', [UserController, 'getAllUsers'])
 router.get('/api/users/all/:type', [UserController, 'getAllUsersByType'])
@@ -49,6 +49,7 @@ router.post('/api/orders', [OrderController, 'createOrder'])
 router.put('/api/orders/:id', [OrderController, 'updateOrder'])
 
 router.get('/api/orders/item/:id', [OrderController, 'getOrderItem'])
+router.put('/api/orders/item/:id', [OrderController, 'updateOrderItem'])
 
 //order status modifications
 router.put('/api/orders/item/:id/courier', [OrderController, 'assignCourier'])

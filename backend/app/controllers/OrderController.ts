@@ -6,6 +6,9 @@ import User from '#models/user'
 import OrderItemStatus from '#models/order_item_status'
 
 import { OrderStatus as Status } from '#shared/enums/OrderEnums'
+import OrderStatusService from '#services/OrderStatusService'
+import OrderItemStatusService from '#services/OrderItemStatusService'
+import { OrderItemStatus as OrderItemStatusEnum } from '#shared/enums/OrderItemEnums'
 
 export class OrderController {
   //order endpoints
@@ -55,7 +58,7 @@ export class OrderController {
       for (const item of orderItems) {
         await OrderItemStatus.create({
           orderItemId: item.id,
-          status: Status.DRAFT,
+          status: OrderItemStatusEnum.DRAFT,
           notes: 'Order item created'
         })
       }
@@ -206,35 +209,33 @@ export class OrderController {
   }
 
   //order status endpoints
-  async updateStatus({ request, response }: HttpContext) {
-    const id = request.param('id')
-    const { status } = request.body()
-    
+  async updateOrderStatus({ params, request, response }: HttpContext) {
     try {
-      // Set all previous statuses to not current
-      await OrderStatus.query()
-        .where('orderId', id)
-        .update({ isCurrent: false })
-
-      // Create new current status
-      await OrderStatus.create({
-        orderId: id,
+      const { id } = params
+      const { status, notes } = request.body()
+      
+      // Find the order
+      const order = await Order.find(id)
+      if (!order) {
+        return response.status(404).json({ error: 'Order not found' })
+      }
+      
+      // Create the new status using the service
+      const orderStatus = await OrderStatusService.createStatus(
+        order.id,
         status,
-        isCurrent: true,
-        description: ''
+        notes
+      )
+      
+      // Return the updated order with its statuses
+      await order.load('orderStatuses')
+      
+      return response.json({
+        order,
+        currentStatus: orderStatus
       })
-
-      const order = await Order.findOrFail(id)
-      await order.load('items')
-      await order.load('orderStatuses', (query) => {
-        query.orderBy('createdAt', 'asc')
-      })
-
-      return response.json(order)
     } catch (error) {
-      return response.status(400).json({ 
-        error: error.message 
-      })
+      return response.status(400).json({ error: error.message })
     }
   }
 
@@ -270,57 +271,128 @@ export class OrderController {
     return response.json(orderItem)
   }
 
-  async assignCourier({ request, response }: HttpContext) {
-    const id = request.param('id')
-    const { courierId } = request.body()
-    
-    const orderItem = await OrderItem.findOrFail(id)
-    const courier = await User.findOrFail(courierId)
-
-    if (courier && courier.userType === 'COURIER') {
+  async assignCourier({ params, request, response }: HttpContext) {
+    try {
+      const { id } = params
+      const { courierId, updatedBy } = request.body()
+      
+      // Find the order item
+      const orderItem = await OrderItem.find(id)
+      if (!orderItem) {
+        return response.status(404).json({ error: 'Order item not found' })
+      }
+      
+      // Assign courier
       orderItem.courierId = courierId
       await orderItem.save()
-    } else {
-      return response.status(400).json({ error: 'Courier not found or is not a courier' })
-    }
-
-    return response.json(orderItem)
-  }
-
-  async unassignCourier({ request, response }: HttpContext) {
-    const id = request.param('id')
-    const orderItem = await OrderItem.findOrFail(id)
-    orderItem.courierId = null
-    await orderItem.save()
-
-    return response.json(orderItem)
-  }
-
-  async updateOrderItemStatus({ request, response }: HttpContext) {
-    const id = request.param('id')
-    const { status, notes } = request.body()
-
-    const orderItem = await OrderItem.findOrFail(id)
-    let orderItemStatus = {
-      orderItemId: orderItem.id,
-      status: status,
-      notes: notes,
-      isCurrent: true,
-      updatedBy:  null
-    }
-
-    //set all previous statuses to not current
-    try {
-      await OrderItemStatus.query()
-        .where('orderItemId', orderItem.id)
-        .update({ isCurrent: false })
-
-      await OrderItemStatus.create(orderItemStatus)
+      
+      // Create a status for the assignment
+      await OrderItemStatusService.createStatus(
+        orderItem.id,
+        OrderItemStatus.ASSIGNED,
+        `Assigned to courier #${courierId}`,
+        updatedBy
+      )
+      
+      // Load relationships
+      await orderItem.load('courier')
+      await orderItem.load('orderItemStatuses', (query) => {
+        query.orderBy('createdAt', 'desc')
+      })
+      
+      return response.json(orderItem)
     } catch (error) {
       return response.status(400).json({ error: error.message })
     }
+  }
 
+  async unassignCourier({ params, response }: HttpContext) {
+    try {
+      const { id } = params
+      
+      // Find the order item
+      const orderItem = await OrderItem.find(id)
+      if (!orderItem) {
+        return response.status(404).json({ error: 'Order item not found' })
+      }
+      
+      // Find the order
+      const order = await Order.find(orderItem.orderId)
+      if (!order) {
+        return response.status(404).json({ error: 'Order not found' })
+      }
+      
+      // Keep track of the courier that was unassigned
+      const previousCourierId = orderItem.courierId
+      
+      // Unassign courier
+      orderItem.courierId = null
+      await orderItem.save()
+      
+      // Create a status for the unassignment
+      await OrderStatusService.createStatus(
+        order.id,
+        Status.ACCEPTED,
+        `Courier #${previousCourierId} unassigned from order item #${orderItem.id}`
+      )
+      
+      return response.json(orderItem)
+    } catch (error) {
+      return response.status(400).json({ error: error.message })
+    }
+  }
+
+  async updateOrderItem({ params, request, response }: HttpContext) {
+    const { id } = params
+    const { status, notes } = request.body()
+
+    const orderItem = await OrderItem.findOrFail(id)
+    await orderItem.merge({ status, notes }).save()
 
     return response.json(orderItem)
+  }
+
+  async updateOrderItemStatus({ params, request, response }: HttpContext) {
+    try {
+      const { id } = params
+      const { status, notes, updatedBy } = request.body()
+      
+      // Find the order item by ID
+      const orderItem = await OrderItem.find(id)
+      if (!orderItem) {
+        return response.status(404).json({ error: 'Order item not found' })
+      }
+      
+      // Get current status
+      const currentStatus = await OrderItemStatusService.getCurrentStatus(orderItem.id)
+      
+      // Check if the status transition is valid
+      if (currentStatus && !OrderItemStatusService.canTransitionTo(currentStatus.status, status)) {
+        return response.status(400).json({ 
+          error: `Cannot transition from ${currentStatus.status} to ${status}` 
+        })
+      }
+      
+      // Create the new status using the service
+      const orderItemStatus = await OrderItemStatusService.createStatus(
+        orderItem.id,
+        status,
+        notes,
+        updatedBy
+      )
+      
+      // Load status history
+      await orderItem.load('orderItemStatuses', (query) => {
+        query.orderBy('createdAt', 'desc')
+      })
+      
+      // Return the updated order item with status history
+      return response.json({
+        orderItem,
+        currentStatus: orderItemStatus
+      })
+    } catch (error) {
+      return response.status(400).json({ error: error.message })
+    }
   }
 } 

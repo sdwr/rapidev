@@ -11,24 +11,16 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Username</th>
+                <th></th>
                 <th>User Type</th>
-                <th>Profile</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="user in users" :key="user.id">
                 <td>{{ user.id }}</td>
+                <td>{{ user.name }}</td>
                 <td>{{ user.userType }}</td>
-                <td>
-                  <template v-if="user.profile">
-                    <div>Name: {{ user.profile.name }}</div>
-                    <div>Phone: {{ user.profile.phone }}</div>
-                    <div>Address: {{ user.profile.address }}</div>
-                  </template>
-                  <span v-else>No profile</span>
-                </td>
                 <td>
                   <button @click="deleteUser(user.id)" class="delete-button">Delete</button>
                 </td>

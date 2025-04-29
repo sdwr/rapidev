@@ -115,7 +115,7 @@ const expandedStatusHistories = ref<Record<string, boolean>>({})
 const fetchClients = async () => {
   loadingClients.value = true
   try {
-    clients.value = await getAllUsers('client')
+    clients.value = await getAllUsers('CLIENT')
   } catch (e) {
     error.value = e.message
   } finally {
@@ -125,7 +125,7 @@ const fetchClients = async () => {
 
 const fetchCouriers = async () => {
   try {
-    couriers.value = await getAllUsers('courier')
+    couriers.value = await getAllUsers('COURIER')
   } catch (e) {
     error.value = e.message
   }

@@ -25,7 +25,7 @@
             placeholder="Enter your phone number (10 digits)"
             :class="{ 'input-error': phoneError }"
             maxlength="10"
-            @input="formatPhoneNumber"
+            @input="(event) => onPhoneInput(event)"
             required
           />
           <small v-if="phoneError" class="validation-message">
@@ -50,6 +50,7 @@ import { ref, computed } from 'vue'
 import { useUserStore } from '../stores/userStore'
 import { updateUser } from '../api/api'
 import { toast } from 'vue3-toastify'
+import { formatPhoneNumber } from '../utils'
 
 const userStore = useUserStore()
 const error = ref('')
@@ -62,12 +63,9 @@ const formData = ref({
 })
 
 // Format and limit phone number as user types
-const formatPhoneNumber = () => {
-  // Remove any non-digit characters
-  const digitsOnly = formData.value.phone.replace(/\D/g, '');
-  
-  // Limit to 10 digits
-  formData.value.phone = digitsOnly.substring(0, 10);
+const onPhoneInput = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  formData.value.phone = formatPhoneNumber(input.value)
 }
 
 // Phone validation

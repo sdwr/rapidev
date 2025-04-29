@@ -2,24 +2,17 @@
   <div class="list-item">
     <h3>Order #{{ order.id }}</h3>
     <p>Status: {{ getCurrentStatus(order) }}</p>
-    <p>Client: {{ order.clientId }}</p>
-    <p>Courier: {{ order.courierId }}</p>
+    <p>Client: {{ order.client?.name }}</p>
     <div class="order-items">
       <div class="order-item-header"  @click="toggleItems" >
         <h4>Items</h4>
-        <span class="toggle-icon">{{ isItemsExpanded ? '▼' : '▶' }}</span>
       </div>
-      <div v-if="isItemsExpanded" class="order-item-entries">
+      <div class="order-item-entries">
         <OrderItemCard v-for="item in order.items" 
           :key="item.id" 
           :order-item="item" 
           :userType="userType"
           :available-couriers="couriers" />
-      </div>
-      <div v-else class="order-items-collapsed">
-        <div class="order-item" v-for="item in order.items" :key="item.id">
-          <p>{{ item.deliveryAddress }}</p>
-        </div>
       </div>
     </div>
     <div class="status-history">
@@ -110,7 +103,6 @@ const emit = defineEmits<{
 const isStatusHistoryExpanded = ref(false)
 const selectedCourier = ref('')
 const isOrderExpanded = ref(false)
-const isItemsExpanded = ref(false)
 const expandedItemId = ref(null)
 const availableCouriers = ref([])
 
@@ -233,16 +225,8 @@ onMounted(async () => {
 // Toggle order expansion
 const toggleOrder = () => {
   isOrderExpanded.value = !isOrderExpanded.value
-  // Reset items expansion when collapsing the order
-  if (!isOrderExpanded.value) {
-    isItemsExpanded.value = false
-  }
 }
 
-// Toggle items expansion
-const toggleItems = () => {
-  isItemsExpanded.value = !isItemsExpanded.value
-}
 
 // Expand a specific item
 const expandItem = (itemId) => {

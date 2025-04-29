@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-
+import { UserType } from '#shared/enums/UserEnums'
 export default class UserController {
   /**
    * Create a new user with associated profile (client or courier)
@@ -91,14 +91,18 @@ export default class UserController {
     return response.json({ message: 'User deleted' })
   }
 
-  async login({ request, response }: HttpContext) {
+  async loginOrRegister({ request, response }: HttpContext) {
     const { email, password } = request.body()
     
     try {
       // Find user by email
-      const user = await User.findBy('email', email)
+      let user = await User.findBy('email', email)
       if (!user) {
-        throw new Error('Invalid credentials')
+        user = await User.create({
+          email,
+          password,
+          userType: UserType.CLIENT
+        })
       }
       
       // Verify password

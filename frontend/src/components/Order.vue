@@ -55,10 +55,12 @@
         
         <div class="form-group">
           <input 
+            type="tel"
             :id="`deliveryPhone-${index}`" 
             v-model="item.deliveryPhone" 
-            placeholder="Enter delivery phone number"
-            required
+            placeholder="Enter delivery phone number (10 digits)"
+            maxlength="10"
+            @input="(event) => onPhoneInput(event, index)"
           />
         </div>
         
@@ -105,6 +107,7 @@ import { useUserStore } from '../stores/userStore'
 import AddressSelector from './AddressSelector.vue'
 import { getOrder,createOrder, createProfile, getProfilesForUserByProfileType, createReceipt } from '../api/api'
 import { ReceiptStatus } from '../models/Receipt'
+import { formatPhoneNumber } from '../utils'
 const emit = defineEmits(['order-created'])
 const userStore = useUserStore()
 
@@ -131,6 +134,13 @@ const bookingFee = 3.99
 const total = computed(() => Math.round(deliveryFee * orderData.value.deliveryItems.length + bookingFee, 2))
 
 const isSubmitting = ref(false)
+
+// Format and limit phone number as user types
+const onPhoneInput = (event, index) => {
+  // Format the phone number for the specific delivery item
+  const input = event.target;
+  orderData.value.deliveryItems[index].deliveryPhone = formatPhoneNumber(input.value);
+}
 
 const addAddress = async (newAddress, profileType) => {
   console.log('Adding address:', newAddress)

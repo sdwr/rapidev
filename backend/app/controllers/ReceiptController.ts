@@ -3,6 +3,8 @@ import Receipt from '#models/receipt'
 import Order from '#models/order'
 import { createReceiptValidator, updateReceiptValidator } from '#validators/ReceiptValidator'
 import { ReceiptStatus } from '#shared/enums/ReceiptEnums'
+import { OrderStatus as OrderStatusEnum } from '#shared/enums/OrderEnums'
+import { OrderStatusService } from '#services/OrderStatusService'
 
 export class ReceiptController {
   async getAllReceipts({ response }: HttpContext) {
@@ -55,6 +57,12 @@ export class ReceiptController {
       
       // Create the receipt
       const receipt = await Receipt.create(data)
+
+      // if the receipt is paid, update the order status to accepted
+      if (data.receiptStatus === ReceiptStatus.PAID) {
+        await OrderStatusService.createStatus(order.id, OrderStatusEnum.ACCEPTED)
+        await order.load('orderStatuses')
+      }
       
       // Load the related order
       await receipt.load('order')
@@ -166,6 +174,10 @@ export class ReceiptController {
       })
       
       await receipt.save()
+      
+
+      //update order status to accepted
+      await OrderStatusService.createStatus(receipt.orderId, OrderStatusEnum.ACCEPTED)
       
       // Load the related order
       await receipt.load('order')
