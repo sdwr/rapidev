@@ -5,10 +5,10 @@ import OrderItem from '#models/order_item'
 import User from '#models/user'
 import OrderItemStatus from '#models/order_item_status'
 
-import { OrderStatus as Status } from '#shared/enums/OrderEnums'
+import { OrderStatusEnum } from '#shared/enums/OrderEnums'
 import OrderStatusService from '#services/OrderStatusService'
 import OrderItemStatusService from '#services/OrderItemStatusService'
-import { OrderItemStatus as OrderItemStatusEnum } from '#shared/enums/OrderItemEnums'
+import { OrderItemStatusEnum } from '#shared/enums/OrderItemEnums'
 
 export class OrderController {
   //order endpoints
@@ -66,7 +66,7 @@ export class OrderController {
       // Create initial order status
       await OrderStatus.create({
         orderId: order.id,
-        status: Status.DRAFT,
+        status: OrderStatusEnum.DRAFT,
         isCurrent: true,
         description: 'Order created and is in draft state'
       })
@@ -212,7 +212,7 @@ export class OrderController {
   async updateOrderStatus({ params, request, response }: HttpContext) {
     try {
       const { id } = params
-      const { status, notes } = request.body()
+      const { status } = request.body()
       
       // Find the order
       const order = await Order.find(id)
@@ -223,8 +223,7 @@ export class OrderController {
       // Create the new status using the service
       const orderStatus = await OrderStatusService.createStatus(
         order.id,
-        status,
-        notes
+        status
       )
       
       // Return the updated order with its statuses

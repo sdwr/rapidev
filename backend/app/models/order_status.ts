@@ -1,7 +1,7 @@
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import Order from '#models/order'
-import { OrderStatus as Status } from '#shared/enums/OrderEnums'
+import { OrderStatusEnum } from '#shared/enums/OrderEnums'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 
 export default class OrderStatus extends BaseModel {
@@ -12,7 +12,7 @@ export default class OrderStatus extends BaseModel {
   declare orderId: number
 
   @column()
-  declare status: Status
+  declare status: OrderStatusEnum
 
   @column()
   declare description: string

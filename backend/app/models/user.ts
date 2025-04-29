@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
-import { UserType } from '#shared/enums/UserEnums'
+import { UserTypeEnum } from '#shared/enums/UserEnums'
 import Profile from './profile.js'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 
@@ -21,7 +21,7 @@ export default class User extends BaseModel {
   declare phone: string
 
   @column()
-  declare userType: UserType
+  declare userType: UserTypeEnum
 
   @hasMany(() => Profile)
   declare profiles: HasMany<typeof Profile>

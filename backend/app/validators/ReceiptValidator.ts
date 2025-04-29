@@ -1,5 +1,5 @@
 import vine from '@vinejs/vine'
-import { ReceiptStatus } from '#shared/enums/ReceiptEnums'
+import { ReceiptStatusEnum } from '#shared/enums/ReceiptEnums'
 
 export const createReceiptValidator = vine.compile(
   vine.object({
@@ -9,7 +9,7 @@ export const createReceiptValidator = vine.compile(
     discount: vine.number().optional(),
     total: vine.number(),
     amountPaid: vine.number().optional(),
-    receiptStatus: vine.enum(Object.values(ReceiptStatus)).optional()
+    receiptStatus: vine.enum(Object.values(ReceiptStatusEnum)).optional()
   })
 )
 
@@ -20,6 +20,6 @@ export const updateReceiptValidator = vine.compile(
     discount: vine.number().optional(),
     total: vine.number().optional(),
     amountPaid: vine.number().optional(),
-    receiptStatus: vine.enum(Object.values(ReceiptStatus)).optional()
+    receiptStatus: vine.enum(Object.values(ReceiptStatusEnum)).optional()
   })
 ) 

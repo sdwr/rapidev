@@ -1,4 +1,4 @@
-export enum OrderStatus {
+export enum OrderStatusEnum {
   DRAFT = 'DRAFT',
   PENDING = 'PENDING',
   ACCEPTED = 'ACCEPTED',

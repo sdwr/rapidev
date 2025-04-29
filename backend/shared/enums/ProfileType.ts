@@ -1,4 +1,4 @@
-export enum ProfileType {
+export enum ProfileTypeEnum {
   PICKUP = 'PICKUP',
   DELIVERY = 'DELIVERY'
 }

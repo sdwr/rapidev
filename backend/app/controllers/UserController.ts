@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import { UserType } from '#shared/enums/UserEnums'
+import { UserTypeEnum } from '#shared/enums/UserEnums'
 export default class UserController {
   /**
    * Create a new user with associated profile (client or courier)
@@ -87,7 +87,7 @@ export default class UserController {
         user = await User.create({
           email,
           password,
-          userType: UserType.CLIENT
+          userType: UserTypeEnum.CLIENT
         })
       }
       

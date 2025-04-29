@@ -1,7 +1,7 @@
 /**
  * Enum for order item statuses
  */
-export enum OrderItemStatus {
+export enum OrderItemStatusEnum {
   DRAFT = 'DRAFT',
   PAID = 'PAID',
   ACCEPTED = 'ACCEPTED',

@@ -1,4 +1,4 @@
-export enum UserType {
+export enum UserTypeEnum {
   CLIENT = 'CLIENT',
   COURIER = 'COURIER',
   ADMIN = 'ADMIN'

@@ -2,8 +2,8 @@ import { HttpContext } from '@adonisjs/core/http'
 import Receipt from '#models/receipt'
 import Order from '#models/order'
 import { createReceiptValidator, updateReceiptValidator } from '#validators/ReceiptValidator'
-import { ReceiptStatus } from '#shared/enums/ReceiptEnums'
-import { OrderStatus as OrderStatusEnum } from '#shared/enums/OrderEnums'
+import { ReceiptStatusEnum } from '#shared/enums/ReceiptEnums'
+import { OrderStatusEnum } from '#shared/enums/OrderEnums'
 import OrderStatusService from '#services/OrderStatusService'
 
 export class ReceiptController {
@@ -48,7 +48,7 @@ export class ReceiptController {
       
       // Set default values if not provided
       if (data.receiptStatus === undefined) {
-        data.receiptStatus = ReceiptStatus.PENDING
+        data.receiptStatus = ReceiptStatusEnum.PENDING
       }
       
       if (data.amountPaid === undefined) {
@@ -59,7 +59,7 @@ export class ReceiptController {
       const receipt = await Receipt.create(data)
 
       // if the receipt is paid, update the order status to accepted
-      if (data.receiptStatus === ReceiptStatus.PAID) {
+      if (data.receiptStatus === ReceiptStatusEnum.PAID) {
         await OrderStatusService.createStatus(order.id, OrderStatusEnum.ACCEPTED)
         await order.load('orderStatuses')
       }
@@ -162,9 +162,9 @@ export class ReceiptController {
       let newStatus = receipt.receiptStatus
       
       if (newAmountPaid >= receipt.total) {
-        newStatus = ReceiptStatus.PAID
+        newStatus = ReceiptStatusEnum.PAID
       } else if (newAmountPaid > 0) {
-        newStatus = ReceiptStatus.PARTIALLY_PAID
+        newStatus = ReceiptStatusEnum.PARTIALLY_PAID
       }
       
       // Update receipt
@@ -220,9 +220,9 @@ export class ReceiptController {
       let newStatus = receipt.receiptStatus
       
       if (newAmountPaid === 0) {
-        newStatus = ReceiptStatus.REFUNDED
+        newStatus = ReceiptStatusEnum.REFUNDED
       } else if (newAmountPaid < receipt.total) {
-        newStatus = ReceiptStatus.PARTIALLY_PAID
+        newStatus = ReceiptStatusEnum.PARTIALLY_PAID
       }
       
       // Update receipt
@@ -254,7 +254,7 @@ export class ReceiptController {
       }
       
       // Update receipt status
-      receipt.receiptStatus = ReceiptStatus.CANCELLED
+      receipt.receiptStatus = ReceiptStatusEnum.CANCELLED
       
       await receipt.save()
       

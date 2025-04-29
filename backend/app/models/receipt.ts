@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Order from './order.js'
-import { ReceiptStatus } from '#shared/enums/ReceiptEnums'
+import { ReceiptStatusEnum } from '#shared/enums/ReceiptEnums'
 
 export default class Receipt extends BaseModel {
   @column({ isPrimary: true })
@@ -27,7 +27,7 @@ export default class Receipt extends BaseModel {
   declare amountPaid: number
 
   @column()
-  declare receiptStatus: ReceiptStatus
+  declare receiptStatus: ReceiptStatusEnum
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
