@@ -3,6 +3,7 @@
     <h3>Order #{{ order.id }}</h3>
     <p>Status: {{ getCurrentStatus(order) }}</p>
     <p>Client: {{ order.client?.name }}</p>
+    <p>Pickup Address: {{ order.pickupAddress }}</p>
     <div class="order-items">
       <div class="order-item-header"  @click="toggleItems" >
         <h4>Items</h4>

@@ -130,6 +130,10 @@ const fetchOrders = async () => {
     myOrders.value = orders.filter(order => ACTIVE_ORDER_STATUSES.includes(getCurrentStatus(order)))
     orderHistory.value = orders.filter(order => HISTORY_ORDER_STATUSES.includes(getCurrentStatus(order)))
     
+    console.log("fetched orders", orders)
+    console.log("my orders", myOrders.value)
+    console.log("order history", orderHistory.value)
+
     // Fetch status history for each order
     for (const order of orders) {
       const statuses = order.orderStatuses
@@ -143,7 +147,7 @@ const fetchOrders = async () => {
   }
 }
 
-const handleOrderCreated = async (orderData: OrderType) => {
+const handleOrderCreated = async () => {
   if (!userStore.user?.id) {
     console.error('No user logged in')
     toast.error('Please log in to create an order')
@@ -151,20 +155,11 @@ const handleOrderCreated = async (orderData: OrderType) => {
   }
 
   try {
-    // Create the order with the correct IDs
-    const order = await createOrder({
-      ...orderData,
-      clientId: userStore.user.id,
-      clientProfileId: userStore.user.profile.id
-    })
-
-    if (order) {
-      toast.success('Order created successfully!')
-      await fetchOrders()
-    }
+    //reload client orders
+    await fetchOrders()
   } catch (error) {
-    console.error('Error creating order:', error)
-    toast.error(error.message || 'Error creating order')
+    console.error('Error reloading orders:', error)
+    toast.error(error.message || 'Error reloading orders')
   }
 }
 
