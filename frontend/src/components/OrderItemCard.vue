@@ -45,7 +45,7 @@
       </div>
 
       <!-- Status History -->
-      <div v-if="statusHistory && statusHistory.length" class="status-history">
+      <div v-if="orderItem.orderItemStatuses" class="status-history">
         <div class="label">Status History:</div>
         <div class="status-timeline">
           <div 
@@ -143,13 +143,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { OrderStatusEnum } from '../shared/enums/OrderEnums'
+import { OrderItemStatusEnum } from '../shared/enums/OrderItemEnums'
 import { toast } from 'vue3-toastify'
 import { 
   assignCourierToOrderItem, 
   unassignCourierFromOrderItem, 
   updateOrderItemStatus
 } from '../api/api'
+import { UserTypeEnum } from '../shared/enums/UserEnums'
 
 const props = defineProps({
   orderItem: {
@@ -159,16 +160,12 @@ const props = defineProps({
   userType: {
     type: String,
     required: true,
-    validator: (value) => ['CLIENT', 'COURIER', 'ADMIN'].includes(value)
+    validator: (value) => [UserTypeEnum.CLIENT, UserTypeEnum.COURIER, UserTypeEnum.ADMIN].includes(value)
   },
   availableCouriers: {
     type: Array,
     default: () => []
   },
-  statusHistory: {
-    type: Array,
-    default: () => []
-  }
 })
 
 const emit = defineEmits(['item-updated'])
@@ -188,20 +185,27 @@ const isCourierAssigned = computed(() => {
          props.orderItem.courierId === getUserId();
 })
 
+const statusHistory = computed(() => {
+  console.log("orderItem", props.orderItem)
+  return props.orderItem?.orderItemStatuses
+})
+
 const statusClass = computed(() => {
   const currentStatus = getCurrentStatus()
   switch (currentStatus) {
-    case OrderStatusEnum.DRAFT:
-    case OrderStatusEnum.PENDING:
+    case OrderItemStatusEnum.DRAFT:
       return 'status-pending'
-    case OrderStatusEnum.ACCEPTED:
+    case OrderItemStatusEnum.ACCEPTED:
       return 'status-confirmed'
-    case OrderStatusEnum.PICKED_UP:
-    case OrderStatusEnum.IN_TRANSIT:
-      return 'status-in-progress'
-    case OrderStatusEnum.DELIVERED:
+    case OrderItemStatusEnum.ASSIGNED:
+      return 'status-assigned'
+    case OrderItemStatusEnum.CONFIRMED_BY_COURIER:
+      return 'status-confirmed'
+    case OrderItemStatusEnum.PICKED_UP:
+      return 'status-picked-up'
+    case OrderItemStatusEnum.DELIVERED:
       return 'status-delivered'
-    case OrderStatusEnum.CANCELLED_BY_ADMIN:
+    case OrderItemStatusEnum.CANCELLED:
       return 'status-cancelled'
     default:
       return ''
@@ -213,14 +217,20 @@ const availableStatuses = computed(() => {
   
   // Define logical status progressions based on current status
   switch (currentStatus) {
-    case OrderStatusEnum.ACCEPTED:
-      return [OrderStatusEnum.PICKED_UP]
-    case OrderStatusEnum.PICKED_UP:
-      return [OrderStatusEnum.IN_TRANSIT]
-    case OrderStatusEnum.IN_TRANSIT:
-      return [OrderStatusEnum.DELIVERED]
+    case OrderItemStatusEnum.DRAFT:
+      return [OrderItemStatusEnum.ACCEPTED, OrderItemStatusEnum.CANCELLED]
+    case OrderItemStatusEnum.ACCEPTED:
+      return [OrderItemStatusEnum.ASSIGNED, OrderItemStatusEnum.CANCELLED]
+    case OrderItemStatusEnum.ASSIGNED:
+      return [OrderItemStatusEnum.CONFIRMED_BY_COURIER, OrderItemStatusEnum.CANCELLED]
+    case OrderItemStatusEnum.CONFIRMED_BY_COURIER:
+      return [OrderItemStatusEnum.PICKED_UP, OrderItemStatusEnum.CANCELLED]
+    case OrderItemStatusEnum.PICKED_UP:
+      return [OrderItemStatusEnum.DELIVERED, OrderItemStatusEnum.CANCELLED]
+    case OrderItemStatusEnum.DELIVERED:
+      return [OrderItemStatusEnum.CANCELLED]
     default:
-      return Object.values(OrderStatusEnum)
+      return Object.values(OrderItemStatusEnum)
   }
 })
 
@@ -237,31 +247,30 @@ const toggleExpand = () => {
 }
 
 const getCurrentStatus = () => {
-  if (props.statusHistory && props.statusHistory.length) {
-    // Sort by created date, descending
-    const sortedHistory = [...props.statusHistory].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-    return sortedHistory[0].status
+  if (props.orderItem?.orderItemStatuses) {
+    let currentStatus = props.orderItem.orderItemStatuses.find(status => status.isCurrent)
+    return currentStatus?.status
   }
   
   // Fallback to a default status if no history
-  return OrderStatusEnum.DRAFT
+  return OrderItemStatusEnum.DRAFT
 }
 
 const getStatusClass = (status) => {
   switch (status) {
-    case OrderStatusEnum.DRAFT:
-    case OrderStatusEnum.PENDING:
+    case OrderItemStatusEnum.DRAFT:
       return 'status-pending'
-    case OrderStatusEnum.ACCEPTED:
+    case OrderItemStatusEnum.ACCEPTED:
       return 'status-confirmed'
-    case OrderStatusEnum.PICKED_UP:
-    case OrderStatusEnum.IN_TRANSIT:
-      return 'status-in-progress'
-    case OrderStatusEnum.DELIVERED:
+    case OrderItemStatusEnum.ASSIGNED:
+      return 'status-assigned'
+    case OrderItemStatusEnum.CONFIRMED_BY_COURIER:
+      return 'status-confirmed'
+    case OrderItemStatusEnum.PICKED_UP:
+      return 'status-picked-up'
+    case OrderItemStatusEnum.DELIVERED:
       return 'status-delivered'
-    case OrderStatusEnum.CANCELLED_BY_ADMIN:
+    case OrderItemStatusEnum.CANCELLED:
       return 'status-cancelled'
     default:
       return ''
@@ -275,7 +284,7 @@ const formatDate = (dateString) => {
 
 const getCourierName = () => {
   if (!props.orderItem.courierId) return 'Not assigned'
-  
+
   const courier = props.availableCouriers.find(c => c.id === props.orderItem.courierId)
   return courier ? (courier.name || courier.email) : `Courier #${props.orderItem.courierId}`
 }
@@ -379,7 +388,12 @@ const updateStatus = async () => {
   color: #004085;
 }
 
-.status-in-progress {
+.status-assigned {
+  background-color: #c3e6cb;
+  color: #155724;
+}
+
+.status-picked-up {
   background-color: #c3e6cb;
   color: #155724;
 }

@@ -72,7 +72,11 @@ export class OrderController {
       })
 
       // Load the relationships
-      await order.load('items')
+      await order.load('items', (query) => {
+        query.preload('orderItemStatuses', (query) => {
+          query.orderBy('createdAt', 'asc')
+        })
+      })
       await order.load('orderStatuses', (query) => {
         query.orderBy('createdAt', 'asc')
       })
@@ -103,7 +107,11 @@ export class OrderController {
     try {
       const orders = await Order.query()
         .preload('client')
-        .preload('items')
+        .preload('items', (query) => {
+          query.preload('orderItemStatuses', (query) => {
+            query.orderBy('createdAt', 'asc')
+          })
+        })
         .preload('orderStatuses', (query) => {
           query.orderBy('createdAt', 'asc')
         })
@@ -125,7 +133,11 @@ export class OrderController {
     try {
       const orders = await Order.query()
         .preload('client')
-        .preload('items')
+        .preload('items', (query) => {
+          query.preload('orderItemStatuses', (query) => {
+            query.orderBy('createdAt', 'asc')
+          })
+        })
         .preload('orderStatuses', (query) => {
           query.orderBy('createdAt', 'asc')
         })
@@ -201,7 +213,11 @@ export class OrderController {
 
   async loadOrderRelationships(order: Order) {
     // Load relationships
-    await order.load('items')
+    await order.load('items', (query) => {  
+      query.preload('orderItemStatuses', (query) => {
+        query.orderBy('createdAt', 'asc')
+      })
+    })
     await order.load('orderStatuses')
     await order.load('client')
     await order.load('receipt')
