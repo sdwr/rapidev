@@ -103,7 +103,7 @@
       </div>
 
       <!-- Courier Controls -->
-      <div v-if="userType === 'COURIER' && isCourierAssigned" class="courier-controls">
+      <div v-if="userType === 'COURIER'" class="courier-controls">
         <div class="status-update">
           <label for="statusSelect">Update Status:</label>
           <select 
@@ -181,14 +181,7 @@ const selectedCourierId = ref('')
 const selectedStatus = ref('')
 const statusNotes = ref('')
 
-// Computed properties
-const isCourierAssigned = computed(() => {
-  return props.userType === 'COURIER' && 
-         props.orderItem.courierId === getUserId();
-})
-
 const statusHistory = computed(() => {
-  console.log("orderItem", props.orderItem)
   return props.orderItem?.orderItemStatuses
 })
 
@@ -360,7 +353,6 @@ const updateStatus = async () => {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
-  overflow: hidden;
   transition: all 0.3s ease;
 }
 
