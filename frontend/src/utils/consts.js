@@ -23,7 +23,6 @@ export const ACCEPTABLE_ORDER_STATUSES = [
 ] 
 
 export const COURIER_ACTIVE_ORDER_STATUSES = [
-  OrderStatusEnum.ACCEPTED,
   OrderStatusEnum.CONFIRMED_BY_COURIER,
   OrderStatusEnum.PICKED_UP,
   OrderStatusEnum.IN_TRANSIT

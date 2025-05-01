@@ -45,23 +45,7 @@
       </div>
 
       <!-- Status History -->
-      <div v-if="orderItem.orderItemStatuses" class="status-history">
-        <div class="label">Status History:</div>
-        <div class="status-timeline">
-          <div 
-            v-for="(status, index) in statusHistory" 
-            :key="index"
-            class="status-item"
-          >
-            <div class="status-dot" :class="getStatusClass(status.status)"></div>
-            <div class="status-details">
-              <div class="status-name">{{ status.status }}</div>
-              <div class="status-time">{{ formatDate(status.createdAt) }}</div>
-              <div v-if="status.notes" class="status-notes">{{ status.notes }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <StatusHistory :statuses="statusHistory" />
 
       <!-- Admin Controls -->
       <div v-if="userType === 'ADMIN'" class="admin-controls">
@@ -153,6 +137,7 @@ import {
 } from '../api/api'
 import { UserTypeEnum } from '../shared/enums/UserEnums'
 import { useOrderStore } from '../stores/orderStore'
+import StatusHistory from './StatusHistory.vue'
 
 const props = defineProps({
   orderItem: {
@@ -249,32 +234,6 @@ const getCurrentStatus = () => {
   
   // Fallback to a default status if no history
   return OrderItemStatusEnum.DRAFT
-}
-
-const getStatusClass = (status) => {
-  switch (status) {
-    case OrderItemStatusEnum.DRAFT:
-      return 'status-pending'
-    case OrderItemStatusEnum.ACCEPTED:
-      return 'status-confirmed'
-    case OrderItemStatusEnum.ASSIGNED:
-      return 'status-assigned'
-    case OrderItemStatusEnum.CONFIRMED_BY_COURIER:
-      return 'status-confirmed'
-    case OrderItemStatusEnum.PICKED_UP:
-      return 'status-picked-up'
-    case OrderItemStatusEnum.DELIVERED:
-      return 'status-delivered'
-    case OrderItemStatusEnum.CANCELLED:
-      return 'status-cancelled'
-    default:
-      return ''
-  }
-}
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleString()
 }
 
 const getCourierName = () => {
@@ -451,53 +410,6 @@ const updateStatus = async () => {
 .not-assigned {
   color: var(--color-text-light);
   font-style: italic;
-}
-
-.status-history {
-  margin-top: 1rem;
-}
-
-.status-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-  padding-left: 1rem;
-  border-left: 2px solid var(--color-border);
-}
-
-.status-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  position: relative;
-}
-
-.status-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-left: -1.3rem;
-  margin-top: 0.25rem;
-}
-
-.status-details {
-  flex: 1;
-}
-
-.status-name {
-  font-weight: 500;
-}
-
-.status-time {
-  font-size: 0.8rem;
-  color: var(--color-text-light);
-}
-
-.status-notes {
-  font-size: 0.9rem;
-  font-style: italic;
-  margin-top: 0.25rem;
 }
 
 /* Admin controls */
