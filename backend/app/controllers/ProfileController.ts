@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { createProfileValidator, updateProfileValidator } from '#validators/ProfileValidator'
+import { createProfileValidator } from '#validators/ProfileValidator'
 import Profile from '#models/profile'
 
 export class ProfileController {

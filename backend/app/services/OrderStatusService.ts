@@ -1,6 +1,6 @@
 import Order from '#models/order'
 import OrderStatus from '#models/order_status'
-import { OrderStatus as OrderStatusEnum } from '#shared/enums/OrderEnums'
+import { OrderStatusEnum } from '#shared/enums/OrderEnums'
 
 export class OrderStatusService {
   /**

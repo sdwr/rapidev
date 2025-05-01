@@ -1,10 +1,13 @@
 import vine from '@vinejs/vine'
-import { OrderStatus, Size } from '../../../shared/enums/OrderEnums'
+import { OrderStatusEnum } from '#shared/enums/OrderEnums'
 
 const orderItemSchema = vine.object({
-  description: vine.string().trim().minLength(3),
-  quantity: vine.number().min(1),
-  size: vine.enum(Object.values(Size))
+  orderItemId: vine.number(),
+  courierId: vine.number().optional(),
+  pickupAddress: vine.string().trim(),
+  deliveryAddress: vine.string().trim(),
+  deliveryPhone: vine.string().trim(),
+  deliveryNotes: vine.string().trim().optional(),
 })
 
 export const createOrderValidator = vine.compile(
@@ -18,6 +21,6 @@ export const createOrderValidator = vine.compile(
 
 export const updateOrderStatusValidator = vine.compile(
   vine.object({
-    status: vine.enum(Object.values(OrderStatus))
+    status: vine.enum(Object.values(OrderStatusEnum))
   })
 ) 

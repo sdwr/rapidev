@@ -64,9 +64,6 @@ export class ReceiptController {
         await order.load('orderStatuses')
       }
       
-      // Load the related order
-      await receipt.load('order')
-      
       return response.status(201).json(receipt)
     } catch (error) {
       return response.status(400).json({ error: error.message })
@@ -84,8 +81,6 @@ export class ReceiptController {
         return response.status(404).json({ error: 'Receipt not found' })
       }
       
-      await receipt.load('order')
-      
       return response.json(receipt)
     } catch (error) {
       return response.status(400).json({ error: error.message })
@@ -102,8 +97,6 @@ export class ReceiptController {
       if (!receipt) {
         return response.status(404).json({ error: 'Receipt not found for this order' })
       }
-      
-      await receipt.load('order')
       
       return response.json(receipt)
     } catch (error) {
@@ -127,9 +120,6 @@ export class ReceiptController {
       // Update receipt
       receipt.merge(data)
       await receipt.save()
-      
-      // Load the related order
-      await receipt.load('order')
       
       return response.json(receipt)
     } catch (error) {
@@ -178,9 +168,6 @@ export class ReceiptController {
 
       //update order status to accepted
       await OrderStatusService.createStatus(receipt.orderId, OrderStatusEnum.ACCEPTED)
-      
-      // Load the related order
-      await receipt.load('order')
       
       return response.json(receipt)
     } catch (error) {
@@ -233,9 +220,6 @@ export class ReceiptController {
       
       await receipt.save()
       
-      // Load the related order
-      await receipt.load('order')
-      
       return response.json(receipt)
     } catch (error) {
       return response.status(400).json({ error: error.message })
@@ -257,9 +241,6 @@ export class ReceiptController {
       receipt.receiptStatus = ReceiptStatusEnum.CANCELLED
       
       await receipt.save()
-      
-      // Load the related order
-      await receipt.load('order')
       
       return response.json(receipt)
     } catch (error) {

@@ -360,16 +360,6 @@ export class OrderController {
     }
   }
 
-  async updateOrderItem({ params, request, response }: HttpContext) {
-    const { id } = params
-    const { status, notes } = request.body()
-
-    const orderItem = await OrderItem.findOrFail(id)
-    await orderItem.merge({ status, notes }).save()
-
-    return response.json(orderItem)
-  }
-
   async updateOrderItemStatus({ params, request, response }: HttpContext) {
     try {
       const { id } = params

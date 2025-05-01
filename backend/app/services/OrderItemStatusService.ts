@@ -33,10 +33,6 @@ export class OrderItemStatusService {
       updatedBy
     })
 
-    // Update the order item's status
-    orderItem.status = status
-    await orderItem.save()
-
     return orderItemStatus
   }
 

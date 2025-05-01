@@ -544,20 +544,3 @@ export async function getOrderItem(orderItemId: string) {
     return null
   }
 }
-
-export async function updateOrderItem(orderItem: OrderItem) {
-  try {
-    const response = await fetch(`${BASE_URL}/api/orders/item/${orderItem.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderItem),
-    })
-    if (!response.ok) throw await response.json()
-    return response.json()
-  } catch (error) {
-    handleApiError(error)
-    return null
-  }
-}

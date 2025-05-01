@@ -2,7 +2,7 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Order from '#models/order'
-import { CourierStatus } from '#shared/enums/CourierEnums'
+import { CourierStatusEnum } from '#shared/enums/CourierEnums'
 
 export default class Courier extends BaseModel {
   @column({ isPrimary: true })
@@ -15,7 +15,7 @@ export default class Courier extends BaseModel {
   declare name: string
 
   @column()
-  declare status: CourierStatus
+  declare status: CourierStatusEnum
 
   @column()
   declare currentOrderId: string | null
