@@ -5,34 +5,22 @@
     <p>Client: {{ order.client?.name }}</p>
     <p>Pickup Address: {{ order.pickupAddress }}</p>
     <div class="order-items">
-      <div class="order-item-header"  @click="toggleItems" >
+      <div class="order-item-header" @click="toggleItems">
         <h4>Items</h4>
       </div>
       <div class="order-item-entries">
-        <OrderItemCard v-for="item in order.items" 
-          :key="item.id" 
-          :order-item="item" 
+        <OrderItemCard
+          v-for="item in order.items"
+          :key="item.id"
+          :order-item="item"
           :userType="userType"
-          :available-couriers="availableCouriers" />
+          :available-couriers="availableCouriers"
+        />
       </div>
     </div>
-    <div class="status-history">
-      <div class="status-header" @click="toggleStatusHistory">
-        <h4>Status History</h4>
-        <span class="toggle-icon">{{ isStatusHistoryExpanded ? '▼' : '▶' }}</span>
-      </div>
-      <div v-if="isStatusHistoryExpanded" class="status-entries">
-        <div v-for="status in props.order.orderStatuses" :key="status.id" class="status-entry">
-          <span class="status">{{ status.status }}</span>
-          <span class="timestamp">{{ new Date(status.createdAt).toLocaleString() }}</span>
-          <p class="description">{{ status.description }}</p>
-        </div>
-      </div>
-      <div v-else class="current-status">
-        <span class="status">{{ getCurrentStatus(props.order) }}</span>
-        <span class="timestamp">{{ getCurrentStatusTimestamp(props.order) }}</span>
-      </div>
-    </div>
+    
+    <!-- Replace the existing status history section with the StatusHistory component -->
+    <StatusHistory :statuses="props.order.orderStatuses" />
 
     <!-- Admin Actions -->
     <div v-if="userType === 'ADMIN'" class="actions">
@@ -40,7 +28,6 @@
         <button @click="acceptOrder" class="accept-button">Accept</button>
         <button @click="cancelOrder" class="cancel-button">Cancel</button>
       </div>
-
     </div>
 
     <!-- Client Actions -->
@@ -70,6 +57,8 @@ import { toast } from 'vue3-toastify'
 import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
 import OrderItemCard from './OrderItemCard.vue'
 import { UserTypeEnum } from '../shared/enums/UserEnums'
+import StatusHistory from './StatusHistory.vue'  // Import the StatusHistory component
+
 const props = defineProps<{
   order: Order
   userType: 'ADMIN' | 'CLIENT' | 'COURIER'
@@ -200,79 +189,6 @@ const expandItem = (itemId) => {
   background: var(--color-background);
   border-radius: 4px;
   margin-bottom: 0.5rem;
-}
-
-.status-history {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.status-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  padding: 0.5rem;
-  background: var(--color-background);
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
-}
-
-.status-header h4 {
-  margin: 0;
-}
-
-.toggle-icon {
-  font-size: 0.875rem;
-  color: var(--color-text);
-}
-
-.status-entries {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.current-status {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.5rem;
-  background: var(--color-background);
-  border-radius: 4px;
-}
-
-.current-status .status {
-  font-weight: 500;
-}
-
-.current-status .timestamp {
-  color: var(--color-text-soft);
-  font-size: 0.9rem;
-}
-
-.status-entry {
-  margin-bottom: 0.1rem;
-  padding: 0.1rem;
-  background: var(--color-background);
-  border-radius: 4px;
-}
-
-.status-entry .status {
-  font-weight: 500;
-  margin-right: 1rem;
-}
-
-.status-entry .timestamp {
-  color: var(--color-text-soft);
-  font-size: 0.9rem;
-}
-
-.status-entry .description {
-  margin: 0.25rem 0 0 0;
-  font-size: 0.9rem;
-  color: var(--color-text-soft);
 }
 
 .actions {

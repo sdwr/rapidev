@@ -6,9 +6,11 @@ import AboutMe from './components/AboutMe.vue'
 import { useUserStore } from './stores/userStore'
 import { onMounted, computed } from 'vue'
 import { useOrderStore } from './stores/orderStore'
+import { useOrderItemStore } from './stores/orderItemStore'
 
 const userStore = useUserStore()
 const orderStore = useOrderStore()
+const orderItemStore = useOrderItemStore()
 
 // Check if user profile is complete
 const isProfileComplete = computed(() => {
@@ -24,9 +26,10 @@ const showAboutMe = computed(() => {
   return userStore.user && !isProfileComplete.value;
 })
 
-onMounted(() => {
+onMounted(async () => {
   userStore.loadUserFromStorage()
-  orderStore.fetchAllOrders()
+  await orderStore.fetchAllOrders()
+  await orderItemStore.fetchAllOrderItems()
 })
 </script>
 
