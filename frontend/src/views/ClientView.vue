@@ -33,7 +33,6 @@
 
         <!-- My Orders Tab -->
         <div v-if="currentTab === 'myOrders'" class="tab-panel">
-          <h2>My Orders</h2>
           <div class="list-container">
             <p v-if="!myOrders.length">No active orders.</p>
             <OrderCard
@@ -50,7 +49,6 @@
 
         <!-- History Tab -->
         <div v-if="currentTab === 'history'" class="tab-panel">
-          <h2>Order History</h2>
           <div class="list-container">
             <p v-if="!orderHistory.length">No order history.</p>
             <OrderCard

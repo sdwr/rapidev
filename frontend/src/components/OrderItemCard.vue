@@ -5,18 +5,17 @@
       <div class="order-item-id">{{ orderItem.pickupAddress }} - {{ orderItem.deliveryAddress }}</div>
       <div class="toggle-icon">{{ isExpanded ? '▼' : '▶' }}</div>
     </div>
-
-    <div v-if="isExpanded" class="order-item-details">
-
-      <!-- Admin Controls -->
-      <div class="item-controls">
+    <!-- Item Controls Section -->
+    <div class="item-controls">
+        <!-- Admin Controls -->
         <div v-if="userType === 'ADMIN'" class="admin-controls">
-          <div v-if="!orderItem.courierId" class="courier-assignment-dropdown">
-            <label for="courierSelect">Assign Courier:</label>
+          <!-- Courier Assignment -->
+          <div v-if="!orderItem.courierId" class="control-group">
             <select 
               id="courierSelect" 
               v-model="selectedCourierId"
               :disabled="isUpdating"
+              class="control-select"
             >
               <option value="">-- Select Courier --</option>
               <option 
@@ -27,64 +26,90 @@
                 {{ courier.name || courier.email }}
               </option>
             </select>
-          </div>
-          <div class="assignment-buttons">
             <button 
-              v-if="orderItem.courierId" 
-              @click="unassignCourier" 
-              class="unassign-btn"
-              :disabled="isUpdating"
-            >
-              Unassign Courier
-            </button>
-            <button 
-              v-else
               @click="assignCourier" 
-              class="assign-btn"
+              class="control-btn assign-btn"
               :disabled="!selectedCourierId || isUpdating"
             >
               Assign
             </button>
           </div>
+          
+          <!-- Unassign Courier Button -->
+          <button 
+            v-if="orderItem.courierId" 
+            @click="unassignCourier" 
+            class="control-btn unassign-btn"
+            :disabled="isUpdating"
+          >
+            Unassign Courier
+          </button>
+          
+          <!-- Cancel Item Button -->
+          <button 
+            v-if="canCancelItem"
+            @click="cancelItem" 
+            class="control-btn cancel-btn"
+            :disabled="isUpdating"
+          >
+            Cancel Item
+          </button>
         </div>
 
         <!-- Courier Controls -->
         <div v-if="userType === 'COURIER'" class="courier-controls">
-          <div class="status-update">
-            <label for="statusSelect">Update Status:</label>
-            <select 
-              id="statusSelect" 
-              v-model="selectedStatus" 
+          <!-- Accept Order Button -->
+          <button 
+            v-if="canAcceptItem"
+            @click="acceptItem" 
+            class="control-btn accept-btn"
+            :disabled="isUpdating"
+          >
+            Accept
+          </button>
+          
+          <!-- Decline Order Button -->
+          <button 
+            v-if="canDeclineItem"
+            @click="declineItem" 
+            class="control-btn decline-btn"
+            :disabled="isUpdating"
+          >
+            Decline Delivery
+          </button>
+          
+          <!-- Picked Up Button -->
+          <button 
+            v-if="canMarkAsPickedUp"
+            @click="markAsPickedUp" 
+            class="control-btn pickup-btn"
+            :disabled="isUpdating"
+          >
+            Mark as Picked Up
+          </button>
+          
+          <!-- Delivered Button -->
+          <button 
+            v-if="canMarkAsDelivered"
+            @click="markAsDelivered" 
+            class="control-btn deliver-btn"
+            :disabled="isUpdating"
+          >
+            Mark as Delivered
+          </button>
+          
+          <!-- Additional Notes -->
+          <div v-if="showNotesInput" class="notes-input">
+            <textarea 
+              v-model="statusNotes"
+              placeholder="Add notes about this update (optional)"
               :disabled="isUpdating"
-            >
-              <option value="">-- Select Status --</option>
-              <option 
-                v-for="status in availableStatuses" 
-                :key="status" 
-                :value="status"
-              >
-                {{ status }}
-              </option>
-            </select>
-            <div class="status-notes-input">
-              <label for="statusNotes">Notes:</label>
-              <textarea 
-                id="statusNotes" 
-                v-model="statusNotes"
-                placeholder="Add notes about this status update"
-                :disabled="isUpdating"
-              ></textarea>
-            </div>
-            <button 
-              @click="updateStatus" 
-              class="update-btn"
-              :disabled="!selectedStatus || isUpdating"
-            >
-              Update Status
-            </button>
+            ></textarea>
           </div>
         </div>
-      </div>  
+      </div>
+
+    <div v-if="isExpanded" class="order-item-details">
 
       <!-- Courier Information -->
       <div class="courier-section" v-if="userType === 'ADMIN'">
@@ -127,9 +152,8 @@ import {
   updateOrderItemStatus 
 } from '../api/api'
 import { UserTypeEnum } from '../shared/enums/UserEnums'
-import { useOrderStore } from '../stores/orderStore'
 import StatusHistory from './StatusHistory.vue'
-
+import { useOrderItemStore } from '../stores/orderItemStore'
 const props = defineProps({
   orderItem: {
     type: Object,
@@ -143,27 +167,109 @@ const props = defineProps({
   availableCouriers: {
     type: Array,
     default: () => []
-  },
+  }
 })
 
 const emit = defineEmits(['item-updated'])
-const orderStore = useOrderStore()
+const orderItemStore = useOrderItemStore()
+
 // UI state
 const isExpanded = ref(false)
 const isUpdating = ref(false)
-
-// Form state
 const selectedCourierId = ref('')
 const selectedStatus = ref('')
 const statusNotes = ref('')
 
+// Computed properties for status-based controls
+const currentStatus = computed(() => getCurrentStatus())
+
+// For Admin
+const canCancelItem = computed(() => {
+  const status = currentStatus.value
+  return ![OrderItemStatusEnum.CANCELLED, OrderItemStatusEnum.DELIVERED].includes(status)
+})
+
+// For Courier
+const canAcceptItem = computed(() => {
+  return currentStatus.value === OrderItemStatusEnum.ASSIGNED
+})
+
+const canDeclineItem = computed(() => {
+  return [OrderItemStatusEnum.ASSIGNED, OrderItemStatusEnum.CONFIRMED_BY_COURIER].includes(currentStatus.value) && 
+         props.orderItem.courierId === getUserId()
+})
+
+const canMarkAsPickedUp = computed(() => {
+  return currentStatus.value === OrderItemStatusEnum.CONFIRMED_BY_COURIER
+})
+
+const canMarkAsDelivered = computed(() => {
+  return currentStatus.value === OrderItemStatusEnum.PICKED_UP
+})
+
+const showNotesInput = computed(() => {
+  return props.userType === 'COURIER' && 
+         (canMarkAsPickedUp.value || canMarkAsDelivered.value || canDeclineItem.value)
+})
+
+// Status-related computed properties
 const statusHistory = computed(() => {
   return props.orderItem?.orderItemStatuses
 })
 
 const statusClass = computed(() => {
-  const currentStatus = getCurrentStatus()
-  switch (currentStatus) {
+  return getStatusClass(currentStatus.value)
+})
+
+// Get user ID helper
+const getUserId = () => {
+  try {
+    const userId = localStorage.getItem('userId')
+    return userId ? parseInt(userId) : null
+  } catch (error) {
+    console.error('Error getting user ID:', error)
+    return null
+  }
+}
+
+// Available statuses by role and current status
+const availableStatuses = computed(() => {
+  const status = currentStatus.value
+  if (props.userType === 'COURIER') {
+    if (status === OrderItemStatusEnum.ASSIGNED) {
+      return [OrderItemStatusEnum.CONFIRMED_BY_COURIER]
+    } else if (status === OrderItemStatusEnum.CONFIRMED_BY_COURIER) {
+      return [OrderItemStatusEnum.PICKED_UP]
+    } else if (status === OrderItemStatusEnum.PICKED_UP) {
+      return [OrderItemStatusEnum.DELIVERED]
+    }
+  }
+  return []
+})
+
+// Methods
+const toggleExpand = () => {
+  isExpanded.value = !isExpanded.value
+}
+
+const getCurrentStatus = () => {
+  if (!props.orderItem.orderItemStatuses || props.orderItem.orderItemStatuses.length === 0) {
+    return OrderItemStatusEnum.DRAFT
+  }
+  
+  const sortedStatuses = [...props.orderItem.orderItemStatuses].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+  
+  if (sortedStatuses.length > 0) {
+    return sortedStatuses[0].status
+  }
+  
+  return OrderItemStatusEnum.DRAFT
+}
+
+const getStatusClass = (status) => {
+  switch (status) {
     case OrderItemStatusEnum.DRAFT:
       return 'status-pending'
     case OrderItemStatusEnum.ACCEPTED:
@@ -181,73 +287,26 @@ const statusClass = computed(() => {
     default:
       return ''
   }
-})
-
-const availableStatuses = computed(() => {
-  const currentStatus = getCurrentStatus()
-  
-  // Define logical status progressions based on current status
-  switch (currentStatus) {
-    case OrderItemStatusEnum.DRAFT:
-      return [OrderItemStatusEnum.ACCEPTED, OrderItemStatusEnum.CANCELLED]
-    case OrderItemStatusEnum.ACCEPTED:
-      return [OrderItemStatusEnum.ASSIGNED, OrderItemStatusEnum.CANCELLED]
-    case OrderItemStatusEnum.ASSIGNED:
-      return [OrderItemStatusEnum.CONFIRMED_BY_COURIER, OrderItemStatusEnum.CANCELLED]
-    case OrderItemStatusEnum.CONFIRMED_BY_COURIER:
-      return [OrderItemStatusEnum.PICKED_UP, OrderItemStatusEnum.CANCELLED]
-    case OrderItemStatusEnum.PICKED_UP:
-      return [OrderItemStatusEnum.DELIVERED, OrderItemStatusEnum.CANCELLED]
-    case OrderItemStatusEnum.DELIVERED:
-      return [OrderItemStatusEnum.CANCELLED]
-    default:
-      return Object.values(OrderItemStatusEnum)
-  }
-})
-
-// Initialize
-onMounted(() => {
-  if (props.orderItem.courierId) {
-    selectedCourierId.value = props.orderItem.courierId.toString()
-  }
-})
-
-// Methods
-const toggleExpand = () => {
-  isExpanded.value = !isExpanded.value
-}
-
-const getCurrentStatus = () => {
-  if (props.orderItem?.orderItemStatuses) {
-    let currentStatus = props.orderItem.orderItemStatuses.find(status => status.isCurrent)
-    return currentStatus?.status
-  }
-  
-  // Fallback to a default status if no history
-  return OrderItemStatusEnum.DRAFT
 }
 
 const getCourierName = () => {
   if (!props.orderItem.courierId) return 'Not assigned'
-
+  
   const courier = props.availableCouriers.find(c => c.id === props.orderItem.courierId)
   return courier ? (courier.name || courier.email) : `Courier #${props.orderItem.courierId}`
 }
 
-const getUserId = () => {
-  // This would come from your auth store
-  // For example: return userStore.user.id
-  return 0; // Replace with actual implementation
-}
-
-// Admin actions
+// Action methods
 const assignCourier = async () => {
-  if (!selectedCourierId.value) return
+  if (!selectedCourierId.value) {
+    toast.error('Please select a courier')
+    return
+  }
   
   isUpdating.value = true
+  
   try {
-    await assignCourierToOrderItem(props.orderItem.id, parseInt(selectedCourierId.value))
-    await orderStore.fetchAllOrders()
+    await assignCourierToOrderItem(props.orderItem.id, selectedCourierId.value)
     toast.success('Courier assigned successfully')
     emit('item-updated')
   } catch (error) {
@@ -260,10 +319,9 @@ const assignCourier = async () => {
 
 const unassignCourier = async () => {
   isUpdating.value = true
+  
   try {
     await unassignCourierFromOrderItem(props.orderItem.id)
-    await orderStore.fetchAllOrders()
-    selectedCourierId.value = ''
     toast.success('Courier unassigned successfully')
     emit('item-updated')
   } catch (error) {
@@ -274,27 +332,49 @@ const unassignCourier = async () => {
   }
 }
 
-// Courier actions
-const updateStatus = async () => {
-  if (!selectedStatus.value) return
-  
+const updateItem = async (newStatus) => {
   isUpdating.value = true
+  
   try {
-    await updateOrderItemStatus(props.orderItem.id, {
-      status: selectedStatus.value,
-      notes: statusNotes.value
-    })
-    toast.success('Status updated successfully')
-    selectedStatus.value = ''
+    await updateOrderItemStatus(props.orderItem.id, newStatus, statusNotes.value)
+    toast.success(`Item status updated to ${newStatus}`)
     statusNotes.value = ''
+    await orderItemStore.fetchAllOrderItems()
     emit('item-updated')
   } catch (error) {
-    toast.error('Failed to update status')
+    toast.error('Failed to update item status')
     console.error(error)
   } finally {
     isUpdating.value = false
   }
 }
+
+// New action methods
+const acceptItem = async () => {
+  await updateItem(OrderItemStatusEnum.CONFIRMED_BY_COURIER)
+}
+
+const declineItem = async () => {
+  await updateItem(OrderItemStatusEnum.CANCELLED)
+}
+
+const markAsPickedUp = async () => {
+  await updateItem(OrderItemStatusEnum.PICKED_UP)
+}
+
+const markAsDelivered = async () => {
+  await updateItem(OrderItemStatusEnum.DELIVERED)
+}
+
+const cancelItem = async () => {
+  await updateItem(OrderItemStatusEnum.CANCELLED)
+}
+
+onMounted(() => {
+  if (props.orderItem?.courierId) {
+    selectedCourierId.value = props.orderItem.courierId.toString()
+  }
+})
 </script>
 
 <style scoped>
@@ -374,12 +454,95 @@ const updateStatus = async () => {
 }
 
 .item-controls {
+  padding: 1rem;
+  background: var(--color-background-soft);
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content:center;
   gap: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--color-border);
+}
+
+.control-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.control-select {
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  min-width: 200px;
+}
+
+.control-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.control-btn:hover {
+  opacity: 0.9;
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.assign-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.unassign-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.accept-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.decline-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.pickup-btn {
+  background-color: #6f42c1;
+  color: white;
+}
+
+.deliver-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.notes-input {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.notes-input textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  resize: vertical;
 }
 
 .address-section,
@@ -419,66 +582,12 @@ const updateStatus = async () => {
   font-style: italic;
 }
 
-/* Admin controls */
+/* Admin and Courier controls */
 .admin-controls, 
 .courier-controls {
-  padding-top: 1rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.courier-assignment-dropdown,
-.status-update {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 0.75rem;
-}
-
-select, textarea {
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background: var(--color-background);
-  font-size: 0.9rem;
-}
-
-textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.assignment-buttons {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.assign-btn {
-  background-color: #007bff;
-  color: white;
-}
-
-.unassign-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.update-btn {
-  background-color: #28a745;
-  color: white;
-  align-self: flex-start;
+  align-items: center;
 }
 </style> 

@@ -17,7 +17,6 @@
       <div class="tab-content">
         <!-- All Clients Tab -->
         <div v-if="currentTab === 'clients'" class="tab-panel">
-          <h2>All Clients</h2>
           <div v-if="error" class="error-message">{{ error }}</div>
           <div v-if="loadingClients" class="loading">Loading clients...</div>
           <div class="list-container">
@@ -32,7 +31,6 @@
 
         <!-- All Couriers Tab -->
         <div v-if="currentTab === 'couriers'" class="tab-panel">
-          <h2>All Couriers</h2>
           <div class="list-container">
             <p v-if="!couriers.length">No couriers registered yet.</p>
             <div v-else v-for="courier in couriers" :key="courier.id" class="list-item">
@@ -45,7 +43,6 @@
 
         <!-- Order History Tab -->
         <div v-if="currentTab === 'history'" class="tab-panel">
-          <h2>Order History</h2>
           <div class="list-container">
             <p v-if="!orderHistory.length">No completed orders.</p>
             <OrderCard
@@ -62,7 +59,6 @@
 
         <!-- Active Orders Tab -->
         <div v-if="currentTab === 'active'" class="tab-panel">
-          <h2>Active Orders</h2>
           <div class="list-container">
             <p v-if="!activeOrders.length">No active orders.</p>
             <OrderCard

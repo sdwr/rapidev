@@ -17,30 +17,13 @@
       <div class="tab-content">
         <!-- Profile Tab -->
         <div v-if="currentTab === 'profile'" class="tab-panel">
-          <h2>My Profile</h2>
           <ProfileInfo 
             profileType="PICKUP"
             @profile-saved="handleProfileSave" />
         </div>
 
-        <!-- Assigned Deliveries Tab -->
-        <div v-if="currentTab === 'assigned'" class="tab-panel">
-          <h2>Assigned Deliveries</h2>
-          <div class="list-container">
-            <p v-if="!assignedDeliveries.length">No assigned deliveries.</p>
-            <OrderItemCard
-              v-else
-              v-for="orderItem in assignedDeliveries"
-              :key="orderItem.id"
-              :orderItem="orderItem"
-              :userType="'COURIER'"
-            />
-          </div>
-        </div>
-
         <!-- Active Deliveries Tab -->
         <div v-if="currentTab === 'active'" class="tab-panel">
-          <h2>Active Deliveries</h2>
           <div class="list-container">
             <p v-if="!activeDeliveries.length">No active deliveries.</p>
             <OrderItemCard
@@ -55,7 +38,6 @@
 
         <!-- Delivery History Tab -->
         <div v-if="currentTab === 'history'" class="tab-panel">
-          <h2>Delivery History</h2>
           <div class="list-container">
             <p v-if="!deliveryHistory.length">No delivery history.</p>
             <OrderItemCard
@@ -83,15 +65,13 @@ import { useOrderItemStore } from '../stores/orderItemStore'
 const userStore = useUserStore()
 const orderItemStore = useOrderItemStore()
 const tabs = [
-  { id: 'assigned', label: 'Assigned Deliveries' },
   { id: 'active', label: 'Active Deliveries' },
   { id: 'history', label: 'Delivery History' },
   { id: 'profile', label: 'My Profile' }
 ]
 
-const currentTab = ref('assigned')
-const assignedDeliveries = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id))
-const activeDeliveries = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id && item.status === 'ACTIVE'))
+const currentTab = ref('active')
+const activeDeliveries = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id))
 const deliveryHistory = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id && item.status === 'DELIVERED'))
 
 const handleProfileSave = async (profileData) => {

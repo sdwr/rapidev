@@ -493,14 +493,14 @@ export const unassignCourierFromOrderItem = async (orderItemId: number) => {
   }
 }
 
-export const updateOrderItemStatus = async (orderItemId: number, data: { status: string, notes?: string }) => {
+export const updateOrderItemStatus = async (orderItemId: number, status: string, notes?: string ) => {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/item/${orderItemId}/status`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ status, notes }),
     })
     if (!response.ok) throw await response.json()
     return response.json()
