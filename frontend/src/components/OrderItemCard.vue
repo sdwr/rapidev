@@ -7,6 +7,20 @@
     </div>
 
     <div v-if="isExpanded" class="order-item-details">
+
+      <!-- Courier Information -->
+      <div class="courier-section">
+        <div class="courier-item">
+          <div class="label">Courier:</div>
+          <div v-if="orderItem.courierId" class="value">
+            {{ getCourierName() }}
+          </div>
+          <div v-else class="value not-assigned">
+            Not assigned
+          </div>
+        </div>
+      </div>
+      
       <!-- Addresses -->
       <div class="address-section">
         <div class="address-item">
@@ -28,19 +42,6 @@
         <div class="notes-item" v-if="orderItem.deliveryNotes">
           <div class="label">Delivery Notes:</div>
           <div class="value">{{ orderItem.deliveryNotes }}</div>
-        </div>
-      </div>
-
-      <!-- Courier Information -->
-      <div class="courier-section">
-        <div class="courier-item">
-          <div class="label">Courier:</div>
-          <div v-if="orderItem.courierId" class="value">
-            {{ getCourierName() }}
-          </div>
-          <div v-else class="value not-assigned">
-            Not assigned
-          </div>
         </div>
       </div>
 

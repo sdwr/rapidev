@@ -54,6 +54,7 @@ const getStatusClass = (status: string) => {
   switch (status) {
     case 'DRAFT': return 'draft'
     case 'PAID': return 'paid'
+    case 'ACCEPTED': return 'accepted'
     case 'ASSIGNED': return 'assigned'
     case 'CONFIRMED_BY_COURIER': return 'confirmed'
     case 'PICKED_UP': return 'picked-up'
@@ -157,6 +158,10 @@ const getStatusClass = (status: string) => {
 
 .paid {
   background-color: #17a2b8;
+}
+
+.accepted {
+  background-color: #28a745;
 }
 
 .assigned {

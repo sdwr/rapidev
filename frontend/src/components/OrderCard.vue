@@ -1,7 +1,11 @@
 <template>
   <div class="list-item">
-    <h3>Order #{{ order.id }}</h3>
-    <p>Status: {{ getCurrentStatus(order) }}</p>
+    <div class="order-header">
+      <div class="status-badge" :class="getStatusClass(getCurrentStatus(order))">
+        {{ getCurrentStatus(order) }}
+      </div>
+      <h3>Order #{{ order.id }}</h3>
+    </div>
     <p>Client: {{ order.client?.name }}</p>
     <p>Pickup Address: {{ order.pickupAddress }}</p>
     <div class="order-items">
@@ -163,6 +167,30 @@ const toggleOrder = () => {
 const expandItem = (itemId) => {
   expandedItemId.value = itemId
 }
+
+// Add a getStatusClass method similar to what's in OrderItemCard
+const getStatusClass = (status: string) => {
+  switch (status) {
+    case OrderStatusEnum.DRAFT:
+      return 'status-draft'
+    case OrderStatusEnum.ACCEPTED:
+      return 'status-accepted'
+    case OrderStatusEnum.ASSIGNED_TO_COURIER:
+      return 'status-assigned'
+    case OrderStatusEnum.CONFIRMED_BY_COURIER:
+      return 'status-confirmed'
+    case OrderStatusEnum.PICKED_UP:
+      return 'status-picked-up'
+    case OrderStatusEnum.DELIVERED:
+      return 'status-delivered'
+    case OrderStatusEnum.CANCELLED_BY_CLIENT:
+    case OrderStatusEnum.CANCELLED_BY_COURIER:
+    case OrderStatusEnum.CANCELLED_BY_ADMIN:
+      return 'status-cancelled'
+    default:
+      return 'status-draft'
+  }
+}
 </script>
 
 <style scoped>
@@ -172,6 +200,60 @@ const expandItem = (itemId) => {
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
+}
+
+/* Add new styles for the order header with status badge */
+.order-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.order-header h3 {
+  margin: 0;
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: white;
+}
+
+/* Status colors */
+.status-draft {
+  background-color: #6c757d;
+}
+
+.status-paid {
+  background-color: #17a2b8;
+}
+
+.status-accepted {
+  background-color: #28a745;
+}
+
+.status-assigned {
+  background-color: #fd7e14;
+}
+
+.status-confirmed {
+  background-color: #007bff;
+}
+
+.status-picked-up {
+  background-color: #6f42c1;
+}
+
+.status-delivered {
+  background-color: #28a745;
+}
+
+.status-cancelled {
+  background-color: #dc3545;
 }
 
 .order-items {
