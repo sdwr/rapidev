@@ -28,7 +28,7 @@ sudo apt update
 sudo apt install postgresql postgresql-contrib
 ```
 3. Start and enable the service
-```
+```e
 sudo systemctl start postgresql
 sudo systemctl enable postgresql
 ```
@@ -56,3 +56,24 @@ GRANT ALL ON SCHEMA public TO rapidev_user;
 2. Run `node ace migration:rollback` to rollback the migrations
 3. Run `node ace migration:refresh` to refresh the migrations
 
+## Running FE and BE in the background, so they stay open when SSH closes
+
+1. Open a new screen with
+```
+screen
+```
+
+2. Run the command to start the process then detach from the screen with
+```
+ctrl+A, then D
+```
+
+3. To see all running screens
+```
+screen -ls
+```
+
+4. Reattaching to restart a process
+```
+screen -r <Screen #>
+```
