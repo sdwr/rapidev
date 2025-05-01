@@ -83,6 +83,10 @@ export class OrderItemStatusService {
         OrderItemStatusEnum.PICKED_UP,
         OrderItemStatusEnum.CANCELLED
       ],
+      [OrderItemStatusEnum.CONFIRMED_BY_COURIER]: [
+        OrderItemStatusEnum.PICKED_UP,
+        OrderItemStatusEnum.CANCELLED
+      ],
       [OrderItemStatusEnum.PICKED_UP]: [
         OrderItemStatusEnum.DELIVERED,
         OrderItemStatusEnum.CANCELLED

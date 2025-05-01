@@ -308,7 +308,7 @@ const assignCourier = async () => {
   try {
     await assignCourierToOrderItem(props.orderItem.id, selectedCourierId.value)
     toast.success('Courier assigned successfully')
-    emit('item-updated')
+    await reloadOrderItems()
   } catch (error) {
     toast.error('Failed to assign courier')
     console.error(error)
@@ -323,7 +323,7 @@ const unassignCourier = async () => {
   try {
     await unassignCourierFromOrderItem(props.orderItem.id)
     toast.success('Courier unassigned successfully')
-    emit('item-updated')
+    await reloadOrderItems()
   } catch (error) {
     toast.error('Failed to unassign courier')
     console.error(error)
@@ -339,14 +339,18 @@ const updateItem = async (newStatus) => {
     await updateOrderItemStatus(props.orderItem.id, newStatus, statusNotes.value)
     toast.success(`Item status updated to ${newStatus}`)
     statusNotes.value = ''
-    await orderItemStore.fetchAllOrderItems()
-    emit('item-updated')
+    await reloadOrderItems()
   } catch (error) {
     toast.error('Failed to update item status')
     console.error(error)
   } finally {
     isUpdating.value = false
   }
+}
+
+const reloadOrderItems = async () => {
+  await orderItemStore.fetchAllOrderItems()
+  emit('item-updated')
 }
 
 // New action methods
@@ -454,7 +458,6 @@ onMounted(() => {
 }
 
 .item-controls {
-  padding: 1rem;
   background: var(--color-background-soft);
   display: flex;
   flex-direction: row;

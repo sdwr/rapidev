@@ -6,7 +6,7 @@
       </div>
       <h3>Order #{{ order.id }}</h3>
     </div>
-    <p>Client: {{ order.client?.name }}</p>
+    <p v-if="userType !== 'CLIENT'">Client: {{ order.client?.name }}</p>
     <p>Pickup Address: {{ order.pickupAddress }}</p>
     <div class="order-items">
       <div class="order-item-header" @click="toggleItems">

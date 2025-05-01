@@ -40,7 +40,7 @@
               v-for="order in myOrders"
               :key="order.id"
               :order="order"
-              :userType="'client'"
+              :userType="'CLIENT'"
               :statusHistory="statusHistories[order.id]"
               @orderUpdated="fetchOrders"
             />
@@ -56,7 +56,7 @@
               v-for="order in orderHistory"
               :key="order.id"
               :order="order"
-              :userType="'client'"
+              :userType="'CLIENT'"
               :statusHistory="statusHistories[order.id]"
               @orderUpdated="fetchOrders"
             />
@@ -78,8 +78,10 @@ import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES } from '@/utils/consts'
 import { getCurrentStatus } from '@/utils'
+import { useOrderStore } from '../stores/orderStore'
 
 const userStore = useUserStore()
+const orderStore = useOrderStore()
 
 const tabs = [
   { id: 'order', label: 'Place Order' },
@@ -116,28 +118,24 @@ const fetchUser = async () => {
 }
 
 const fetchOrders = async () => {
-  if (!userStore.user?.id) {
-    error.value = 'No user logged in'
-    return
-  }
-
   loadingOrders.value = true
-  try {
-    const orders = await getClientOrders(userStore.user.id)
-    myOrders.value = orders.filter(order => ACTIVE_ORDER_STATUSES.includes(getCurrentStatus(order)))
-    orderHistory.value = orders.filter(order => HISTORY_ORDER_STATUSES.includes(getCurrentStatus(order)))
+  await orderStore.fetchAllOrders()
 
-    // Fetch status history for each order
-    for (const order of orders) {
-      const statuses = order.orderStatuses
-      statusHistories.value[order.id] = statuses
-      statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    }
-  } catch (e) {
-    error.value = e.message
-  } finally {
-    loadingOrders.value = false
+  const orders = orderStore.orders
+  myOrders.value = orders.filter(order => {
+    return ACTIVE_ORDER_STATUSES.includes(getCurrentStatus(order)) && order.clientId === userStore.user?.id
+  })
+  orderHistory.value = orders.filter(order => {
+    return HISTORY_ORDER_STATUSES.includes(getCurrentStatus(order)) && order.clientId === userStore.user?.id
+  })
+
+  // Fetch status history for each order
+  for (const order of orders) {
+    const statuses = order.orderStatuses
+    statusHistories.value[order.id] = statuses
+    statusHistories.value[order.id].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
   }
+  loadingOrders.value = false
 }
 
 const handleOrderCreated = async () => {
