@@ -2,11 +2,89 @@
   <div class="order-item-card" :class="{ expanded: isExpanded }">
     <div class="order-item-header" @click="toggleExpand">
       <div class="status-badge" :class="statusClass">{{ getCurrentStatus() }}</div>
-      <div class="order-item-id">{{ orderItem.deliveryAddress }}</div>
+      <div class="order-item-id">{{ orderItem.pickupAddress }} - {{ orderItem.deliveryAddress }}</div>
       <div class="toggle-icon">{{ isExpanded ? '▼' : '▶' }}</div>
     </div>
 
     <div v-if="isExpanded" class="order-item-details">
+
+      <!-- Admin Controls -->
+      <div class="item-controls">
+        <div v-if="userType === 'ADMIN'" class="admin-controls">
+          <div v-if="!orderItem.courierId" class="courier-assignment-dropdown">
+            <label for="courierSelect">Assign Courier:</label>
+            <select 
+              id="courierSelect" 
+              v-model="selectedCourierId"
+              :disabled="isUpdating"
+            >
+              <option value="">-- Select Courier --</option>
+              <option 
+                v-for="courier in availableCouriers" 
+                :key="courier.id" 
+                :value="courier.id"
+              >
+                {{ courier.name || courier.email }}
+              </option>
+            </select>
+          </div>
+          <div class="assignment-buttons">
+            <button 
+              v-if="orderItem.courierId" 
+              @click="unassignCourier" 
+              class="unassign-btn"
+              :disabled="isUpdating"
+            >
+              Unassign Courier
+            </button>
+            <button 
+              v-else
+              @click="assignCourier" 
+              class="assign-btn"
+              :disabled="!selectedCourierId || isUpdating"
+            >
+              Assign
+            </button>
+          </div>
+        </div>
+
+        <!-- Courier Controls -->
+        <div v-if="userType === 'COURIER'" class="courier-controls">
+          <div class="status-update">
+            <label for="statusSelect">Update Status:</label>
+            <select 
+              id="statusSelect" 
+              v-model="selectedStatus" 
+              :disabled="isUpdating"
+            >
+              <option value="">-- Select Status --</option>
+              <option 
+                v-for="status in availableStatuses" 
+                :key="status" 
+                :value="status"
+              >
+                {{ status }}
+              </option>
+            </select>
+            <div class="status-notes-input">
+              <label for="statusNotes">Notes:</label>
+              <textarea 
+                id="statusNotes" 
+                v-model="statusNotes"
+                placeholder="Add notes about this status update"
+                :disabled="isUpdating"
+              ></textarea>
+            </div>
+            <button 
+              @click="updateStatus" 
+              class="update-btn"
+              :disabled="!selectedStatus || isUpdating"
+            >
+              Update Status
+            </button>
+          </div>
+        </div>
+      </div>  
 
       <!-- Courier Information -->
       <div class="courier-section" v-if="userType === 'ADMIN'">
@@ -18,18 +96,6 @@
           <div v-else class="value not-assigned">
             Not assigned
           </div>
-        </div>
-      </div>
-      
-      <!-- Addresses -->
-      <div class="address-section">
-        <div class="address-item">
-          <div class="label">Pickup Address:</div>
-          <div class="value">{{ orderItem.pickupAddress }}</div>
-        </div>
-        <div class="address-item">
-          <div class="label">Delivery Address:</div>
-          <div class="value">{{ orderItem.deliveryAddress }}</div>
         </div>
       </div>
 
@@ -47,82 +113,6 @@
 
       <!-- Status History -->
       <StatusHistory :statuses="statusHistory" />
-
-      <!-- Admin Controls -->
-      <div v-if="userType === 'ADMIN'" class="admin-controls">
-        <div class="courier-assignment">
-          <label for="courierSelect">Assign Courier:</label>
-          <select 
-            id="courierSelect" 
-            v-model="selectedCourierId"
-            :disabled="isUpdating"
-          >
-            <option value="">-- Select Courier --</option>
-            <option 
-              v-for="courier in availableCouriers" 
-              :key="courier.id" 
-              :value="courier.id"
-            >
-              {{ courier.name || courier.email }}
-            </option>
-          </select>
-          <div class="assignment-buttons">
-            <button 
-              v-if="orderItem.courierId" 
-              @click="unassignCourier" 
-              class="unassign-btn"
-              :disabled="isUpdating"
-            >
-              Unassign
-            </button>
-            <button 
-              v-else
-              @click="assignCourier" 
-              class="assign-btn"
-              :disabled="!selectedCourierId || isUpdating"
-            >
-              Assign
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Courier Controls -->
-      <div v-if="userType === 'COURIER'" class="courier-controls">
-        <div class="status-update">
-          <label for="statusSelect">Update Status:</label>
-          <select 
-            id="statusSelect" 
-            v-model="selectedStatus" 
-            :disabled="isUpdating"
-          >
-            <option value="">-- Select Status --</option>
-            <option 
-              v-for="status in availableStatuses" 
-              :key="status" 
-              :value="status"
-            >
-              {{ status }}
-            </option>
-          </select>
-          <div class="status-notes-input">
-            <label for="statusNotes">Notes:</label>
-            <textarea 
-              id="statusNotes" 
-              v-model="statusNotes"
-              placeholder="Add notes about this status update"
-              :disabled="isUpdating"
-            ></textarea>
-          </div>
-          <button 
-            @click="updateStatus" 
-            class="update-btn"
-            :disabled="!selectedStatus || isUpdating"
-          >
-            Update Status
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -383,6 +373,15 @@ const updateStatus = async () => {
   gap: 1rem;
 }
 
+.item-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
 .address-section,
 .contact-section,
 .courier-section {
@@ -427,7 +426,7 @@ const updateStatus = async () => {
   border-top: 1px solid var(--color-border);
 }
 
-.courier-assignment,
+.courier-assignment-dropdown,
 .status-update {
   display: flex;
   flex-direction: column;
