@@ -6,6 +6,11 @@ A real-time delivery management system with separate interfaces for clients, cou
 
 1. Clone the repository
 
+1.5 Install node and npm
+```
+sudo apt install nodejs npm
+```
+
 2. Run `npm install` in the frontend directory to install the dependencies
 3. Run `npm run dev` in the frontend directory to start the frontend server on port 5173
 
