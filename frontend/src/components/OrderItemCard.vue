@@ -9,7 +9,7 @@
     <div v-if="isExpanded" class="order-item-details">
 
       <!-- Courier Information -->
-      <div class="courier-section">
+      <div class="courier-section" v-if="userType === 'ADMIN'">
         <div class="courier-item">
           <div class="label">Courier:</div>
           <div v-if="orderItem.courierId" class="value">
@@ -310,6 +310,7 @@ const updateStatus = async () => {
 <style scoped>
 .order-item-card {
   background: var(--color-background);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
@@ -319,23 +320,24 @@ const updateStatus = async () => {
 .order-item-header {
   display: flex;
   align-items: center;
-  padding: 1rem;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
   cursor: pointer;
   background: var(--color-background-soft);
-  border-bottom: 1px solid var(--color-border);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .status-badge {
-  padding: 0.35rem 0.7rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
-  margin-right: 1rem;
 }
 
 .status-pending {
-  background-color: #ffeeba;
+  background-color: #fff3cd;
   color: #856404;
 }
 
@@ -389,23 +391,28 @@ const updateStatus = async () => {
   gap: 0.5rem;
 }
 
+/* Updated styles for horizontal layout */
 .address-item,
 .contact-item,
 .courier-item,
 .notes-item {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.75rem;
 }
 
 .label {
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--color-text-light);
+  min-width: 120px; /* Fixed width for labels */
+  text-align: right; /* Right align the labels */
 }
 
 .value {
   font-size: 1rem;
+  flex: 1; /* Allow the value to take up remaining space */
 }
 
 .not-assigned {
@@ -416,7 +423,6 @@ const updateStatus = async () => {
 /* Admin controls */
 .admin-controls, 
 .courier-controls {
-  margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--color-border);
 }
