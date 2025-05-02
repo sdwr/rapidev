@@ -256,16 +256,31 @@ form {
 .address-select, .new-address-input {
   width: 100%;
   padding: 0.75rem;
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
+  padding-left: 3.25rem;
+  padding-right: 3.25rem;
   border: 1px solid var(--color-border);
   border-radius: 4px;
   background: var(--color-background);
   color: var(--color-text);
   font-size: 1rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .address-select {
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.address-select:after {
+  content: "▼";
+  position: absolute;
+  right: 2.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 </style> 
