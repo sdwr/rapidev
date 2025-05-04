@@ -98,6 +98,33 @@ payment
     -courier payment based on flat fee and time deliveries
 
 
+FEATURE REQUESTS:
+- autocomplete address
+- delivery name is required for items
+- delivery picture or select "hand-delivered to customer"
+- courier payout view
+- courier map view
+- admin reports
+
+- client receipts
+
+-text notification
+    - courier is on route
+    - courier action (en route)
+
+
+
+USER REPORTS
+CLIENT
+    - list of completed deliveries filtered by day/week/month
+
+
+ADMIN
+    - list of all deliveries
+COURIER
+    - list of deliveries filtered by day/week/month
+    
+
 
 -- Potential issues
 

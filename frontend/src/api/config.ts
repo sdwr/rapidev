@@ -1,6 +1,6 @@
 const isProd = import.meta.env.VITE_API_ENV === 'production'
 const baseURL = isProd 
-  ? import.meta.env.VITE_BACKEND_URL_PROD 
+  ? '/api'
   : import.meta.env.VITE_BACKEND_URL_DEV
 
 export const apiConfig = {
