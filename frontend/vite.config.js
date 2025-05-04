@@ -10,9 +10,8 @@ export default defineConfig({
     host: true,
     port: process.env.VITE_FRONTEND_PORT,
     allowedHosts: [
-      'sdwr.ca',
-      'www.sdwr.ca',
-      'rapidev.sdwr.ca',
+      'rapidel.ca',
+      'www.rapidel.ca',
       'localhost',
     ],
   },
