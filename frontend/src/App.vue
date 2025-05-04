@@ -73,6 +73,9 @@ onMounted(async () => {
             
             <!-- Debug link - only for admins -->
             <RouterLink v-if="isAdmin" to="/debug">Debug</RouterLink>
+            
+            <!-- Map link -->
+            <RouterLink to="/map">Map</RouterLink>
           </template>
         </nav>
       </div>

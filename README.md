@@ -13,6 +13,10 @@ sudo apt install nodejs npm
 
 2. Run `npm install` in the frontend directory to install the dependencies
 3. Run `npm run dev` in the frontend directory to start the frontend server on port 5173
+  to run the frontend server for production, add VITE_API_ENV=production to the .env file or to the command 
+  ```
+  VITE_API_ENV=production npm run dev
+  ```
 
 4. Run `npm install` in the backend directory to install the dependencies
 5. Run `npm run dev` in the backend directory to start the backend server on port 3333
@@ -77,3 +81,18 @@ screen -ls
 ```
 screen -r <Screen #>
 ```
+
+## Google Maps Integration Setup
+
+The application uses Google Maps for address autocomplete and location mapping. To set up:
+
+In frontend:
+1. Copy `secrets.example.js` to `secrets.js`
+2. Get a Google Maps API key from the [Google Cloud Console](https://console.cloud.google.com/)
+3. Enable the following APIs in your Google Cloud project:
+   - Maps JavaScript API
+   - Places API
+   - Geocoding API
+4. Add your API key to `secrets.js`
+
+Note: The `secrets.js` file is excluded from version control to protect your API keys.

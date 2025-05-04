@@ -4,6 +4,7 @@ import AdminView from '../views/AdminView.vue'
 import CourierView from '../views/CourierView.vue'
 import DebugView from '../views/DebugView.vue'
 import LoginView from '../views/LoginView.vue'
+import DeliveriesMapView from '../views/DeliveriesMapView.vue'
 import { useUserStore } from '../stores/userStore'
 
 const router = createRouter({
@@ -49,6 +50,11 @@ const router = createRouter({
       path: '/debug',
       name: 'debug',
       component: DebugView
+    },
+    {
+      path: '/map',
+      name: 'map',
+      component: DeliveriesMapView
     }
   ]
 })

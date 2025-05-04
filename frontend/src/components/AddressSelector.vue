@@ -35,31 +35,39 @@
       <form @submit.prevent="confirmNewAddress" v-if="isCreatingNewAddress">
         <input
           ref="addressInput"
-          type="text"
-          v-model="addressValue"
-          :placeholder="`Enter new ${label.toLowerCase()} address`"
-          required
+          type="text" 
+          :id="`new-${id}`" 
+          v-model="newAddress" 
           class="new-address-input"
-          @keydown.esc="cancelNewAddress"
+          :placeholder="`Enter ${label.toLowerCase()} address`"
+          @input="searchAddresses"
+          required
+          autocomplete="off"
         />
+        
+        <!-- Address suggestions dropdown -->
+        <div v-if="addressSuggestions.length > 0" class="address-suggestions">
+          <div 
+            v-for="suggestion in addressSuggestions" 
+            :key="suggestion.place_id"
+            @click="selectSuggestion(suggestion)"
+            class="suggestion-item"
+          >
+            {{ suggestion.description }}
+          </div>
+        </div>
+
+        <button type="submit" class="confirm-btn">
+          ✓
+        </button>
       </form>
-      
-      <!-- Confirm button for new address -->
-      <button 
-        v-if="isCreatingNewAddress && addressValue" 
-        type="button" 
-        @click="confirmNewAddress" 
-        class="confirm-btn"
-        :aria-label="`Confirm new ${label.toLowerCase()} address`"
-      >
-        ✓
-      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted, nextTick } from 'vue'
+import { getPlacePredictions, getPlaceDetails } from '../services/googleMapsService'
 
 const props = defineProps({
   id: {
@@ -92,14 +100,16 @@ const emit = defineEmits(['update:modelValue', 'address-added', 'address-selecte
 
 const selectedOption = ref('')
 const isCreatingNewAddress = ref(false)
-const addressValue = ref('')
+const newAddress = ref('')
 const addressInput = ref(null)
+const addressSuggestions = ref([])
+const debounceTimeout = ref(null)
 
 // Watch for changes to selectedOption
 watch(selectedOption, (newValue) => {
   if (newValue === 'new') {
     isCreatingNewAddress.value = true
-    addressValue.value = ''
+    newAddress.value = ''
     emit('update:modelValue', '')
     
     // Focus the input field after the DOM updates
@@ -133,7 +143,7 @@ watch(isCreatingNewAddress, (newValue) => {
 // Watch for external changes to modelValue
 watch(() => props.modelValue, (newValue) => {
   if (!isCreatingNewAddress.value) {
-    addressValue.value = newValue
+    newAddress.value = newValue
   }
 })
 
@@ -167,20 +177,61 @@ watch(() => props.addresses, (newAddresses) => {
 const cancelNewAddress = () => {
   isCreatingNewAddress.value = false
   selectedOption.value = ''
-  addressValue.value = ''
+  newAddress.value = ''
   emit('update:modelValue', '')
 }
 
-const confirmNewAddress = () => {
-  // Don't proceed if the address is empty
-  if (!addressValue.value.trim()) return
+const confirmNewAddress = async () => {
+  if (!newAddress.value) return
   
   // Emit event to add the address to the parent's list
-  emit('address-added', addressValue.value, props.profileType)
+  emit('address-added', {
+    address: newAddress.value,
+    profileType: props.profileType
+  })
 
-  //the new address will be selected by the parent component once returned from the api
+  // Update the modelValue with the new address
+  emit('update:modelValue', newAddress.value)
+
+  // Reset state
   isCreatingNewAddress.value = false
-  emit('update:modelValue', addressValue.value)
+  newAddress.value = ''
+  addressSuggestions.value = []
+}
+
+// Search for address suggestions
+const searchAddresses = () => {
+  // Clear previous timeout
+  if (debounceTimeout.value) clearTimeout(debounceTimeout.value)
+  
+  // Set new timeout to prevent too many API calls
+  debounceTimeout.value = setTimeout(async () => {
+    if (!newAddress.value || newAddress.value.length < 3) {
+      addressSuggestions.value = []
+      return
+    }
+    
+    try {
+      const predictions = await getPlacePredictions(newAddress.value)
+      addressSuggestions.value = predictions
+    } catch (error) {
+      console.error('Error getting place predictions:', error)
+      addressSuggestions.value = []
+    }
+  }, 300)
+}
+
+// Select an address suggestion
+const selectSuggestion = async (suggestion) => {
+  try {
+    const placeDetails = await getPlaceDetails(suggestion.place_id)
+    newAddress.value = placeDetails.formatted_address
+    addressSuggestions.value = []
+  } catch (error) {
+    console.error('Error getting place details:', error)
+    newAddress.value = suggestion.description
+    addressSuggestions.value = []
+  }
 }
 
 onMounted(() => {
@@ -282,5 +333,32 @@ form {
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
+}
+
+.address-suggestions {
+  position: absolute;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  z-index: 100;
+  margin-top: 2px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.suggestion-item {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border-hover);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background-color: var(--color-background-soft);
 }
 </style> 
