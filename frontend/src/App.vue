@@ -62,18 +62,11 @@ onMounted(async () => {
         <div class="header-text">Rapid Delivery</div>
         <UserProfile />
       </div>
-      <div class="content-container">
+      <div v-if="isAdmin"class="content-container">
         <nav>
-          <!-- Always show login link when logged out -->
-          <RouterLink v-if="!isLoggedIn" to="/login">Login</RouterLink>
           
           <!-- Show appropriate links based on user role when logged in -->
-          <template v-else>
-            <!-- Client links -->
-            <RouterLink v-if="isClient" to="/">Client</RouterLink>
-            
-            <!-- Courier links -->
-            <RouterLink v-if="isCourier" to="/courier">Courier</RouterLink>
+          <template>
             
             <!-- Admin links -->
             <RouterLink v-if="isAdmin" to="/admin">Admin</RouterLink>

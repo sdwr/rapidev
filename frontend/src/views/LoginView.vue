@@ -86,15 +86,17 @@ const handleLogin = async () => {
     
     // Redirect based on user type
     switch (userType.value) {
-      case 'client':
-        router.push('/')
+      case 'CLIENT':
+        router.push('/client')
         break
-      case 'courier':
+      case 'COURIER':
         router.push('/courier')
         break
-      case 'admin':
+      case 'ADMIN':
         router.push('/admin')
         break
+      default:
+        router.push('/login')
     }
   } catch (err) {
     error.value = 'Login failed. Please try again.'

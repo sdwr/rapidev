@@ -1,7 +1,5 @@
 <template>
   <div class="view courier-view">
-    <h1>Courier View</h1>
-    
     <div class="view-container">
       <div class="tabs">
         <button 

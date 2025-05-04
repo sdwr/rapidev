@@ -1,7 +1,5 @@
 <template>
   <div class="view admin-view">
-    <h1>Admin View</h1>
-    
     <div class="view-container">
       <div class="tabs">
         <button 
