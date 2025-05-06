@@ -6,6 +6,7 @@ import DebugView from '../views/DebugView.vue'
 import LoginView from '../views/LoginView.vue'
 import DeliveriesMapView from '../views/DeliveriesMapView.vue'
 import { useUserStore } from '../stores/userStore'
+import { watch } from 'vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,9 +60,32 @@ const router = createRouter({
   ]
 })
 
+// Wait for auth to be loaded before routing
+let authInitialized = false
+
 // Navigation guard for authentication
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
+  
+  // Wait for authentication to be loaded on first navigation
+  if (!authInitialized) {
+    if (userStore.isLoadingAuth) {
+      // Wait for auth to finish loading if it's in progress
+      await new Promise(resolve => {
+        const unwatch = watch(
+          () => userStore.isLoadingAuth,
+          (isLoading) => {
+            if (!isLoading) {
+              unwatch()
+              resolve()
+            }
+          }
+        )
+      })
+    }
+    authInitialized = true
+  }
+  
   const isLoggedIn = !!userStore.user
   const allowUnauthenticated = to.meta.allowUnauthenticated
   

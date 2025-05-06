@@ -4,7 +4,7 @@ import { toast } from 'vue3-toastify'
 import UserProfile from './components/UserProfile.vue'
 import AboutMe from './components/AboutMe.vue'
 import { useUserStore } from './stores/userStore'
-import { onMounted, computed } from 'vue'
+import { onBeforeMount, computed } from 'vue'
 import { useOrderStore } from './stores/orderStore'
 import { useOrderItemStore } from './stores/orderItemStore'
 
@@ -44,14 +44,21 @@ const isAdmin = computed(() => {
   return isLoggedIn.value && userStore.user.userType === 'ADMIN';
 })
 
-onMounted(async () => {
-  userStore.loadUserFromStorage()
-  await orderStore.fetchAllOrders()
-  await orderItemStore.fetchAllOrderItems()
+// Load user authentication state before mounting the app
+onBeforeMount(async () => {
+  await userStore.loadUserFromStorage()
+  // These can be loaded after router navigation happens:
+  orderStore.fetchAllOrders()
+  orderItemStore.fetchAllOrderItems()
 })
 </script>
 
 <template>
+  <!-- Add a loading state while auth is loading -->
+  <div v-if="userStore.isLoadingAuth" class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+
   <!-- Show About Me if user is logged in but profile is incomplete -->
   <AboutMe v-if="showAboutMe" />
 
@@ -107,6 +114,34 @@ onMounted(async () => {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Add these styles for loading indicator */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
 
