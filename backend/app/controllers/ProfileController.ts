@@ -58,8 +58,16 @@ export class ProfileController {
     try {
       // Create new profile
       await createProfileValidator.validate(data)
-      const profile = await Profile.create(data)
-      return response.json(profile)
+
+      //check if the profile already exists, and if it does, update it
+      const existingProfile = await Profile.query().where('userId', data.userId).where('profileType', data.profileType).first()
+      if (existingProfile) {
+        await existingProfile.merge(data).save()
+        return response.json(existingProfile)
+      } else {
+        const profile = await Profile.create(data)
+        return response.json(profile)
+      }
     } catch (error) {
       return response.status(400).json({ 
         error: error.message 
