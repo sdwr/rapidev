@@ -13,13 +13,6 @@
       </div>
 
       <div class="tab-content">
-        <!-- Profile Tab -->
-        <div v-if="currentTab === 'profile'" class="tab-panel">
-          <ProfileInfo 
-            profileType="PICKUP"
-            @profile-saved="handleProfileSave" />
-        </div>
-
         <!-- Active Deliveries Tab -->
         <div v-if="currentTab === 'active'" class="tab-panel">
           <div class="list-container">
@@ -47,6 +40,23 @@
             />
           </div>
         </div>
+        
+        <!-- Map View Tab -->
+        <div v-if="currentTab === 'map'" class="tab-panel">
+          <div class="map-container">
+            <div class="filter-controls">
+              <label>
+                <input type="checkbox" v-model="showPickups"> 
+                Show Pickup Locations
+              </label>
+              <label>
+                <input type="checkbox" v-model="showDeliveries"> 
+                Show Delivery Locations
+              </label>
+            </div>
+            <MapView :locations="filteredLocations" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -54,39 +64,75 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import ProfileInfo from '@/components/ProfileInfo.vue'
 import OrderItemCard from '@/components/OrderItemCard.vue'
+import MapView from '@/components/MapView.vue'
 import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
 import { useOrderItemStore } from '../stores/orderItemStore'
+import { useOrderStore } from '../stores/orderStore'
 
 const userStore = useUserStore()
 const orderItemStore = useOrderItemStore()
+const orderStore = useOrderStore()
+
 const tabs = [
   { id: 'active', label: 'Active Deliveries' },
   { id: 'history', label: 'Delivery History' },
-  { id: 'profile', label: 'My Profile' }
+  { id: 'map', label: 'Delivery Map' }
 ]
 
 const currentTab = ref('active')
 const activeDeliveries = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id))
 const deliveryHistory = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id && item.status === 'DELIVERED'))
 
-const handleProfileSave = async (profileData) => {
-  try {
-    await userStore.setUser({
-      ...userStore.user,
-      profile: profileData
-    })
-    toast.success('Profile saved successfully!')
-  } catch (error) {
-    console.error('Error saving profile:', error)
-    toast.error('Failed to save profile')
-  }
-}
+// Map configurations
+const showPickups = ref(true)
+const showDeliveries = ref(true)
+
+// Create locations array for the map
+const allLocations = computed(() => {
+  const locations = [];
+  
+  // Get all orders for the courier's active deliveries
+  const courierOrderIds = activeDeliveries.value.map(item => item.orderId);
+  const courierOrders = orderStore.orders.filter(order => courierOrderIds.includes(order.id));
+  
+  // Add pickup locations from orders
+  courierOrders.forEach(order => {
+    locations.push({
+      address: order.pickupAddress,
+      type: 'PICKUP',
+      orderId: order.id,
+      label: `Pickup: Order #${order.id}`
+    });
+  });
+  
+  // Add delivery locations from order items
+  activeDeliveries.value.forEach(item => {
+    locations.push({
+      address: item.deliveryAddress,
+      type: 'DELIVERY',
+      orderId: item.orderId,
+      itemId: item.id,
+      label: `Delivery: Item #${item.id}`
+    });
+  });
+  
+  return locations;
+});
+
+// Filter locations based on checkboxes
+const filteredLocations = computed(() => {
+  return allLocations.value.filter(location => {
+    if (location.type === 'PICKUP' && !showPickups.value) return false;
+    if (location.type === 'DELIVERY' && !showDeliveries.value) return false;
+    return true;
+  });
+});
 
 onMounted(async () => {
-  await orderItemStore.fetchAllOrderItems()
+  await orderItemStore.fetchAllOrderItems();
+  await orderStore.fetchAllOrders();
 })
 </script>
 
@@ -145,6 +191,26 @@ onMounted(async () => {
   max-height: 600px;
   overflow-y: auto;
   padding-right: 1rem;
+}
+
+.map-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.filter-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 
 .list-container::-webkit-scrollbar {
