@@ -27,6 +27,13 @@
           </div>
         </div>
 
+        <!-- Map View Tab -->
+        <div v-if="currentTab === 'map'" class="tab-panel">
+          <div class="map-container">
+            <MapView :locations="filteredLocations" />
+          </div>
+        </div>
+
         <!-- Delivery History Tab -->
         <div v-if="currentTab === 'history'" class="tab-panel">
           <div class="list-container">
@@ -41,22 +48,6 @@
           </div>
         </div>
         
-        <!-- Map View Tab -->
-        <div v-if="currentTab === 'map'" class="tab-panel">
-          <div class="map-container">
-            <div class="filter-controls">
-              <label>
-                <input type="checkbox" v-model="showPickups"> 
-                Show Pickup Locations
-              </label>
-              <label>
-                <input type="checkbox" v-model="showDeliveries"> 
-                Show Delivery Locations
-              </label>
-            </div>
-            <MapView :locations="filteredLocations" />
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -77,8 +68,8 @@ const orderStore = useOrderStore()
 
 const tabs = [
   { id: 'active', label: 'Active Deliveries' },
+  { id: 'map', label: 'Delivery Map'},
   { id: 'history', label: 'Delivery History' },
-  { id: 'map', label: 'Delivery Map' }
 ]
 
 const currentTab = ref('active')
@@ -86,8 +77,6 @@ const activeDeliveries = computed(() => orderItemStore.orderItems.filter(item =>
 const deliveryHistory = computed(() => orderItemStore.orderItems.filter(item => item.courierId === userStore.user?.id && item.status === 'DELIVERED'))
 
 // Map configurations
-const showPickups = ref(true)
-const showDeliveries = ref(true)
 
 // Create locations array for the map
 const allLocations = computed(() => {
@@ -123,11 +112,7 @@ const allLocations = computed(() => {
 
 // Filter locations based on checkboxes
 const filteredLocations = computed(() => {
-  return allLocations.value.filter(location => {
-    if (location.type === 'PICKUP' && !showPickups.value) return false;
-    if (location.type === 'DELIVERY' && !showDeliveries.value) return false;
-    return true;
-  });
+  return allLocations.value
 });
 
 onMounted(async () => {

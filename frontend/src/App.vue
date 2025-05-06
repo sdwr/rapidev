@@ -69,21 +69,11 @@ onBeforeMount(async () => {
         <div class="header-text">Rapid Delivery</div>
         <UserProfile />
       </div>
-      <div v-if="isAdmin"class="content-container">
+      <div v-if="isAdmin" class="content-container">
         <nav>
-          
           <!-- Show appropriate links based on user role when logged in -->
-          <template>
-            
-            <!-- Admin links -->
-            <RouterLink v-if="isAdmin" to="/admin">Admin</RouterLink>
-            
-            <!-- Debug link - only for admins -->
-            <RouterLink v-if="isAdmin" to="/debug">Debug</RouterLink>
-            
-            <!-- Map link -->
-            <RouterLink to="/map">Map</RouterLink>
-          </template>
+          <RouterLink to="/admin">Admin</RouterLink>
+          <RouterLink to="/debug">Debug</RouterLink>
         </nav>
       </div>
     </header>
