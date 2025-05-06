@@ -142,16 +142,16 @@ const onPhoneInput = (event, index) => {
   orderData.value.deliveryItems[index].deliveryPhone = formatPhoneNumber(input.value);
 }
 
-const addAddress = async (newAddress, profileType) => {
+const addAddress = async (newAddress) => {
   console.log('Adding address:', newAddress)
   newAddress.userId = userStore.user.id
   const profile = await createProfile(newAddress)
   //reload the addresses
   await loadAddresses()
 
-  if (profileType === 'PICKUP') {
+  if (profile.profileType === 'PICKUP') {
     selectedPickupAddressId.value = profile.id
-  } else if (profileType === 'DELIVERY') {
+  } else if (profile.profileType === 'DELIVERY') {
     selectedDeliveryAddressId.value = profile.id
   }
 }

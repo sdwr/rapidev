@@ -227,6 +227,8 @@ const selectSuggestion = async (suggestion) => {
     const placeDetails = await getPlaceDetails(suggestion.place_id)
     newAddress.value = placeDetails.formatted_address
     addressSuggestions.value = []
+    
+    confirmNewAddress()
   } catch (error) {
     console.error('Error getting place details:', error)
     newAddress.value = suggestion.description
