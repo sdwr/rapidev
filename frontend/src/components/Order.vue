@@ -144,12 +144,8 @@ const onPhoneInput = (event, index) => {
 
 const addAddress = async (newAddress, profileType) => {
   console.log('Adding address:', newAddress)
-  const addressData = {
-    address: newAddress,
-    userId: userStore.user.id,
-    profileType: profileType
-  }
-  const profile = await createProfile(addressData)
+  newAddress.userId = userStore.user.id
+  const profile = await createProfile(newAddress)
   //reload the addresses
   await loadAddresses()
 
