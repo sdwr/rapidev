@@ -60,7 +60,7 @@ export class ProfileController {
       await createProfileValidator.validate(data)
 
       //check if the profile already exists, and if it does, update it
-      const existingProfile = await Profile.query().where('userId', data.userId).where('profileType', data.profileType).first()
+      const existingProfile = await Profile.query().where('address', data.address).where('userId', data.userId).where('profileType', data.profileType).first()
       if (existingProfile) {
         await existingProfile.merge(data).save()
         return response.json(existingProfile)
