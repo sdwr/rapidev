@@ -54,8 +54,15 @@ export const getPlacePredictions = async (input) => {
   return new Promise((resolve, reject) => {
     try {
       const autocompleteService = new google.maps.places.AutocompleteService();
+      const winnipegCenter = { lat: 49.8954, lng: -97.1385 }
       autocompleteService.getPlacePredictions({ 
         input,
+        locationRestriction: {
+          west: winnipegCenter.lng - 0.5,
+          east: winnipegCenter.lng + 0.5,
+          north: winnipegCenter.lat + 0.5,
+          south: winnipegCenter.lat - 0.5
+        },
         componentRestrictions: { country: 'ca' },
         types: ['address'],
         sessionToken: sessionToken // Add session token if available
