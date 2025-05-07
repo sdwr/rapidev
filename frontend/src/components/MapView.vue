@@ -85,12 +85,12 @@ const addLocationsToMap = async () => {
         position,
         map: map.value,
         title: location.address,
-        icon: getMarkerIcon(location.type)
+        icon: getMarkerIcon(location)
       });
       
       // Create info window
       const infoWindow = new google.maps.InfoWindow({
-        content: `<div><strong>${location.type}</strong><br>${location.address}</div>`
+        content: `<div><strong>${location.type}</strong><br>${location.address}<br>${location.status.status}</div>`
       });
       
       // Add click listener
@@ -122,9 +122,9 @@ const addLocationsToMap = async () => {
 };
 
 // Get marker icon based on location type
-const getMarkerIcon = (type) => {
+const getMarkerIcon = (location) => {
   return {
-    url: type === 'PICKUP' 
+    url: location.type === 'PICKUP' 
       ? 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' 
       : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
     scaledSize: { width: 32, height: 32 }

@@ -1,20 +1,37 @@
-import type { Order } from '../shared/models/Order'
-import type { OrderStatus } from '../shared/models/OrderStatus'
-
+import type { Order } from './shared/models/Order'
+import type { OrderStatus } from './shared/models/OrderStatus'
+import { OrderItemStatus } from './shared/models/OrderItemStatus'
+import type { OrderItem } from './shared/models/OrderItem'
 export const getCurrentStatus = (order: Order): OrderStatus | undefined => {
   if (!order.orderStatuses || order.orderStatuses.length === 0) {
     return undefined
   }
   
-  return order.orderStatuses[order.orderStatuses.length - 1].status
+  return order.orderStatuses.find(status => status.isCurrent)
 } 
 
-export const getCurrentStatusTimestamp = (order: Order): Date | undefined => {
+export const getCurrentStatusTimestamp = (order: Order): string | undefined => {
   if (!order.orderStatuses || order.orderStatuses.length === 0) {
     return undefined
   }
   
-  return order.orderStatuses[order.orderStatuses.length - 1].createdAt
+  return order.orderStatuses.find(status => status.isCurrent)?.createdAt
+}
+
+export const getCurrentItemStatus = (order: OrderItem): OrderItemStatus | undefined => {
+  if (!order.orderItemStatuses || order.orderItemStatuses.length === 0) {
+    return undefined
+  }
+  
+  return order.orderItemStatuses.find(status => status.isCurrent)
+}
+
+export const getCurrentItemStatusTimestamp = (order: OrderItem): string | undefined => {
+  if (!order.orderItemStatuses || order.orderItemStatuses.length === 0) {
+    return undefined
+  }
+  
+  return order.orderItemStatuses.find(status => status.isCurrent)?.createdAt
 }
 
 // Format and limit phone number as user types

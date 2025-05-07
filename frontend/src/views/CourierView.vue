@@ -61,7 +61,7 @@ import { useUserStore } from '../stores/userStore'
 import { toast } from 'vue3-toastify'
 import { useOrderItemStore } from '../stores/orderItemStore'
 import { useOrderStore } from '../stores/orderStore'
-
+import { getCurrentStatus, getCurrentItemStatus } from '../utils'
 const userStore = useUserStore()
 const orderItemStore = useOrderItemStore()
 const orderStore = useOrderStore()
@@ -88,8 +88,10 @@ const allLocations = computed(() => {
   
   // Add pickup locations from orders
   courierOrders.forEach(order => {
+    console.log(order)
     locations.push({
       address: order.pickupAddress,
+      status: getCurrentStatus(order),
       type: 'PICKUP',
       orderId: order.id,
       label: `Pickup: Order #${order.id}`
@@ -98,8 +100,10 @@ const allLocations = computed(() => {
   
   // Add delivery locations from order items
   activeDeliveries.value.forEach(item => {
+    console.log(item)
     locations.push({
       address: item.deliveryAddress,
+      status: getCurrentItemStatus(item),
       type: 'DELIVERY',
       orderId: item.orderId,
       itemId: item.id,
@@ -112,6 +116,7 @@ const allLocations = computed(() => {
 
 // Filter locations based on checkboxes
 const filteredLocations = computed(() => {
+  console.log(allLocations.value)
   return allLocations.value
 });
 
