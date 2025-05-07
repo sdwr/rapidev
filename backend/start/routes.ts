@@ -12,6 +12,7 @@ import { OrderController } from '#controllers/OrderController'
 import { ProfileController } from '#controllers/ProfileController'
 import UserController from '#controllers/UserController'
 import { ReceiptController } from '#controllers/ReceiptController'
+import { PaymentsController } from '#controllers/PaymentsController'
 
 router.get('/', async () => {
   return {
@@ -69,3 +70,7 @@ router.put('/api/receipts/:id', [ReceiptController, 'updateReceipt'])
 router.post('/api/receipts/:id/payment', [ReceiptController, 'payReceipt'])
 router.post('/api/receipts/:id/refund', [ReceiptController, 'refundReceipt'])
 router.post('/api/receipts/:id/cancel', [ReceiptController, 'cancelReceipt'])
+
+// Payment routes
+router.post('/api/payments/create-checkout-session', [PaymentsController, 'createCheckoutSession'])
+router.get('/api/payments/checkout-session/:sessionId', [PaymentsController, 'getCheckoutSession'])

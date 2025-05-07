@@ -56,6 +56,18 @@ const router = createRouter({
       path: '/map',
       name: 'map',
       component: DeliveriesMapView
+    },
+    {
+      path: '/payment/success',
+      name: 'paymentSuccess',
+      component: () => import('../views/PaymentSuccessView.vue'),
+      meta: { allowUnauthenticated: true }
+    },
+    {
+      path: '/payment/cancel',
+      name: 'paymentCancel',
+      component: () => import('../views/PaymentCancelView.vue'),
+      meta: { allowUnauthenticated: true }
     }
   ]
 })

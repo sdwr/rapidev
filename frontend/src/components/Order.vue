@@ -108,6 +108,8 @@ import AddressSelector from './AddressSelector.vue'
 import { getOrder,createOrder, createProfile, getProfilesForUserByProfileType, createReceipt } from '../api/api'
 import { ReceiptStatusEnum } from '../shared/enums/ReceiptEnums'
 import { formatPhoneNumber } from '../utils'
+import { createCheckoutSession } from '../services/paymentService'
+import { toast } from 'vue3-toastify'
 const emit = defineEmits(['order-created'])
 const userStore = useUserStore()
 
@@ -194,11 +196,8 @@ const removeDeliveryItem = (index) => {
 }
 
 const submitOrder = async () => {
-  if (!isFormValid.value) return
-  
-  isSubmitting.value = true
-  
   try {
+    isSubmitting.value = true;
     
     orderData.value.clientId = userStore.user.id
     const order = await createOrder(orderData.value)
@@ -235,10 +234,24 @@ const submitOrder = async () => {
       ]
     }
     
+    // Create a Stripe checkout session
+    const { sessionId, url } = await createCheckoutSession({
+      orderId: updatedOrder.id,
+      amount: total.value,
+      customerEmail: userStore.user.email,
+      customerName: userStore.user.name,
+      metadata: {
+        // Any additional metadata you want to include
+      }
+    });
+    
+    // Redirect to Stripe Checkout
+    window.location.href = url;
+    
   } catch (error) {
-    console.error('Error creating order:', error)
-  } finally {
-    isSubmitting.value = false
+    console.error('Error submitting order:', error);
+    toast.error('Failed to create order');
+    isSubmitting.value = false;
   }
 }
 
