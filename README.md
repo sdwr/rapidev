@@ -21,6 +21,12 @@ sudo apt install nodejs npm
 4. Run `npm install` in the backend directory to install the dependencies
 5. Run `npm run dev` in the backend directory to start the backend server on port 3333
 
+NOTE: 
+  make sure the backend NODE_ENV in .env is set to development or production
+
+  make sure the frontend VITE_API_ENV in .env is set to development or production
+
+
 ## Database Setup (PostgreSQL on Linux)
 
 1. Update package list
@@ -96,3 +102,11 @@ In frontend:
 4. Add your API key to `secrets.js`
 
 Note: The `secrets.js` file is excluded from version control to protect your API keys.
+
+## Stripe Integration Setup
+
+1. Create a Stripe account and get your API keys from the [Stripe Dashboard](https://dashboard.stripe.com/)
+2. Add your API keys to the `.env` file in the backend directory
+
+
+

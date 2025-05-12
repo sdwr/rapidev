@@ -100,18 +100,47 @@ payment
 
 FEATURE REQUESTS:
 - autocomplete address
+- courier map view
+    -show own location in center
+    -show all orders in area
+
+- courier view
+    - notification for new orders
+    - system notifications
+    - map view as default
+    - delivery shows start/end/route
+    - delivery shows distance
+
+    -upload photo of delivery
+
+    -help menu with problems with delivery
+
+
 - delivery name is required for items
 - delivery picture or select "hand-delivered to customer"
 - courier payout view
-- courier map view
 - admin reports
 
 - client receipts
+    -subtotal = delivery fee
+    -total = subtotal + booking fee + tax
+
+- client payments tab
+    - list of payments, breakdown by date/month
+
+- courier payments tab
+    -list of payouts, breakdown by date/month
+
+-admin reports
+    - income/payouts
+    - refund delivery?
+    - pay courier?
 
 -text notification
     - courier is on route
     - courier action (en route)
 
+- client select ASAP delivery or scheduled delivery
 
 
 USER REPORTS
