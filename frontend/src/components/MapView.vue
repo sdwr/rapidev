@@ -17,10 +17,6 @@ const props = defineProps({
     default: () => [],
     // Expected format: [{ address: 'Full address', type: 'PICKUP'|'DELIVERY' }]
   },
-  center: {
-    type: Object,
-    default: () => ({ lat: 43.6532, lng: -79.3832 }) // Default to Toronto
-  },
   zoom: {
     type: Number,
     default: 12
@@ -38,6 +34,7 @@ const markers = ref([]);
 const userLocationMarker = ref(null);
 const directionsRenderer = ref(null);
 const currentPosition = ref(null);
+const center = ref({ lat: 49.8893, lng: -97.1604 });
 const loading = ref(true);
 const locationWatchId = ref(null);
 const locationUpdateInterval = ref(null);
@@ -48,7 +45,7 @@ onMounted(async () => {
     const google = await initGoogleMaps();
     
     map.value = new google.maps.Map(mapRef.value, {
-      center: props.center,
+      center: center.value, // Make sure to use .value here
       zoom: props.zoom,
       mapTypeControl: false,
       streetViewControl: false,
@@ -86,7 +83,7 @@ const startLocationTracking = () => {
   if ('geolocation' in navigator) {
     // Get initial position
     navigator.geolocation.getCurrentPosition(
-      handlePositionUpdate,
+      handlePositionUpdateFirstTime,
       handlePositionError,
       { enableHighAccuracy: true }
     );
@@ -111,10 +108,14 @@ const startLocationTracking = () => {
   }
 };
 
+const handlePositionUpdateFirstTime = async (position) => {
+  await handlePositionUpdate(position);
+  const { latitude, longitude } = position.coords;
+  center.value = { lat: latitude, lng: longitude };
+}
 // Handle successful position update
 const handlePositionUpdate = async (position) => {
   const { latitude, longitude } = position.coords;
-  console.log('handlePositionUpdate', latitude, longitude);
   currentPosition.value = { lat: latitude, lng: longitude };
   
   await updateUserLocationMarker();
