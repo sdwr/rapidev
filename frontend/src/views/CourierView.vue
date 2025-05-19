@@ -30,7 +30,10 @@
         <!-- Map View Tab -->
         <div v-if="currentTab === 'map'" class="tab-panel">
           <div class="map-container">
-            <MapView :locations="filteredLocations" />
+            <MapView 
+              :locations="filteredLocations" 
+              :nextLocation="selectedNextLocation"
+            />
           </div>
         </div>
 
@@ -119,6 +122,8 @@ const filteredLocations = computed(() => {
   console.log(allLocations.value)
   return allLocations.value
 });
+
+const selectedNextLocation = ref(null);
 
 onMounted(async () => {
   await orderItemStore.fetchAllOrderItems();
