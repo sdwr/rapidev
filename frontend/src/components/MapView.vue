@@ -141,7 +141,6 @@ const clearMarkers = () => {
 <style scoped>
 .map-container {
   width: 100%;
-  height: 400px;
   position: relative;
   border-radius: 8px;
   overflow: hidden;

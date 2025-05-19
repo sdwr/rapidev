@@ -169,6 +169,7 @@ onMounted(() => {
   width: 100%;
   display: flex;
   gap: 0.5rem;
+  margin-top: 0.5rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid var(--color-border);
   padding-bottom: 0.5rem;
@@ -203,6 +204,7 @@ onMounted(() => {
 
 .tab-panel {
   min-height: 200px;
+  height: 100%;
 }
 
 .list-container {

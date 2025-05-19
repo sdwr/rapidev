@@ -93,6 +93,7 @@ onBeforeMount(async () => {
 .view, 
 .view-container,
 .tab-content {
+  height: 100%;
   width: 100% !important;
   max-width: 510 !important;
   margin: 0 !important;
@@ -156,7 +157,9 @@ onBeforeMount(async () => {
 }
 
 .content-container {
+  max-height: calc(100vh - 150px);
   width: 100%;
+
   max-width: 510px;
   margin: 0 auto;
   justify-items: center;
@@ -171,9 +174,8 @@ main {
 header {
   width: 100%;
   border-bottom: 1px solid var(--color-border);
-  margin-bottom: 2rem;
   background: var(--color-background);
-  padding: 1rem 0;
+  padding: 0.5rem 0;
 }
 
 nav {
