@@ -162,17 +162,26 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.view, .courier-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+}
+
 .view-container {
   width: 100%;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  height: 100%;
 }
 
 .tabs {
   width: 100%;
   display: flex;
   gap: 0.5rem;
-  margin-top: rem;
+  margin-top: 0.5rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid var(--color-border);
   padding-bottom: 0.5rem;
@@ -203,17 +212,24 @@ onMounted(async () => {
   background: var(--color-background-soft);
   padding: 1.5rem;
   border-radius: 8px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .tab-panel {
   min-height: 200px;
   height: 100%;
   overflow-y: scroll;
+  flex: 1;
 }
 
 .tab-panel-no-scroll {
-  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
   height: 100%;
+  flex: 1;
 }
 
 .list-container {
@@ -231,7 +247,7 @@ onMounted(async () => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  flex: 1;
 }
 
 .filter-controls {

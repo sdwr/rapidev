@@ -96,6 +96,7 @@ onBeforeMount(async () => {
   display: flex;
   flex-direction: column;
   max-height: 100%;
+  min-height: 100%;
   height: 100%;
   width: 100% !important;
   max-width: 510 !important;
@@ -162,8 +163,8 @@ onBeforeMount(async () => {
 
 .content-container {
   max-height: calc(100vh - 150px);
+  height: calc(100vh - 150px);
   width: 100%;
-
   max-width: 510px;
   margin: 0 auto;
   justify-items: center;
@@ -174,8 +175,10 @@ onBeforeMount(async () => {
 
 main {
   flex: 1;
-  display: grid;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: 100%;
 }
 
 header {

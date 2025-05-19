@@ -415,11 +415,16 @@ const emit = defineEmits(['setDestination', 'markPickedUp', 'markDelivered', 're
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   height: 100%;
+  min-height: 400px;
+  flex: 1;
+  display: flex;
 }
 
 #map {
+  min-height: 400px;
   width: 100%;
   height: 100%;
+  flex: 1;
 }
 
 .map-overlay {
