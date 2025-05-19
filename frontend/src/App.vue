@@ -140,7 +140,7 @@ onBeforeMount(async () => {
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
   width: 100%;
 }
 
