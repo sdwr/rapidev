@@ -93,11 +93,15 @@ onBeforeMount(async () => {
 .view, 
 .view-container,
 .tab-content {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
   height: 100%;
   width: 100% !important;
   max-width: 510 !important;
   margin: 0 !important;
   padding: 0 !important;
+  overflow-y: hidden;
 }
 
 /* Reset default margins/paddings for consistency */
@@ -163,6 +167,9 @@ onBeforeMount(async () => {
   max-width: 510px;
   margin: 0 auto;
   justify-items: center;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
 }
 
 main {

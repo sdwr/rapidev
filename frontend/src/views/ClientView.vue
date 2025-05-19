@@ -205,6 +205,7 @@ onMounted(() => {
 .tab-panel {
   min-height: 200px;
   height: 100%;
+  overflow-y: scroll;
 }
 
 .list-container {

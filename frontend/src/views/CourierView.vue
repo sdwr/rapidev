@@ -28,7 +28,7 @@
         </div>
 
         <!-- Map View Tab -->
-        <div v-if="currentTab === 'map'" class="tab-panel">
+        <div v-if="currentTab === 'map'" class="tab-panel-no-scroll">
           <div class="map-container">
             <MapView 
               :locations="filteredLocations" 
@@ -206,6 +206,12 @@ onMounted(async () => {
 }
 
 .tab-panel {
+  min-height: 200px;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.tab-panel-no-scroll {
   min-height: 200px;
   height: 100%;
 }
