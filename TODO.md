@@ -142,6 +142,29 @@ FEATURE REQUESTS:
 
 - client select ASAP delivery or scheduled delivery
 
+- multiple pickup locations with one delivery location?
+    - calculate distance between all pickup locations and delivery locations
+    - and make one price for all of them
+
+- REGISTERED VS CASUAL CLIENTS
+    - more than 5 deliveries in a month (or 10)
+    - qualified for lower base rate ($10 vs by drive time)
+        - 0-15min $10
+        - 15-25   $15
+        - 25-35   $20
+    - hold max balance of $30,$50   
+      - once the delivery is completed, the difference is refunded
+
+- different registration flow for registered clients
+    - have to be approved by admin
+    - verified checkmark on profile
+        -additional business information
+    
+    - different login flow for preapproved registered clients
+
+
+
+
 
 USER REPORTS
 CLIENT
