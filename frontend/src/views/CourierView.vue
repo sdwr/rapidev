@@ -212,7 +212,7 @@ onMounted(async () => {
 }
 
 .tab-panel-no-scroll {
-  min-height: 200px;
+  min-height: 500px;
   height: 100%;
 }
 

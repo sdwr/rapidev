@@ -1,13 +1,14 @@
 import type { Order } from './shared/models/Order'
-import type { OrderStatus } from './shared/models/OrderStatus'
-import { OrderItemStatus } from './shared/models/OrderItemStatus'
 import type { OrderItem } from './shared/models/OrderItem'
-export const getCurrentStatus = (order: Order): OrderStatus | undefined => {
+import { OrderStatusEnum } from './shared/enums/OrderEnums'
+import { OrderItemStatusEnum } from './shared/enums/OrderItemEnums'
+export const getCurrentStatus = (order: Order): OrderStatusEnum | undefined => {
   if (!order.orderStatuses || order.orderStatuses.length === 0) {
     return undefined
   }
   
-  return order.orderStatuses.find(status => status.isCurrent)
+  let status = order.orderStatuses.find(status => status.isCurrent)
+  return status?.status as OrderStatusEnum
 } 
 
 export const getCurrentStatusTimestamp = (order: Order): string | undefined => {
@@ -15,15 +16,17 @@ export const getCurrentStatusTimestamp = (order: Order): string | undefined => {
     return undefined
   }
   
-  return order.orderStatuses.find(status => status.isCurrent)?.createdAt
+  let status = order.orderStatuses.find(status => status.isCurrent)
+  return status?.createdAt
 }
 
-export const getCurrentItemStatus = (order: OrderItem): OrderItemStatus | undefined => {
+export const getCurrentItemStatus = (order: OrderItem): OrderItemStatusEnum | undefined => {
   if (!order.orderItemStatuses || order.orderItemStatuses.length === 0) {
     return undefined
   }
   
-  return order.orderItemStatuses.find(status => status.isCurrent)
+  let status = order.orderItemStatuses.find(status => status.isCurrent)
+  return status?.status as OrderItemStatusEnum
 }
 
 export const getCurrentItemStatusTimestamp = (order: OrderItem): string | undefined => {
@@ -31,7 +34,8 @@ export const getCurrentItemStatusTimestamp = (order: OrderItem): string | undefi
     return undefined
   }
   
-  return order.orderItemStatuses.find(status => status.isCurrent)?.createdAt
+  let status = order.orderItemStatuses.find(status => status.isCurrent)
+  return status?.createdAt
 }
 
 // Format and limit phone number as user types
