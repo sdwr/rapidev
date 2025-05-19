@@ -33,6 +33,10 @@
             <MapView 
               :locations="filteredLocations" 
               :nextLocation="selectedNextLocation"
+              @setDestination="handleSetDestination"
+              @markPickedUp="handleMarkPickedUp"
+              @markDelivered="handleMarkDelivered"
+              @reportProblem="handleReportProblem"
             />
           </div>
         </div>
@@ -124,6 +128,32 @@ const filteredLocations = computed(() => {
 });
 
 const selectedNextLocation = ref(null);
+
+// Add these handler functions
+const handleSetDestination = (location) => {
+  selectedNextLocation.value = location;
+  // You might want to toast a confirmation
+  toast.success(`Set destination to ${location.address}`);
+};
+
+const handleMarkPickedUp = async (location) => {
+  // Logic to mark item as picked up
+  // This might involve an API call
+  toast.info(`Marking pickup for ${location.address}`);
+  // Add your API call here
+};
+
+const handleMarkDelivered = async (location) => {
+  // Logic to mark item as delivered
+  toast.info(`Marking delivery for ${location.address}`);
+  // Add your API call here
+};
+
+const handleReportProblem = (location) => {
+  // Logic to report a problem
+  toast.warning(`Reporting problem for ${location.address}`);
+  // Perhaps open a modal or navigate to a problem report form
+};
 
 onMounted(async () => {
   await orderItemStore.fetchAllOrderItems();

@@ -231,9 +231,88 @@ const addLocationsToMap = async () => {
         icon: getMarkerIcon(location)
       });
       
-      // Create info window
+      // Create info window with custom content
+      const createInfoWindowContent = (location) => {
+        const div = document.createElement('div');
+        div.className = 'map-info-window';
+        
+        // Header with type and close button
+        const header = document.createElement('div');
+        header.className = 'info-window-header';
+        
+        const title = document.createElement('strong');
+        title.textContent = location.type === 'PICKUP' ? 'Pickup Location' : 'Delivery Location';
+        header.appendChild(title);
+        
+        div.appendChild(header);
+        
+        // Address and status
+        const addressDiv = document.createElement('div');
+        addressDiv.className = 'info-window-address';
+        addressDiv.textContent = location.address;
+        div.appendChild(addressDiv);
+        
+        if (location.status?.status) {
+          const statusDiv = document.createElement('div');
+          statusDiv.className = 'info-window-status';
+          statusDiv.textContent = `Status: ${location.status.status}`;
+          div.appendChild(statusDiv);
+        }
+        
+        // Action buttons
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'info-window-actions';
+        
+        // Set Destination button
+        const setDestBtn = document.createElement('button');
+        setDestBtn.textContent = 'Set Destination';
+        setDestBtn.className = 'info-window-button set-destination-btn';
+        setDestBtn.onclick = (e) => {
+          e.stopPropagation();
+          handleSetDestination(location);
+        };
+        actionsDiv.appendChild(setDestBtn);
+        
+        // Add status-specific buttons
+        if (location.type === 'PICKUP' && location.status?.status === 'ASSIGNED') {
+          const pickupBtn = document.createElement('button');
+          pickupBtn.textContent = 'Mark Picked Up';
+          pickupBtn.className = 'info-window-button pickup-btn';
+          pickupBtn.onclick = (e) => {
+            e.stopPropagation();
+            handlePickup(location);
+          };
+          actionsDiv.appendChild(pickupBtn);
+        }
+        
+        if (location.type === 'DELIVERY' && location.status?.status === 'PICKED_UP') {
+          const deliverBtn = document.createElement('button');
+          deliverBtn.textContent = 'Mark Delivered';
+          deliverBtn.className = 'info-window-button deliver-btn';
+          deliverBtn.onclick = (e) => {
+            e.stopPropagation();
+            handleDelivery(location);
+          };
+          actionsDiv.appendChild(deliverBtn);
+        }
+        
+        // Report Problem button
+        const reportBtn = document.createElement('button');
+        reportBtn.textContent = 'Report Problem';
+        reportBtn.className = 'info-window-button report-btn';
+        reportBtn.onclick = (e) => {
+          e.stopPropagation();
+          handleReportProblem(location);
+        };
+        actionsDiv.appendChild(reportBtn);
+        
+        div.appendChild(actionsDiv);
+        
+        return div;
+      };
+      
       const infoWindow = new google.maps.InfoWindow({
-        content: `<div><strong>${location.type}</strong><br>${location.address}<br>${location.status?.status || ''}</div>`
+        content: createInfoWindowContent(location)
       });
       
       // Add click listener
@@ -303,6 +382,29 @@ onUnmounted(() => {
     userLocationMarker.value.setMap(null);
   }
 });
+
+// Handle setting a location as the destination
+const handleSetDestination = (location) => {
+  emit('setDestination', location);
+};
+
+// Handle marking a package as picked up
+const handlePickup = (location) => {
+  emit('markPickedUp', location);
+};
+
+// Handle marking a package as delivered
+const handleDelivery = (location) => {
+  emit('markDelivered', location);
+};
+
+// Handle reporting a problem with a location
+const handleReportProblem = (location) => {
+  emit('reportProblem', location);
+};
+
+// Don't forget to define the emits
+const emit = defineEmits(['setDestination', 'markPickedUp', 'markDelivered', 'reportProblem']);
 </script>
 
 <style scoped>
@@ -345,5 +447,64 @@ onUnmounted(() => {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Add these styles for the InfoWindow */
+.map-info-window {
+  padding: 10px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.info-window-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.info-window-address {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.info-window-status {
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #666;
+}
+
+.info-window-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.info-window-button {
+  padding: 5px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  color: white;
+  background-color: #3498db;
+}
+
+.set-destination-btn {
+  background-color: #3498db;
+}
+
+.pickup-btn, .deliver-btn {
+  background-color: #2ecc71;
+}
+
+.report-btn {
+  background-color: #e74c3c;
+}
+
+.info-window-button:hover {
+  opacity: 0.9;
 }
 </style> 
