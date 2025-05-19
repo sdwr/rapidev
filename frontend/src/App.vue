@@ -69,7 +69,7 @@ onBeforeMount(async () => {
         <div class="header-text">Rapid Delivery</div>
         <UserProfile />
       </div>
-      <div v-if="isAdmin" class="content-container">
+      <div v-if="isAdmin" class="header-content">
         <nav>
           <!-- Show appropriate links based on user role when logged in -->
           <RouterLink to="/admin">Admin</RouterLink>
@@ -171,6 +171,13 @@ onBeforeMount(async () => {
   display: flex;
   flex-direction: column;
   overflow-y: hidden;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  justify-content: center;
+  padding: 0 1rem;
 }
 
 main {
