@@ -98,14 +98,6 @@
             Mark as Delivered
           </button>
           
-          <!-- Additional Notes -->
-          <div v-if="showNotesInput" class="notes-input">
-            <textarea 
-              v-model="statusNotes"
-              placeholder="Add notes about this update (optional)"
-              :disabled="isUpdating"
-            ></textarea>
-          </div>
         </div>
       </div>
 
@@ -170,7 +162,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['item-updated'])
+const emit = defineEmits(['item-updated', 'markPickedUp', 'markDelivered', 'cancelItem'])
 const orderItemStore = useOrderItemStore()
 
 // UI state
@@ -363,15 +355,15 @@ const declineItem = async () => {
 }
 
 const markAsPickedUp = async () => {
-  await updateItem(OrderItemStatusEnum.PICKED_UP)
+  emit('markPickedUp', props.orderItem)
 }
 
 const markAsDelivered = async () => {
-  await updateItem(OrderItemStatusEnum.DELIVERED)
+  emit('markDelivered', props.orderItem)
 }
 
 const cancelItem = async () => {
-  await updateItem(OrderItemStatusEnum.CANCELLED)
+  emit('cancelItem', props.orderItem)
 }
 
 onMounted(() => {

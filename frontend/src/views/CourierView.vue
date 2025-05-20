@@ -23,6 +23,9 @@
               :key="orderItem.id"
               :orderItem="orderItem"
               :userType="'COURIER'"
+              @markPickedUp="handleMarkPickedUp"
+              @markDelivered="handleMarkDelivered"
+              @reportProblem="handleReportProblem"
             />
           </div>
         </div>
