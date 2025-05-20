@@ -145,7 +145,6 @@ const onPhoneInput = (event, index) => {
 }
 
 const addAddress = async (newAddress) => {
-  console.log('Adding address:', newAddress)
   newAddress.userId = userStore.user.id
   const profile = await createProfile(newAddress)
   //reload the addresses
@@ -212,7 +211,6 @@ const submitOrder = async () => {
     }
 
     const receipt = await createReceipt(receiptData)
-    console.log('Receipt created:', receipt)
 
     //reload the order
     const updatedOrder = await getOrder(order.id)

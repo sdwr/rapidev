@@ -252,10 +252,10 @@ const addLocationsToMap = async () => {
         addressDiv.textContent = location.address;
         div.appendChild(addressDiv);
         
-        if (location.status?.status) {
+        if (location.status) {
           const statusDiv = document.createElement('div');
           statusDiv.className = 'info-window-status';
-          statusDiv.textContent = `Status: ${location.status.status}`;
+          statusDiv.textContent = `Status: ${location.status}`;
           div.appendChild(statusDiv);
         }
         
@@ -274,7 +274,7 @@ const addLocationsToMap = async () => {
         actionsDiv.appendChild(setDestBtn);
         
         // Add status-specific buttons
-        if (location.type === 'PICKUP' && location.status?.status === 'ASSIGNED') {
+        if (location.type === 'PICKUP' && location.status === 'CONFIRMED_BY_COURIER') {
           const pickupBtn = document.createElement('button');
           pickupBtn.textContent = 'Mark Picked Up';
           pickupBtn.className = 'info-window-button pickup-btn';
@@ -285,7 +285,7 @@ const addLocationsToMap = async () => {
           actionsDiv.appendChild(pickupBtn);
         }
         
-        if (location.type === 'DELIVERY' && location.status?.status === 'PICKED_UP') {
+        if (location.type === 'DELIVERY' && location.status === 'PICKED_UP') {
           const deliverBtn = document.createElement('button');
           deliverBtn.textContent = 'Mark Delivered';
           deliverBtn.className = 'info-window-button deliver-btn';

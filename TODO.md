@@ -99,10 +99,6 @@ payment
 
 
 FEATURE REQUESTS:
-- autocomplete address
-- courier map view
-    -show own location in center
-    -show all orders in area
 
 - courier view
     - notification for new orders
@@ -166,7 +162,7 @@ FEATURE REQUESTS:
 
 
 
-USER REPORTS
+User reports
 CLIENT
     - list of completed deliveries filtered by day/week/month
 
@@ -176,6 +172,12 @@ ADMIN
 COURIER
     - list of deliveries filtered by day/week/month
     
+
+-- BUGS
+
+-- courier view:
+    - map view doesn't always load/center on current location
+    - when map view reloads, it loses the route to current destination
 
 
 -- Potential issues

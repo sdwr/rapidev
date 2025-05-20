@@ -57,6 +57,15 @@
         
       </div>
     </div>
+
+    <!-- Add the confirmation dialog -->
+    <ConfirmationDialog
+      v-model:show="showConfirmation"
+      :action="confirmationAction"
+      :orderItem="selectedOrderItem"
+      @success="handleConfirmationSuccess"
+      @error="handleConfirmationError"
+    />
   </div>
 </template>
 
@@ -69,6 +78,8 @@ import { toast } from 'vue3-toastify'
 import { useOrderItemStore } from '../stores/orderItemStore'
 import { useOrderStore } from '../stores/orderStore'
 import { getCurrentStatus, getCurrentItemStatus } from '../utils'
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
+
 const userStore = useUserStore()
 const orderItemStore = useOrderItemStore()
 const orderStore = useOrderStore()
@@ -95,7 +106,6 @@ const allLocations = computed(() => {
   
   // Add pickup locations from orders
   courierOrders.forEach(order => {
-    console.log(order)
     locations.push({
       address: order.pickupAddress,
       status: getCurrentStatus(order),
@@ -107,7 +117,6 @@ const allLocations = computed(() => {
   
   // Add delivery locations from order items
   activeDeliveries.value.forEach(item => {
-    console.log(item)
     locations.push({
       address: item.deliveryAddress,
       status: getCurrentItemStatus(item),
@@ -123,7 +132,6 @@ const allLocations = computed(() => {
 
 // Filter locations based on checkboxes
 const filteredLocations = computed(() => {
-  console.log(allLocations.value)
   return allLocations.value
 });
 
@@ -136,23 +144,43 @@ const handleSetDestination = (location) => {
   toast.success(`Set destination to ${location.address}`);
 };
 
-const handleMarkPickedUp = async (location) => {
-  // Logic to mark item as picked up
-  // This might involve an API call
-  toast.info(`Marking pickup for ${location.address}`);
-  // Add your API call here
+// Simplified dialog state
+const showConfirmation = ref(false);
+const confirmationAction = ref('PICKUP');
+const selectedOrderItem = ref(null);
+
+// Method to open confirmation dialog for pickup
+const handleMarkPickedUp = async (orderItem) => {
+  selectedOrderItem.value = orderItem;
+  confirmationAction.value = 'PICKUP';
+  showConfirmation.value = true;
 };
 
-const handleMarkDelivered = async (location) => {
-  // Logic to mark item as delivered
-  toast.info(`Marking delivery for ${location.address}`);
-  // Add your API call here
+// Method to open confirmation dialog for delivery
+const handleMarkDelivered = async (orderItem) => {
+  selectedOrderItem.value = orderItem;
+  confirmationAction.value = 'DELIVERY';
+  showConfirmation.value = true;
 };
 
-const handleReportProblem = (location) => {
-  // Logic to report a problem
-  toast.warning(`Reporting problem for ${location.address}`);
-  // Perhaps open a modal or navigate to a problem report form
+// Method to open confirmation dialog for problem report
+const handleReportProblem = (orderItem) => {
+  selectedOrderItem.value = orderItem;
+  confirmationAction.value = 'PROBLEM';
+  showConfirmation.value = true;
+};
+
+// Handle successful confirmation
+const handleConfirmationSuccess = async (result) => {
+  // Refresh data as needed
+  await orderItemStore.fetchAllOrderItems();
+  await orderStore.fetchAllOrders();
+};
+
+// Handle confirmation error
+const handleConfirmationError = (error) => {
+  console.error('Action failed:', error);
+  // Additional error handling if needed
 };
 
 onMounted(async () => {
