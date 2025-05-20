@@ -109,7 +109,6 @@ const dialogTitle = computed(() => {
 
 const dialogDescription = computed(() => {
   if (!props.orderItem) return '';
-  console.log('in confirmation dialog', props.orderItem)
   switch (props.action) {
     case 'PICKUP': 
       return `Are you sure you want to mark the pickup from ${props.orderItem.address} as picked up?`;

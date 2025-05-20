@@ -88,7 +88,6 @@ onBeforeMount(async () => {
 /* Global styles */
 .app {
   margin: 0 !important;
-  padding: 10px !important;
 }
 .view, 
 .view-container,
