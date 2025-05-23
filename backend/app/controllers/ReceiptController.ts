@@ -60,8 +60,9 @@ export class ReceiptController {
 
       // if the receipt is paid, update the order status to accepted
       if (data.receiptStatus === ReceiptStatusEnum.PAID) {
-        await OrderStatusService.createStatus(order.id, OrderStatusEnum.ACCEPTED)
+        await OrderStatusService.createStatus(order.id, OrderStatusEnum.PENDING)
         await order.load('orderStatuses')
+        
       }
       
       return response.status(201).json(receipt)

@@ -92,7 +92,7 @@ const getTotalCost = () => {
   // Placeholder for total cost.
   // Replace with actual calculation from order.receipt or items if available.
   if (props.order.receipt && props.order.receipt.total) {
-    return props.order.receipt.total.toFixed(2);
+    return props.order.receipt.total
   }
   return 'N/A'; // Placeholder
 }
@@ -165,6 +165,7 @@ const confirmOrder = async () => {
 
 // Fetch available couriers for admin users
 onMounted(async () => {
+  console.log('order', props.order)
   if (props.userType === UserTypeEnum.ADMIN) {
     try {
       const couriers = await getAllUsersByType(UserTypeEnum.COURIER)
@@ -262,15 +263,13 @@ const getStatusClass = (status: string) => {
   flex-shrink: 1;
   flex-basis: 30px;
   font-weight: bold;
-  color: var(--color-text-soft);
 }
 
 .total-cost {
   flex-grow: 1;
   flex-shrink: 1;
-  flex-basis: 50px;
+  flex-basis: 70px;
   font-weight: bold;
-  color: var(--color-primary);
 }
 
 .toggle-icon {

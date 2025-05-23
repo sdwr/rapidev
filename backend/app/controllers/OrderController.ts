@@ -81,6 +81,7 @@ export class OrderController {
         query.orderBy('createdAt', 'asc')
       })
       await order.load('client')
+      await order.load('receipt')
 
       return response.json(order)
     } catch (error) {
@@ -115,6 +116,7 @@ export class OrderController {
         .preload('orderStatuses', (query) => {
           query.orderBy('createdAt', 'asc')
         })
+        .preload('receipt')
         .orderBy('createdAt', 'asc')
       return response.json(orders)
     } catch (error) {
@@ -141,6 +143,7 @@ export class OrderController {
         .preload('orderStatuses', (query) => {
           query.orderBy('createdAt', 'asc')
         })
+        .preload('receipt')
         .orderBy('createdAt', 'asc')
       return response.json(orders)
     } catch (error) {
@@ -184,6 +187,7 @@ export class OrderController {
           query.orderBy('createdAt', 'asc')
         })
         .preload('client')
+        .preload('receipt')
         .orderBy('createdAt', 'asc')
       return response.json(orders)
     } catch (error) {
@@ -202,6 +206,7 @@ export class OrderController {
           query.orderBy('createdAt', 'asc')
         })
         .preload('client')
+        .preload('receipt')
         .orderBy('createdAt', 'asc')
       return response.json(orders)
     } catch (error) {

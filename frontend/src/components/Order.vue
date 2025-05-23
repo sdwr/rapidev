@@ -199,6 +199,7 @@ const submitOrder = async () => {
     isSubmitting.value = true;
     
     orderData.value.clientId = userStore.user.id
+    console.log('orderData', orderData.value)
     const order = await createOrder(orderData.value)
     const receiptData = {
       orderId: order.id,
