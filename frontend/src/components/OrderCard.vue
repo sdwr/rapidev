@@ -1,51 +1,57 @@
 <template>
-  <div class="list-item">
-    <div class="order-header">
+  <div class="list-item" :class="{ 'expanded': isExpanded }">
+    <div class="order-summary-header" @click="toggleExpand">
       <div class="status-badge" :class="getStatusClass(getCurrentStatus(order))">
         {{ getCurrentStatus(order) }}
       </div>
-      <h3>Order #{{ order.id }}</h3>
-    </div>
-    <p v-if="userType !== 'CLIENT'">Client: {{ order.client?.name }}</p>
-    <p>Pickup Address: {{ order.pickupAddress }}</p>
-    <div class="order-items">
-      <div class="order-item-header" @click="toggleItems">
-        <h4>Items</h4>
+      <div class="order-info">
+        <span class="order-id">#{{ order.id }}</span>
+        <span class="pickup-address">{{ order.pickupAddress }}</span>
+        <span class="total-cost">${{ getTotalCost() }}</span>
       </div>
-      <div class="order-item-entries">
-        <OrderItemCard
-          v-for="item in order.items"
-          :key="item.id"
-          :order-item="item"
-          :userType="userType"
-          :available-couriers="availableCouriers"
-        />
-      </div>
-    </div>
-    
-    <!-- Replace the existing status history section with the StatusHistory component -->
-    <StatusHistory :statuses="props.order.orderStatuses" />
-
-    <!-- Admin Actions -->
-    <div v-if="userType === 'ADMIN'" class="actions">
-      <div v-if="canAcceptOrder" class="action-buttons">
-        <button @click="acceptOrder" class="accept-button">Accept</button>
-        <button @click="cancelOrder" class="cancel-button">Cancel</button>
-      </div>
+      <div class="toggle-icon">{{ isExpanded ? '▼' : '▶' }}</div>
     </div>
 
-    <!-- Client Actions -->
-    <div v-if="userType === 'CLIENT'" class="actions">
-      <div v-if="canCancelOrder" class="action-buttons">
-        <button @click="cancelOrder" class="cancel-button">Cancel Order</button>
+    <div v-if="isExpanded" class="order-details-content">
+      <p v-if="userType !== 'CLIENT'">Client: {{ order.client?.name }}</p>
+      <div class="order-items">
+        <div class="order-item-header">
+          <h4>Items:</h4>
+        </div>
+        <div class="order-item-entries">
+          <OrderItemCard
+            v-for="item in order.items"
+            :key="item.id"
+            :order-item="item"
+            :userType="userType"
+            :available-couriers="availableCouriers"
+          />
+        </div>
       </div>
-    </div>
 
-    <!-- Courier Actions -->
-    <div v-if="userType === 'COURIER'" class="actions">
-      <div v-if="isAssigned" class="action-buttons">
-        <button @click="confirmOrder" class="confirm-button">Confirm</button>
-        <button @click="cancelOrder" class="cancel-button">Cancel</button>
+      <StatusHistory :statuses="props.order.orderStatuses" />
+
+      <!-- Admin Actions -->
+      <div v-if="userType === 'ADMIN'" class="actions">
+        <div v-if="canAcceptOrder" class="action-buttons">
+          <button @click="acceptOrder" class="accept-button">Accept</button>
+          <button @click="cancelOrder" class="cancel-button">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Client Actions -->
+      <div v-if="userType === 'CLIENT'" class="actions">
+        <div v-if="canCancelOrder" class="action-buttons">
+          <button @click="cancelOrder" class="cancel-button">Cancel Order</button>
+        </div>
+      </div>
+
+      <!-- Courier Actions -->
+      <div v-if="userType === 'COURIER'" class="actions">
+        <div v-if="isAssigned" class="action-buttons">
+          <button @click="confirmOrder" class="confirm-button">Confirm</button>
+          <button @click="cancelOrder" class="cancel-button">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
@@ -61,23 +67,38 @@ import { toast } from 'vue3-toastify'
 import { getCurrentStatus, getCurrentStatusTimestamp } from '../utils'
 import OrderItemCard from './OrderItemCard.vue'
 import { UserTypeEnum } from '../shared/enums/UserEnums'
-import StatusHistory from './StatusHistory.vue'  // Import the StatusHistory component
+import StatusHistory from './StatusHistory.vue'
 
 const props = defineProps<{
   order: Order
-  userType: 'ADMIN' | 'CLIENT' | 'COURIER'
-  couriers?: User[]
+  userType: 'CLIENT' | 'ADMIN' | 'COURIER'
+  statusHistory?: any[] // Kept for now, but StatusHistory component handles its own data
+  availableCouriers?: User[]
 }>()
 
-const emit = defineEmits<{
-  (e: 'orderUpdated'): void
-}>()
+const emit = defineEmits(['orderUpdated', 'assignCourier', 'unassignCourier'])
+
+const isExpanded = ref(false) // Collapsed by default
+
+const selectedCourierId = ref<number | null>(null)
+const availableCouriers = ref<User[]>([])
+
+const toggleExpand = () => {
+  isExpanded.value = !isExpanded.value
+}
+
+
+const getTotalCost = () => {
+  // Placeholder for total cost.
+  // Replace with actual calculation from order.receipt or items if available.
+  if (props.order.receipt && props.order.receipt.total) {
+    return props.order.receipt.total.toFixed(2);
+  }
+  return 'N/A'; // Placeholder
+}
 
 const isStatusHistoryExpanded = ref(false)
-const selectedCourier = ref('')
-const isOrderExpanded = ref(false)
 const expandedItemId = ref(null)
-const availableCouriers = ref([])
 
 const toggleStatusHistory = () => {
   isStatusHistoryExpanded.value = !isStatusHistoryExpanded.value
@@ -157,12 +178,6 @@ onMounted(async () => {
   }
 })
 
-// Toggle order expansion
-const toggleOrder = () => {
-  isOrderExpanded.value = !isOrderExpanded.value
-}
-
-
 // Expand a specific item
 const expandItem = (itemId) => {
   expandedItemId.value = itemId
@@ -195,23 +210,92 @@ const getStatusClass = (status: string) => {
 
 <style scoped>
 .list-item {
-  background: var(--color-background);
+  background: var(--color-background-soft);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  padding: 1rem;
+  padding: 0; /* Remove padding from list-item itself */
   margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
 }
 
-/* Add new styles for the order header with status badge */
+.list-item.expanded {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 0.5rem; /* Add padding to the header */
+}
+
+.order-info {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.9rem;
+  overflow: hidden;
+}
+
+.order-info span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+
+.pickup-address {
+  font-weight: 500;
+  flex-grow: 0.1;
+  flex-shrink: 1;
+  flex-basis: auto;
+}
+
+.order-id {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 30px;
+  font-weight: bold;
+  color: var(--color-text-soft);
+}
+
+.total-cost {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 50px;
+  font-weight: bold;
+  color: var(--color-primary);
+}
+
+.toggle-icon {
+  font-size: 1.2rem;
+  color: var(--color-text-light);
+}
+
+.order-details-content {
+  border-top: none; /* Remove top border if header has bottom border */
+}
+
 .order-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 0.75rem;
+  /* cursor: pointer; /* Moved to order-summary-header */
+  /* padding: 1rem; /* Moved to order-summary-header */
+  /* background: var(--color-background); */
+  /* border-radius: 4px; */
+  /* border: 1px solid var(--color-border); */
 }
 
 .order-header h3 {
   margin: 0;
+  flex: 1;
 }
 
 .status-badge {
@@ -257,20 +341,24 @@ const getStatusClass = (status: string) => {
 }
 
 .order-items {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--color-border);
 }
 
 .order-item-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   cursor: pointer;
-  padding: 0.5rem;
-  background: var(--color-background);
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.5rem; /* Adjust padding if needed */
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--color-border-hover);
+}
+
+.order-item-header h4 {
+  margin: 0;
+}
+
+.order-item-entries {
+  padding-top: 0.5rem;
 }
 
 .actions {

@@ -43,7 +43,6 @@ export const useOrderStore = defineStore('order', () => {
     
     try {
       const response = await getAllOrders()
-      console.log('in order store', response)
       orders.value = response
     } catch (err) {
       console.error('Error fetching orders:', err)

@@ -248,9 +248,8 @@ const orderHistory = computed(() => orderStore.orderHistory)
 
 .list-item {
   background: var(--color-background);
-  padding: 1rem;
+  padding: 0.25rem;
   border-radius: 4px;
-  border: 1px solid var(--color-border);
 }
 
 .list-item h3 {
