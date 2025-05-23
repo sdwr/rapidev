@@ -243,9 +243,12 @@ onMounted(async () => {
   background: var(--color-background-soft);
   padding: 1.5rem;
   border-radius: 8px;
-  flex: 1;
   display: flex;
   flex-direction: column;
+
+  flex: 1;
+  overflow-y: hidden;
+  min-height: 0;
 }
 
 .tab-panel {
