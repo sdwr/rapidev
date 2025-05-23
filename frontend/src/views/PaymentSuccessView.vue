@@ -39,7 +39,7 @@ onMounted(async () => {
 });
 
 const goToOrders = () => {
-  router.push('/client');
+  router.push('/client', { query: { tab: 'myOrders' } });
 };
 </script>
 

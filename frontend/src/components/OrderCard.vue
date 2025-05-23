@@ -74,11 +74,12 @@ const props = defineProps<{
   userType: 'CLIENT' | 'ADMIN' | 'COURIER'
   statusHistory?: any[] // Kept for now, but StatusHistory component handles its own data
   availableCouriers?: User[]
+  startExpanded?: boolean
 }>()
 
 const emit = defineEmits(['orderUpdated', 'assignCourier', 'unassignCourier'])
 
-const isExpanded = ref(false) // Collapsed by default
+const isExpanded = ref(props.startExpanded || false) // Collapsed by default
 
 const selectedCourierId = ref<number | null>(null)
 const availableCouriers = ref<User[]>([])
@@ -260,7 +261,7 @@ const getStatusClass = (status: string) => {
 .order-id {
   flex-grow: 1;
   flex-shrink: 1;
-  flex-basis: 30px;
+  flex-basis: 35px;
   font-weight: bold;
 }
 

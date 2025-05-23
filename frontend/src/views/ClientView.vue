@@ -40,6 +40,7 @@
               :order="order"
               :userType="'CLIENT'"
               :statusHistory="statusHistories[order.id]"
+              :startExpanded="myOrders.length === 1"
               @orderUpdated="fetchOrders"
             />
           </div>
