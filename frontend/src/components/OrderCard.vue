@@ -1,5 +1,5 @@
 <template>
-  <div class="list-item" :class="{ 'expanded': isExpanded }">
+  <div class="order-card-list-item" :class="{ 'expanded': isExpanded }">
     <div class="order-summary-header" @click="toggleExpand">
       <div class="status-badge" :class="getStatusClass(getCurrentStatus(order))">
         {{ getCurrentStatus(order) }}
@@ -165,7 +165,6 @@ const confirmOrder = async () => {
 
 // Fetch available couriers for admin users
 onMounted(async () => {
-  console.log('order', props.order)
   if (props.userType === UserTypeEnum.ADMIN) {
     try {
       const couriers = await getAllUsersByType(UserTypeEnum.COURIER)
@@ -210,17 +209,17 @@ const getStatusClass = (status: string) => {
 </script>
 
 <style scoped>
-.list-item {
+.order-card-list-item {
   background: var(--color-background-soft);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 0; /* Remove padding from list-item itself */
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease-in-out;
 }
 
-.list-item.expanded {
+.order-card-list-item.expanded {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
