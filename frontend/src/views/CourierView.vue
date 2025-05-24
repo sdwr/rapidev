@@ -82,7 +82,8 @@ import { useOrderItemStore } from '../stores/orderItemStore'
 import { useOrderStore } from '../stores/orderStore'
 import { getCurrentStatus, getCurrentItemStatus } from '../utils'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
-
+import { OrderItemStatusEnum } from '../shared/enums/OrderItemEnums'
+import { updateOrderItemStatus } from '../api/api'
 const userStore = useUserStore()
 const orderItemStore = useOrderItemStore()
 const orderStore = useOrderStore()
@@ -149,32 +150,34 @@ const handleSetDestination = (location) => {
 
 // Simplified dialog state
 const showConfirmation = ref(false);
-const confirmationAction = ref('PICKUP');
+const confirmationAction = ref(OrderItemStatusEnum.PICKED_UP);
 const selectedOrderItem = ref(null);
 
 // Method to open confirmation dialog for pickup
 const handleMarkPickedUp = async (orderItem) => {
   selectedOrderItem.value = orderItem;
-  confirmationAction.value = 'PICKUP';
+  confirmationAction.value = OrderItemStatusEnum.PICKED_UP;
   showConfirmation.value = true;
 };
 
 // Method to open confirmation dialog for delivery
 const handleMarkDelivered = async (orderItem) => {
   selectedOrderItem.value = orderItem;
-  confirmationAction.value = 'DELIVERY';
+  confirmationAction.value = OrderItemStatusEnum.DELIVERED;
   showConfirmation.value = true;
 };
 
 // Method to open confirmation dialog for problem report
-const handleReportProblem = (orderItem) => {
+const handleReportProblem = async (orderItem) => {
   selectedOrderItem.value = orderItem;
-  confirmationAction.value = 'PROBLEM';
+  confirmationAction.value = OrderItemStatusEnum.PROBLEM;
   showConfirmation.value = true;
 };
 
 // Handle successful confirmation
 const handleConfirmationSuccess = async (result) => {
+  
+  await updateOrderItemStatus(selectedOrderItem.value.id, result.action, result.notes);
   // Refresh data as needed
   await orderItemStore.fetchAllOrderItems();
   await orderStore.fetchAllOrders();

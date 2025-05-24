@@ -274,7 +274,6 @@ const addLocationsToMap = async () => {
         actionsDiv.appendChild(setDestBtn);
         
         // Add status-specific buttons
-        console.log('location', location)
         if (location.type === 'PICKUP' && location.status === 'CONFIRMED_BY_COURIER' || location.status === 'ACCEPTED') {
           const pickupBtn = document.createElement('button');
           pickupBtn.textContent = 'Mark Picked Up';

@@ -62,8 +62,8 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { toast } from 'vue3-toastify';
-import { updateOrderItemStatus } from '../api/api'; // Import API functions
-
+import { updateOrderItemStatus } from '../api/api';
+import { OrderItemStatusEnum } from '../shared/enums/OrderItemEnums';
 const props = defineProps({
   orderItem: {
     type: Object,
@@ -75,8 +75,8 @@ const props = defineProps({
   },
   action: {
     type: String,
-    default: 'PICKUP', // PICKUP, DELIVERY, PROBLEM
-    validator: (value) => ['PICKUP', 'DELIVERY', 'PROBLEM'].includes(value)
+    default: OrderItemStatusEnum.PICKED_UP, // PICKUP, DELIVERY, PROBLEM
+    validator: (value) => [OrderItemStatusEnum.PICKED_UP, OrderItemStatusEnum.DELIVERED, OrderItemStatusEnum.PROBLEM].includes(value)
   }
 });
 
@@ -85,9 +85,9 @@ const emit = defineEmits(['update:show', 'success', 'error']);
 // Form state
 const noteLabel = computed(() => {
   switch (props.action) {
-    case 'PICKUP': return 'Pickup Notes:';
-    case 'DELIVERY': return 'Delivery Notes:';
-    case 'PROBLEM': return 'Problem Notes:';
+    case OrderItemStatusEnum.PICKED_UP: return 'Pickup Notes:';
+    case OrderItemStatusEnum.DELIVERED: return 'Delivery Notes:';
+    case OrderItemStatusEnum.PROBLEM: return 'Problem Notes:';
   }
 });
 const notes = ref('');
@@ -100,9 +100,9 @@ const isProcessing = ref(false);
 // Dialog configuration based on action
 const dialogTitle = computed(() => {
   switch (props.action) {
-    case 'PICKUP': return 'Confirm Pickup';
-    case 'DELIVERY': return 'Confirm Delivery';
-    case 'PROBLEM': return 'Report Problem';
+    case OrderItemStatusEnum.PICKED_UP: return 'Confirm Pickup';
+    case OrderItemStatusEnum.DELIVERED: return 'Confirm Delivery';
+    case OrderItemStatusEnum.PROBLEM: return 'Report Problem';
     default: return 'Confirm Action';
   }
 });
@@ -110,11 +110,11 @@ const dialogTitle = computed(() => {
 const dialogDescription = computed(() => {
   if (!props.orderItem) return '';
   switch (props.action) {
-    case 'PICKUP': 
+    case OrderItemStatusEnum.PICKED_UP: 
       return `Are you sure you want to mark the pickup from ${props.orderItem.address} as picked up?`;
-    case 'DELIVERY': 
+    case OrderItemStatusEnum.DELIVERED: 
       return `Are you sure you want to mark the delivery to ${props.orderItem.address} as delivered?`;
-    case 'PROBLEM': 
+    case OrderItemStatusEnum.PROBLEM: 
       return `Report a problem at ${props.orderItem.address}, and mark the order as incomplete`;
     default: 
       return 'Please confirm this action';
@@ -123,9 +123,9 @@ const dialogDescription = computed(() => {
 
 const dialogConfirmLabel = computed(() => {
   switch (props.action) {
-    case 'PICKUP': return 'Confirm Pickup';
-    case 'DELIVERY': return 'Confirm Delivery';
-    case 'PROBLEM': return 'Cancel Order';
+    case OrderItemStatusEnum.PICKED_UP: return 'Confirm Pickup';
+    case OrderItemStatusEnum.DELIVERED: return 'Confirm Delivery';
+    case OrderItemStatusEnum.PROBLEM: return 'Cancel Order';
     default: return 'Confirm';
   }
 });
@@ -133,11 +133,11 @@ const dialogConfirmLabel = computed(() => {
 const showNotes = computed(() => true); // Always show notes for now
 
 const showPicture = computed(() => {
-  return props.action === 'DELIVERY';
+  return props.action === OrderItemStatusEnum.DELIVERED;
 });
 
 const requirePicture = computed(() => {
-  return props.action === 'DELIVERY'; // Only require picture for delivery
+  return props.action === OrderItemStatusEnum.DELIVERED; // Only require picture for delivery
 });
 
 // Reset state when dialog is closed
@@ -191,13 +191,13 @@ const handleConfirmAction = async () => {
   
   try {
     switch (props.action) {
-      case 'PICKUP':
+      case OrderItemStatusEnum.PICKED_UP:
         await handlePickupConfirm();
         break;
-      case 'DELIVERY':
+      case OrderItemStatusEnum.DELIVERED:
         await handleDeliveryConfirm();
         break;
-      case 'PROBLEM':
+      case OrderItemStatusEnum.PROBLEM:
         await handleProblemConfirm();
         break;
       default:
@@ -218,33 +218,24 @@ const handleConfirmAction = async () => {
 
 // Mark item as picked up
 const handlePickupConfirm = async () => {
-  // API stub - replace with actual API call
-  console.log('Marking item as picked up:', props.orderItem.id, 'Notes:', notes.value);
+  console.log(props.orderItem)
+  console.log('Marking item as picked up:', props.orderItem.orderId, 'Notes:', notes.value);
   
-  // Uncomment when API is ready:
-  // await updateOrderItemStatus(props.orderItem.id, 'PICKED_UP', notes.value);
+  await updateOrderItemStatus(props.orderItem.orderId, OrderItemStatusEnum.PICKED_UP, notes.value);
   
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  toast.success(`Item picked up from ${props.orderItem.pickupAddress}`);
-  emit('success', { action: 'PICKUP', orderItem: props.orderItem, notes: notes.value });
+  toast.success(`Item picked up from ${props.orderItem.address}`);
+  emit('success', { action: OrderItemStatusEnum.PICKED_UP, orderItem: props.orderItem, notes: notes.value });
 };
 
 // Mark item as delivered
 const handleDeliveryConfirm = async () => {
-  // API stub - replace with actual API call
-  console.log('Marking item as delivered:', props.orderItem.id, 'Notes:', notes.value, 'Image:', imageFile.value);
+  console.log('Marking item as delivered:', props.orderItem.orderId, 'Notes:', notes.value, 'Image:', imageFile.value);
   
-  // Uncomment when API is ready:
-  // await updateOrderItemStatus(props.orderItem.id, 'DELIVERED', notes.value, imageFile.value);
+  await updateOrderItemStatus(props.orderItem.orderId, OrderItemStatusEnum.DELIVERED, notes.value);
   
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  toast.success(`Item delivered to ${props.orderItem.deliveryAddress}`);
+  toast.success(`Item delivered to ${props.orderItem.address}`);
   emit('success', { 
-    action: 'DELIVERY', 
+    action: OrderItemStatusEnum.DELIVERED,   
     orderItem: props.orderItem, 
     notes: notes.value, 
     picture: imageFile.value,
@@ -254,18 +245,13 @@ const handleDeliveryConfirm = async () => {
 
 // Report a problem with the item
 const handleProblemConfirm = async () => {
-  // API stub - replace with actual API call
-  console.log('Reporting problem for item:', props.orderItem.id, 'Notes:', notes.value, 'Image:', imageFile.value);
+  console.log('Reporting problem for item:', props.orderItem.orderId, 'Notes:', notes.value, 'Image:', imageFile.value);
   
-  // Uncomment when API is ready:
-  // await reportProblem(props.orderItem.id, notes.value, imageFile.value);
-  
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  toast.info(`Problem reported for order item #${props.orderItem.id}`);
+  await updateOrderItemStatus(props.orderItem.orderId, OrderItemStatusEnum.PROBLEM, notes.value);
+    
+  toast.info(`Problem reported for order item #${props.orderItem.orderId}`);
   emit('success', { 
-    action: 'PROBLEM', 
+    action: OrderItemStatusEnum.PROBLEM, 
     orderItem: props.orderItem, 
     notes: notes.value, 
     picture: imageFile.value,
