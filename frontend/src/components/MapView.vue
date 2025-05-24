@@ -10,6 +10,7 @@
 <script setup>
 import { ref, onMounted, watch, onUnmounted } from 'vue';
 import { initGoogleMaps, geocodeAddress } from '../services/googleMapsService';
+import { MAP_MARKERS, getMarkerIcon } from '../constants/mapMarkers';
 
 const props = defineProps({
   locations: {
@@ -141,18 +142,14 @@ const updateUserLocationMarker = async () => {
   if (userLocationMarker.value) {
     userLocationMarker.value.setPosition(currentPosition.value);
   } else {
-    // Create new marker
+    // Create new marker using constants
     userLocationMarker.value = new google.maps.Marker({
       position: currentPosition.value,
       map: map.value,
       title: 'Your Location',
       icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 10,
-        fillColor: '#4285F4',
-        fillOpacity: 1,
-        strokeColor: 'white',
-        strokeWeight: 2
+        ...MAP_MARKERS.USER_LOCATION,
+        path: google.maps.SymbolPath.CIRCLE
       }
     });
   }
@@ -220,15 +217,14 @@ const addLocationsToMap = async () => {
   // Create markers for all locations
   for (const location of props.locations) {
     try {
-      // Geocode the address to get coordinates
       const position = await geocodeAddress(location.address);
       
-      // Create marker
+      // Create marker using the helper function
       const marker = new google.maps.Marker({
         position,
         map: map.value,
         title: location.address,
-        icon: getMarkerIcon(location)
+        icon: getMarkerIcon(location, google)
       });
       
       // Create info window with custom content
@@ -326,7 +322,7 @@ const addLocationsToMap = async () => {
       // Extend bounds to include this position
       bounds.extend(position);
     } catch (error) {
-      console.error(`Error geocoding address ${location.address}:`, error);
+      console.error('Error creating marker:', error);
     }
   }
   
@@ -341,16 +337,6 @@ const addLocationsToMap = async () => {
       });
     }
   }
-};
-
-// Get marker icon based on location type
-const getMarkerIcon = (location) => {
-  return {
-    url: location.type === 'PICKUP' 
-      ? 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' 
-      : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-    scaledSize: { width: 32, height: 32 }
-  };
 };
 
 // Clear all markers from the map (except user location)
