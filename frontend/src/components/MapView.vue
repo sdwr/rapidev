@@ -274,7 +274,8 @@ const addLocationsToMap = async () => {
         actionsDiv.appendChild(setDestBtn);
         
         // Add status-specific buttons
-        if (location.type === 'PICKUP' && location.status === 'CONFIRMED_BY_COURIER') {
+        console.log('location', location)
+        if (location.type === 'PICKUP' && location.status === 'CONFIRMED_BY_COURIER' || location.status === 'ACCEPTED') {
           const pickupBtn = document.createElement('button');
           pickupBtn.textContent = 'Mark Picked Up';
           pickupBtn.className = 'info-window-button pickup-btn';
@@ -407,7 +408,7 @@ const handleReportProblem = (location) => {
 const emit = defineEmits(['setDestination', 'markPickedUp', 'markDelivered', 'reportProblem']);
 </script>
 
-<style scoped>
+<style>
 .map-container {
   width: 100%;
   position: relative;
@@ -482,13 +483,15 @@ const emit = defineEmits(['setDestination', 'markPickedUp', 'markDelivered', 're
 
 .info-window-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 5px;
   margin-top: 10px;
 }
 
 .info-window-button {
   padding: 5px 8px;
+  min-height: 40px;
+  height: 40px;
   border: none;
   border-radius: 4px;
   font-size: 12px;
