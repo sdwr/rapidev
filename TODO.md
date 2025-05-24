@@ -100,7 +100,14 @@ payment
 
 FEATURE REQUESTS:
 
+- admin view
+    - map of all order, assign to courier on map
+    - list of online couriers (logged in in last 15 minutes)
+
+
 - courier view
+    - pending orders appear on map
+        - map colors based on status + associated pickup/delivery
     - notification for new orders
     - system notifications
     - map view as default
@@ -111,6 +118,15 @@ FEATURE REQUESTS:
 
     -help menu with problems with delivery
 
+-client view
+    -info to register
+        - business name
+        - business address
+        - business contact name
+        - business contact phone number
+        - business contact email
+
+        
 
 - delivery name is required for items
 - delivery picture or select "hand-delivered to customer"

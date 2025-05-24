@@ -53,6 +53,8 @@ router.post('/api/orders', [OrderController, 'createOrder'])
 router.put('/api/orders/:id', [OrderController, 'updateOrder'])
 
 //order status modifications
+router.put('/api/orders/:id/status', [OrderController, 'updateOrderStatus'])
+
 router.put('/api/orders/item/:id/courier', [OrderController, 'assignCourier'])
 router.put('/api/orders/item/:id/unassign-courier', [OrderController, 'unassignCourier'])
 router.put('/api/orders/item/:id/status', [OrderController, 'updateOrderItemStatus'])

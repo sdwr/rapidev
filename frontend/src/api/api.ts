@@ -85,7 +85,7 @@ export async function getClientOrders(clientId: string): Promise<Order[]> {
   }
 }
 
-export async function updateOrderState(orderId: string, status: OrderStatus): Promise<Order> {
+export async function updateOrderState(orderId: string, status: OrderStatusEnum): Promise<Order> {
   try {
     const response = await fetch(`${BASE_URL}/api/orders/${orderId}/status`, {
       method: 'PUT',
