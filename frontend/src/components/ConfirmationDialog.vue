@@ -62,7 +62,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { toast } from 'vue3-toastify';
-import { updateOrderItemStatus } from '../api/api';
+import { updateOrderItemStatus, updateOrderState } from '../api/api';
 import { OrderItemStatusEnum } from '../shared/enums/OrderItemEnums';
 const props = defineProps({
   orderItem: {
@@ -76,7 +76,7 @@ const props = defineProps({
   action: {
     type: String,
     default: OrderItemStatusEnum.PICKED_UP, // PICKUP, DELIVERY, PROBLEM
-    validator: (value) => [OrderItemStatusEnum.PICKED_UP, OrderItemStatusEnum.DELIVERED, OrderItemStatusEnum.PROBLEM].includes(value)
+    validator: (value) => ["ORDER_PICKUP", OrderItemStatusEnum.PICKED_UP, OrderItemStatusEnum.DELIVERED, OrderItemStatusEnum.PROBLEM].includes(value)
   }
 });
 
@@ -86,6 +86,7 @@ const emit = defineEmits(['update:show', 'success', 'error']);
 const noteLabel = computed(() => {
   switch (props.action) {
     case OrderItemStatusEnum.PICKED_UP: return 'Pickup Notes:';
+    case "ORDER_PICKUP": return 'Pickup Notes:';
     case OrderItemStatusEnum.DELIVERED: return 'Delivery Notes:';
     case OrderItemStatusEnum.PROBLEM: return 'Problem Notes:';
   }
@@ -101,6 +102,7 @@ const isProcessing = ref(false);
 const dialogTitle = computed(() => {
   switch (props.action) {
     case OrderItemStatusEnum.PICKED_UP: return 'Confirm Pickup';
+    case "ORDER_PICKUP": return 'Confirm Pickup';
     case OrderItemStatusEnum.DELIVERED: return 'Confirm Delivery';
     case OrderItemStatusEnum.PROBLEM: return 'Report Problem';
     default: return 'Confirm Action';
@@ -111,6 +113,8 @@ const dialogDescription = computed(() => {
   if (!props.orderItem) return '';
   switch (props.action) {
     case OrderItemStatusEnum.PICKED_UP: 
+      return `Are you sure you want to mark the pickup from ${props.orderItem.address} as picked up?`;
+    case "ORDER_PICKUP":
       return `Are you sure you want to mark the pickup from ${props.orderItem.address} as picked up?`;
     case OrderItemStatusEnum.DELIVERED: 
       return `Are you sure you want to mark the delivery to ${props.orderItem.address} as delivered?`;
@@ -124,6 +128,7 @@ const dialogDescription = computed(() => {
 const dialogConfirmLabel = computed(() => {
   switch (props.action) {
     case OrderItemStatusEnum.PICKED_UP: return 'Confirm Pickup';
+    case "ORDER_PICKUP": return 'Confirm Pickup';
     case OrderItemStatusEnum.DELIVERED: return 'Confirm Delivery';
     case OrderItemStatusEnum.PROBLEM: return 'Cancel Order';
     default: return 'Confirm';
@@ -192,7 +197,10 @@ const handleConfirmAction = async () => {
   try {
     switch (props.action) {
       case OrderItemStatusEnum.PICKED_UP:
-        await handlePickupConfirm();
+        await handleOrderItemPickupConfirm();
+        break;
+      case "ORDER_PICKUP":
+        await handleOrderPickupConfirm();
         break;
       case OrderItemStatusEnum.DELIVERED:
         await handleDeliveryConfirm();
@@ -217,19 +225,21 @@ const handleConfirmAction = async () => {
 };
 
 // Mark item as picked up
-const handlePickupConfirm = async () => {
-  console.log(props.orderItem)
-  console.log('Marking item as picked up:', props.orderItem.orderId, 'Notes:', notes.value);
+const handleOrderItemPickupConfirm = async () => {
   
-  await updateOrderItemStatus(props.orderItem.orderId, OrderItemStatusEnum.PICKED_UP, notes.value);
+  await updateOrderItemStatus(props.orderItem.id, OrderItemStatusEnum.PICKED_UP, notes.value);
   
   toast.success(`Item picked up from ${props.orderItem.address}`);
   emit('success', { action: OrderItemStatusEnum.PICKED_UP, orderItem: props.orderItem, notes: notes.value });
 };
 
+const handleOrderPickupConfirm = async () => {
+  await updateOrderState(props.orderItem.orderId, OrderItemStatusEnum.PICKED_UP, notes.value);
+  toast.success(`Order picked up from ${props.orderItem.address}`);
+  emit('success', { action: "ORDER_PICKUP", orderItem: props.orderItem, notes: notes.value });
+};
 // Mark item as delivered
 const handleDeliveryConfirm = async () => {
-  console.log('Marking item as delivered:', props.orderItem.orderId, 'Notes:', notes.value, 'Image:', imageFile.value);
   
   await updateOrderItemStatus(props.orderItem.orderId, OrderItemStatusEnum.DELIVERED, notes.value);
   
@@ -245,7 +255,6 @@ const handleDeliveryConfirm = async () => {
 
 // Report a problem with the item
 const handleProblemConfirm = async () => {
-  console.log('Reporting problem for item:', props.orderItem.orderId, 'Notes:', notes.value, 'Image:', imageFile.value);
   
   await updateOrderItemStatus(props.orderItem.orderId, OrderItemStatusEnum.PROBLEM, notes.value);
     

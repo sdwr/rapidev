@@ -23,7 +23,7 @@
               :key="orderItem.id"
               :orderItem="orderItem"
               :userType="'COURIER'"
-              @markPickedUp="handleMarkPickedUp"
+              @markPickedUp="handleOrderItemPickup"
               @markDelivered="handleMarkDelivered"
               @reportProblem="handleReportProblem"
             />
@@ -37,7 +37,7 @@
               :locations="filteredLocations" 
               :nextLocation="selectedNextLocation"
               @setDestination="handleSetDestination"
-              @markPickedUp="handleMarkPickedUp"
+              @markPickedUp="handleOrderPickup"
               @markDelivered="handleMarkDelivered"
               @reportProblem="handleReportProblem"
             />
@@ -154,7 +154,13 @@ const confirmationAction = ref(OrderItemStatusEnum.PICKED_UP);
 const selectedOrderItem = ref(null);
 
 // Method to open confirmation dialog for pickup
-const handleMarkPickedUp = async (orderItem) => {
+const handleOrderPickup = async (orderItem) => {
+  selectedOrderItem.value = orderItem;
+  confirmationAction.value = "ORDER_PICKUP";
+  showConfirmation.value = true;
+};
+
+const handleOrderItemPickup = async (orderItem) => {
   selectedOrderItem.value = orderItem;
   confirmationAction.value = OrderItemStatusEnum.PICKED_UP;
   showConfirmation.value = true;
@@ -176,9 +182,7 @@ const handleReportProblem = async (orderItem) => {
 
 // Handle successful confirmation
 const handleConfirmationSuccess = async (result) => {
-  
-  await updateOrderItemStatus(selectedOrderItem.value.id, result.action, result.notes);
-  // Refresh data as needed
+    // Refresh data as needed
   await orderItemStore.fetchAllOrderItems();
   await orderStore.fetchAllOrders();
 };

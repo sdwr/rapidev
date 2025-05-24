@@ -241,6 +241,8 @@ export class OrderController {
         return response.status(404).json({ error: 'Order not found' })
       }
       
+      await order.load('items')
+      
       // Create the new status using the service
       const orderStatus = await OrderStatusService.createStatus(
         order.id,
@@ -249,6 +251,23 @@ export class OrderController {
       
       // Return the updated order with its statuses
       await order.load('orderStatuses')
+
+      // Update all order items to the new status if necessary
+      if (status === OrderStatusEnum.PICKED_UP) {
+        for (const item of order.items) {
+          await OrderItemStatusService.createStatus(
+            item.id,
+            status,
+            `Order status updated to ${status}`
+          )
+        }
+      }
+
+      await order.load('items', (query) => {
+        query.preload('orderItemStatuses', (query) => {
+          query.orderBy('createdAt', 'asc')
+        })
+      })
       
       return response.json({
         order,

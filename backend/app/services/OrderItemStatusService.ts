@@ -71,24 +71,29 @@ export class OrderItemStatusService {
       ],
       [OrderItemStatusEnum.ACCEPTED]: [
         OrderItemStatusEnum.ASSIGNED,
-        OrderItemStatusEnum.CANCELLED
+        OrderItemStatusEnum.CANCELLED,
+        OrderItemStatusEnum.PROBLEM
       ],
       [OrderItemStatusEnum.ASSIGNED]: [
         OrderItemStatusEnum.ASSIGNED,
         OrderItemStatusEnum.CONFIRMED_BY_COURIER,
         OrderItemStatusEnum.PICKED_UP,
-        OrderItemStatusEnum.CANCELLED
+        OrderItemStatusEnum.CANCELLED,
+        OrderItemStatusEnum.PROBLEM
       ],
       [OrderItemStatusEnum.CONFIRMED_BY_COURIER]: [
         OrderItemStatusEnum.PICKED_UP,
-        OrderItemStatusEnum.CANCELLED
+        OrderItemStatusEnum.CANCELLED,
+        OrderItemStatusEnum.PROBLEM
       ],
       [OrderItemStatusEnum.PICKED_UP]: [
         OrderItemStatusEnum.DELIVERED,
-        OrderItemStatusEnum.CANCELLED
+        OrderItemStatusEnum.CANCELLED,
+        OrderItemStatusEnum.PROBLEM
       ],
       [OrderItemStatusEnum.DELIVERED]: [],
-      [OrderItemStatusEnum.CANCELLED]: []
+      [OrderItemStatusEnum.CANCELLED]: [],
+      [OrderItemStatusEnum.PROBLEM]: []
     }
 
     return validTransitions[currentStatus]?.includes(newStatus) || false
