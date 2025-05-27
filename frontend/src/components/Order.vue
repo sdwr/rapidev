@@ -28,13 +28,15 @@
         class="delivery-item"
       >
         <div class="delivery-item-header">
-          <h4>Item {{ index + 1 }}</h4>
-          <p>${{ getDeliveryFee(index) }}</p>
+          <div class="delivery-item-header-left">
+            <h4>Item {{ index + 1 }}</h4>
+            <p v-if="deliveryTimes[index]">{{ deliveryTimes[index] }} minutes</p>
+            <h4>${{ getDeliveryFee(index) }}</h4>
+          </div>
           <button 
             type="button" 
             @click="removeDeliveryItem(index)" 
             class="remove-item-btn"
-            v-if="orderData.deliveryItems.length > 1"
           >
             ✕
           </button>
@@ -82,7 +84,7 @@
             ]"
             size="inline"
             :showControls="false"
-            @routeUpdated="(time) => updateDeliveryFee(index, time)"
+            @routeUpdated="(time) => routeUpdated(index, time)"
           />
         </div>
       </div>
@@ -148,6 +150,12 @@ const selectedDeliveryAddressId = ref(0)
 
 // Modify delivery fee calculation based on drive time
 const deliveryFees = ref({})
+const deliveryTimes = ref({})
+
+const routeUpdated = (index, durationInSeconds) => {
+  deliveryTimes.value[index] = Math.round(durationInSeconds / 60)
+  updateDeliveryFee(index, durationInSeconds)
+}
 
 const updateDeliveryFee = (index, durationInSeconds) => {
   // Base fee of $10
@@ -223,6 +231,10 @@ const addDeliveryItem = () => {
 const removeDeliveryItem = (index) => {
   if (orderData.value.deliveryItems.length > 1) {
     orderData.value.deliveryItems.splice(index, 1)
+    deliveryTimes.value = deliveryTimes.value.filter((_, i) => i !== index)
+    deliveryFees.value = deliveryFees.value.filter((_, i) => i !== index)
+  } else {
+    orderData.value.deliveryItems = []
   }
 }
 
@@ -319,21 +331,19 @@ const loadAddresses = async () => {
 }
 
 .spacer {
-  height: 20px;
   background-color: var(--color-background);
 }
 
 .delivery-items-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.25rem;
 }
 
 .delivery-item {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 1rem;
-  margin-bottom: 1rem;
   background-color: var(--color-background-soft);
 }
 
@@ -344,6 +354,16 @@ const loadAddresses = async () => {
   margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--color-border);
   padding-bottom: 0.5rem;
+  gap: 1rem;
+}
+
+.delivery-item-header-left {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
 .delivery-item-header h4 {
@@ -371,6 +391,7 @@ input, textarea {
 }
 
 .remove-item-btn {
+  flex-shrink: 0;
   background: #f44336;
   color: white;
   border: none;

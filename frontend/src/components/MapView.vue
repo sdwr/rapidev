@@ -214,6 +214,11 @@ watch(() => props.locations, async (newLocations) => {
     clearMarkers();
     // Add new markers
     await addLocationsToMap();
+    
+    // If we have both pickup and delivery locations, calculate route
+    if (newLocations.length === 2) {
+      await calculateRoute(newLocations[0].address, newLocations[1].address);
+    }
   }
 }, { deep: true });
 
@@ -414,7 +419,7 @@ const handleReportProblem = (location) => {
 // Don't forget to define the emits
 const emit = defineEmits(['setDestination', 'markPickedUp', 'markDelivered', 'reportProblem', 'routeUpdated']);
 
-// Modify calculateRoute to emit drive time
+// Modify calculateRoute to handle geocoding
 const calculateRoute = async (origin, destination) => {
   if (!map.value || !origin || !destination) return;
   
@@ -422,14 +427,16 @@ const calculateRoute = async (origin, destination) => {
   const directionsService = new google.maps.DirectionsService();
   
   try {
+    // Geocode both addresses
+    const originPosition = await geocodeAddress(origin);
+    const destinationPosition = await geocodeAddress(destination);
+    
     const result = await directionsService.route({
-      origin,
-      destination,
+      origin: originPosition,
+      destination: destinationPosition,
       travelMode: google.maps.TravelMode.DRIVING,
     });
     
-    console.log('result', result)
-    console.log('directionsRenderer.value', directionsRenderer.value)
     if (directionsRenderer.value) {
       directionsRenderer.value.setDirections(result);
       
