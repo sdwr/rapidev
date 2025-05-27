@@ -44,7 +44,6 @@ export const MAP_MARKERS = {
 }
 
 export const getMarkerIcon = (location: any, google: any) => {
-  console.log('location', location)
   const isCompleted = location.type === 'DELIVERY' && location.status === 'DELIVERED' || location.type === 'PICKUP' && location.status === 'PICKED_UP'
   
   if (location.type === 'PICKUP') {

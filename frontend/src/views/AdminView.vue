@@ -78,7 +78,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { getAllUsers, getAllOrders, updateOrderState, assignCourier, unassignCourier } from '../api/api'
+import { getAllUsersByType, getAllOrders, updateOrderState, assignCourier, unassignCourier } from '../api/api'
 import type { Order } from '../shared/models/Order'
 import type { User } from '../shared/models/User'
 import { ACTIVE_ORDER_STATUSES, HISTORY_ORDER_STATUSES, ACCEPTABLE_ORDER_STATUSES } from '../utils/consts'
@@ -88,6 +88,7 @@ import { getCurrentStatus } from '../utils'
 import OrderCard from '../components/OrderCard.vue'
 import { useOrderStore } from '../stores/orderStore'
 import { useUserStore } from '../stores/userStore'
+import { UserTypeEnum } from '../shared/enums/UserEnums'
 
 const tabs = [
   { id: 'active', label: 'Active Orders' },
@@ -112,7 +113,7 @@ const userStore = useUserStore()
 const fetchClients = async () => {
   loadingClients.value = true
   try {
-    clients.value = await getAllUsers(UserTypeEnum.CLIENT)
+    clients.value = await getAllUsersByType(UserTypeEnum.CLIENT)
   } catch (e) {
     error.value = e.message
   } finally {
@@ -122,7 +123,7 @@ const fetchClients = async () => {
 
 const fetchCouriers = async () => {
   try {
-    couriers.value = await getAllUsers(UserTypeEnum.COURIER)
+    couriers.value = await getAllUsersByType(UserTypeEnum.COURIER)
   } catch (e) {
     error.value = e.message
   }

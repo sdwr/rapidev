@@ -184,7 +184,7 @@ export const updateUser = async (userId: number, userData: any) => {
 export async function getAllUsers(userType?: UserTypeEnum): Promise<User[]> {
   try {
     const url = userType 
-      ? `${BASE_URL}/api/users/all?userType=${userType}`
+      ? `${BASE_URL}/api/users/all/{userType}`
       : `${BASE_URL}/api/users/all`
     const response = await fetch(url)
     if (!response.ok) throw await response.json()
