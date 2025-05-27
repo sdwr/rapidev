@@ -32,6 +32,10 @@ export const useOrderStore = defineStore('order', () => {
     )
   })
 
+  const allOrders = computed(() => {
+    return orders.value
+  })
+
   const getOrderById = computed(() => {
     return (id: number) => orders.value.find(order => order.id === id)
   })
@@ -165,6 +169,7 @@ export const useOrderStore = defineStore('order', () => {
     activeOrders,
     orderHistory,
     getOrderById,
+    allOrders,
     
     // Actions
     fetchAllOrders,

@@ -19,11 +19,15 @@
           <div v-if="loadingClients" class="loading">Loading clients...</div>
           <div class="list-container">
             <p v-if="!loadingClients && !clients.length">No clients registered yet.</p>
-            <div v-else v-for="client in clients" :key="client.id" class="list-item">
-              <h3>Name: {{ client.name }}</h3>
-              <p>Email: {{ client.email || 'No email' }}</p>
-              <p>Phone: {{ client.phone || 'No phone' }}</p>
-            </div>
+            <UserCard
+              v-else
+              v-for="client in clients"
+              :key="client.id"
+              :user="client"
+              :userType="'CLIENT'"
+              :orders="getOrdersForUser(client)"
+              @refresh="fetchClients"
+            />
           </div>
         </div>
 
@@ -31,11 +35,14 @@
         <div v-if="currentTab === 'couriers'" class="tab-panel">
           <div class="list-container">
             <p v-if="!couriers.length">No couriers registered yet.</p>
-            <div v-else v-for="courier in couriers" :key="courier.id" class="list-item">
-              <h3>Name: {{ courier.name }}</h3>
-              <p>Email: {{ courier.email || 'No email' }}</p>
-              <p>Phone: {{ courier.phone || 'No phone' }}</p>
-            </div>
+            <UserCard
+              v-for="courier in couriers"
+              :key="courier.id"
+              :user="courier"
+              :userType="'COURIER'"
+              :orders="getOrdersForUser(courier)"
+              @refresh="fetchCouriers"
+            />
           </div>
         </div>
 
@@ -89,6 +96,7 @@ import OrderCard from '../components/OrderCard.vue'
 import { useOrderStore } from '../stores/orderStore'
 import { useUserStore } from '../stores/userStore'
 import { UserTypeEnum } from '../shared/enums/UserEnums'
+import UserCard from '../components/UserCard.vue'
 
 const tabs = [
   { id: 'active', label: 'Active Orders' },
@@ -183,6 +191,16 @@ onMounted(async () => {
 // Use computed properties from the store
 const activeOrders = computed(() => orderStore.activeOrders)
 const orderHistory = computed(() => orderStore.orderHistory)
+
+const getOrdersForUser = (user: User) => {
+  return orderStore.allOrders.filter(order => {
+    if (user.userType === UserTypeEnum.CLIENT) {
+      return order.clientId === user.id
+    } else {
+      return order.items?.some(item => item.courierId === user.id)
+    }
+  })
+}
 
 </script>
 
