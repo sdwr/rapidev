@@ -1,8 +1,11 @@
 <template>
-  <div class="map-container">
+  <div class="map-container" :class="{ 'inline-map': size === 'inline' }">
     <div id="map" ref="mapRef"></div>
     <div class="map-overlay" v-if="loading">
       <div class="spinner"></div>
+    </div>
+    <div v-if="estimatedTime" class="estimated-time">
+      {{ formatDriveTime(estimatedTime) }}
     </div>
   </div>
 </template>
@@ -26,6 +29,14 @@ const props = defineProps({
     type: Object,
     default: null
     // Expected format: { address: 'Full address', type: 'PICKUP'|'DELIVERY' }
+  },
+  size: {
+    type: String,
+    default: 'fullscreen', // or 'inline'
+  },
+  showControls: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -39,6 +50,7 @@ const center = ref({ lat: 49.8893, lng: -97.1604 });
 const loading = ref(true);
 const locationWatchId = ref(null);
 const locationUpdateInterval = ref(null);
+const estimatedTime = ref(null);
 
 // Initialize map on component mount
 onMounted(async () => {
@@ -46,12 +58,19 @@ onMounted(async () => {
     const google = await initGoogleMaps();
     
     map.value = new google.maps.Map(mapRef.value, {
-      center: center.value, // Make sure to use .value here
+      center: center.value,
       zoom: props.zoom,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: true,
-      zoomControl: true
+      // Disable controls when in inline mode
+      mapTypeControl: props.size === 'fullscreen',
+      streetViewControl: props.size === 'fullscreen',
+      fullscreenControl: props.size === 'fullscreen',
+      zoomControl: props.size === 'fullscreen',
+      // Disable scrolling/dragging in inline mode
+      gestureHandling: props.size === 'fullscreen' ? 'auto' : 'none',
+      // Disable keyboard shortcuts in inline mode
+      keyboardShortcuts: props.size === 'fullscreen',
+      // Disable clickable POIs in inline mode
+      clickableIcons: props.size === 'fullscreen'
     });
     
     // Initialize directions renderer
@@ -71,7 +90,10 @@ onMounted(async () => {
     if (props.locations.length > 0) {
       await addLocationsToMap();
     }
-    
+
+    if(props.locations.length === 2) {
+      await calculateRoute(props.locations[0].address, props.locations[1].address);
+    }
     loading.value = false;
   } catch (error) {
     console.error('Error initializing map:', error);
@@ -390,24 +412,87 @@ const handleReportProblem = (location) => {
 };
 
 // Don't forget to define the emits
-const emit = defineEmits(['setDestination', 'markPickedUp', 'markDelivered', 'reportProblem']);
+const emit = defineEmits(['setDestination', 'markPickedUp', 'markDelivered', 'reportProblem', 'routeUpdated']);
+
+// Modify calculateRoute to emit drive time
+const calculateRoute = async (origin, destination) => {
+  if (!map.value || !origin || !destination) return;
+  
+  const google = await initGoogleMaps();
+  const directionsService = new google.maps.DirectionsService();
+  
+  try {
+    const result = await directionsService.route({
+      origin,
+      destination,
+      travelMode: google.maps.TravelMode.DRIVING,
+    });
+    
+    console.log('result', result)
+    console.log('directionsRenderer.value', directionsRenderer.value)
+    if (directionsRenderer.value) {
+      directionsRenderer.value.setDirections(result);
+      
+      // Get estimated time and emit it
+      const durationInSeconds = result.routes[0].legs[0].duration.value;
+      estimatedTime.value = durationInSeconds;
+      emit('routeUpdated', durationInSeconds);
+    }
+  } catch (error) {
+    console.error('Error calculating route:', error);
+  }
+};
+
+const formatDriveTime = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes} minutes`;
+};
 </script>
 
 <style>
 .map-container {
   width: 100%;
+  height: 100%;
   position: relative;
+}
+
+.map-container.inline-map {
+  height: 200px;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  height: 100%;
-  min-height: 400px;
-  flex: 1;
-  display: flex;
+  margin: 1rem 0;
+  /* Prevent interaction with map in inline mode */
+  pointer-events: none;
+}
+
+/* Make estimated time visible even in inline mode */
+.inline-map .estimated-time {
+  pointer-events: auto;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+}
+
+.estimated-time {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
 
 #map {
-  min-height: 400px;
   width: 100%;
   height: 100%;
   flex: 1;

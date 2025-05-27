@@ -29,7 +29,7 @@
       >
         <div class="delivery-item-header">
           <h4>Item {{ index + 1 }}</h4>
-          <p>${{ deliveryFee }}</p>
+          <p>${{ getDeliveryFee(index) }}</p>
           <button 
             type="button" 
             @click="removeDeliveryItem(index)" 
@@ -40,7 +40,7 @@
           </button>
         </div>
         
-        <div class="form-group">
+        <div class="address-selectors">
           <AddressSelector
             :id="`deliveryAddress-${index}`"
             label="Delivery"
@@ -72,6 +72,19 @@
             class="delivery-notes"
           ></textarea>
         </div>
+
+        <!-- Map View - show only when both addresses are selected -->
+        <div v-if="item.deliveryAddress && orderData.pickupAddress" class="delivery-map">
+          <MapView
+            :locations="[
+              { address: orderData.pickupAddress, type: 'PICKUP' },
+              { address: item.deliveryAddress, type: 'DELIVERY' }
+            ]"
+            size="inline"
+            :showControls="false"
+            @routeUpdated="(time) => updateDeliveryFee(index, time)"
+          />
+        </div>
       </div>
       
       <button 
@@ -84,7 +97,7 @@
     </div>
 
     <div class="order-summary">
-      <p>Delivery Price: ${{ deliveryFee * orderData.deliveryItems.length }}</p>
+      <p>Delivery Price: ${{ total }}</p>
       <p>Booking Fee: ${{ bookingFee }}</p>
       <p>Total: ${{ total }}</p>
     </div>
@@ -110,6 +123,8 @@ import { ReceiptStatusEnum } from '../shared/enums/ReceiptEnums'
 import { formatPhoneNumber } from '../utils'
 import { createCheckoutSession } from '../services/paymentService'
 import { toast } from 'vue3-toastify'
+import MapView from './MapView.vue'
+
 const emit = defineEmits(['order-created'])
 const userStore = useUserStore()
 
@@ -131,9 +146,26 @@ const orderData = ref({
 const selectedPickupAddressId = ref(0)
 const selectedDeliveryAddressId = ref(0)
 
-const deliveryFee = 10
+// Modify delivery fee calculation based on drive time
+const deliveryFees = ref({})
+
+const updateDeliveryFee = (index, durationInSeconds) => {
+  // Base fee of $10
+  const baseFee = 10
+  // Add $5 for every 15 minutes of driving
+  const timeBasedFee = Math.ceil(durationInSeconds / 900) * 5
+  deliveryFees.value[index] = baseFee + timeBasedFee
+}
+
+const getDeliveryFee = (index) => {
+  return deliveryFees.value[index] || 15 // Default fee if route not calculated
+}
+
 const bookingFee = 3.99
-const total = computed(() => Math.round(deliveryFee * orderData.value.deliveryItems.length + bookingFee, 2))
+const total = computed(() => {
+  const totalDeliveryFees = Object.values(deliveryFees.value).reduce((sum, fee) => sum + fee, 0)
+  return totalDeliveryFees + bookingFee
+})
 
 const isSubmitting = ref(false)
 
@@ -202,7 +234,7 @@ const submitOrder = async () => {
     const order = await createOrder(orderData.value)
     const receiptData = {
       orderId: order.id,
-      deliveryFee,
+      deliveryFee: total.value,
       bookingFee,
       discount: 0,
       total: total.value,
@@ -384,5 +416,12 @@ input, textarea {
 .submit-btn:disabled {
   background: #cccccc;
   cursor: not-allowed;
+}
+
+.delivery-map {
+  margin: 1rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
 }
 </style> 
