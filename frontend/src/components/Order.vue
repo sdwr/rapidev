@@ -94,25 +94,30 @@
         @click="addDeliveryItem" 
         class="add-item-btn"
       >
-        + Add Delivery Item
+        + Add Item
       </button>
     </div>
 
     <div class="order-summary">
-      <p>Delivery Price: ${{ total }}</p>
+      <p>Delivery Price: ${{ totalDeliveryFees }}</p>
       <p>Booking Fee: ${{ bookingFee }}</p>
       <p>Total: ${{ total }}</p>
     </div>
 
-    <!-- Submit Button -->
-    <button 
-      type="submit" 
-      @click.prevent="submitOrder" 
-      class="submit-btn" 
-      :disabled="!isFormValid || isSubmitting"
-    >
-      {{ isSubmitting ? 'Placing Order...' : 'Pay for Order' }}
-    </button>
+    <!-- Submit Button Section -->
+    <div class="submit-section">
+      <button 
+        type="submit" 
+        @click.prevent="submitOrder" 
+        class="submit-btn" 
+        :disabled="!isFormValid || isSubmitting"
+      >
+        {{ isSubmitting ? 'Placing Order...' : 'Pay for Order' }}
+      </button>
+      <p v-if="!allItemsValid" class="error-text">
+        Address and phone number required for all items
+      </p>
+    </div>
   </div>
 </template>
 
@@ -149,8 +154,8 @@ const selectedPickupAddressId = ref(0)
 const selectedDeliveryAddressId = ref(0)
 
 // Modify delivery fee calculation based on drive time
-const deliveryFees = ref({})
-const deliveryTimes = ref({})
+const deliveryFees = ref([])
+const deliveryTimes = ref([])
 
 const routeUpdated = (index, durationInSeconds) => {
   deliveryTimes.value[index] = Math.round(durationInSeconds / 60)
@@ -170,9 +175,12 @@ const getDeliveryFee = (index) => {
 }
 
 const bookingFee = 3.99
+const totalDeliveryFees = computed(() => {
+  return deliveryFees.value.reduce((sum, fee) => sum + fee, 0)
+})
 const total = computed(() => {
-  const totalDeliveryFees = Object.values(deliveryFees.value).reduce((sum, fee) => sum + fee, 0)
-  return totalDeliveryFees + bookingFee
+  //round to 2 decimal places
+  return Math.round((totalDeliveryFees.value + bookingFee) * 100) / 100
 })
 
 const isSubmitting = ref(false)
@@ -212,11 +220,13 @@ const isFormValid = computed(() => {
   if (!orderData.value.pickupAddress) return false
   
   // Check if all delivery items have required fields
-  const allItemsValid = orderData.value.deliveryItems.every(item => {
+  return allItemsValid.value
+})
+
+const allItemsValid = computed(() => {
+  return orderData.value.deliveryItems.every(item => {
     return !!item.deliveryAddress && !!item.deliveryPhone;
   });
-  
-  return allItemsValid;
 })
 
 const addDeliveryItem = () => {
@@ -226,6 +236,8 @@ const addDeliveryItem = () => {
     deliveryNotes: '',
     selectedAddressId: ''
   })
+  deliveryTimes.value.push(0)
+  deliveryFees.value.push(15)
 }
 
 const removeDeliveryItem = (index) => {
@@ -235,6 +247,8 @@ const removeDeliveryItem = (index) => {
     deliveryFees.value = deliveryFees.value.filter((_, i) => i !== index)
   } else {
     orderData.value.deliveryItems = []
+    deliveryTimes.value = []
+    deliveryFees.value = []
   }
 }
 
@@ -417,6 +431,14 @@ input, textarea {
   font-size: 1rem;
 }
 
+.submit-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
 .submit-btn {
   background: #4CAF50;
   color: white;
@@ -426,17 +448,20 @@ input, textarea {
   font-size: 1.125rem;
   font-weight: bold;
   cursor: pointer;
-  margin-top: 1.5rem;
+  width: 100%;
   transition: background-color 0.2s;
-}
-
-.submit-btn:hover {
-  background: #45a049;
 }
 
 .submit-btn:disabled {
   background: #cccccc;
   cursor: not-allowed;
+}
+
+.error-text {
+  color: #f44336;
+  font-size: 0.875rem;
+  margin: 0;
+  text-align: center;
 }
 
 .delivery-map {
