@@ -3,6 +3,37 @@
     <h1>Login</h1>
     
     <div class="login-container">
+      <!-- Dev Mode Quick Login -->
+      <div v-if="isDevMode" class="dev-login-section">
+        <div class="dev-mode-header">
+          <span class="dev-mode-badge">DEV MODE</span>
+          <span class="dev-mode-text">Quick Login</span>
+        </div>
+        <div class="dev-login-buttons">
+          <button 
+            @click="devLoginAsClient" 
+            class="dev-button client-button"
+            :disabled="loading"
+          >
+            Client
+          </button>
+          <button 
+            @click="devLoginAsCourier" 
+            class="dev-button courier-button"
+            :disabled="loading"
+          >
+            Courier
+          </button>
+          <button 
+            @click="devLoginAsAdmin" 
+            class="dev-button admin-button"
+            :disabled="loading"
+          >
+            Admin
+          </button>
+        </div>
+      </div>
+
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
           <label for="email">Email</label>
@@ -48,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import { loginOrRegister } from '../api/api'
@@ -61,6 +92,11 @@ const password = ref('')
 const userType = ref('client')
 const loading = ref(false)
 const error = ref('')
+
+// Check if we're in dev mode
+const isDevMode = computed(() => {
+  return import.meta.env.VITE_API_ENV !== 'production'
+})
 
 const handleLogin = async () => {
   if (!email.value || !password.value) {
@@ -104,6 +140,28 @@ const handleLogin = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// Dev login methods
+const devLoginAsClient = async () => {
+  email.value = 'dev-client@test.com'
+  password.value = 'devpass123'
+  userType.value = 'CLIENT'
+  await handleLogin()
+}
+
+const devLoginAsCourier = async () => {
+  email.value = 'dev-courier@test.com'
+  password.value = 'devpass123'
+  userType.value = 'COURIER'
+  await handleLogin()
+}
+
+const devLoginAsAdmin = async () => {
+  email.value = 'dev-admin@test.com'
+  password.value = 'devpass123'
+  userType.value = 'ADMIN'
+  await handleLogin()
 }
 </script>
 
@@ -173,5 +231,94 @@ input, select {
   color: #f44336;
   margin-bottom: 1rem;
   font-size: 0.9rem;
+}
+
+/* Dev Mode Styles */
+.dev-login-section {
+  margin-bottom: 1.5rem;
+  background: #fffbf0;
+  border: 2px dashed #ffa726;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.dev-mode-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.dev-mode-badge {
+  background: #ff9800;
+  color: white;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.dev-mode-text {
+  font-size: 0.9rem;
+  color: #f57c00;
+  font-weight: 500;
+}
+
+.dev-login-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dev-button {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+}
+
+.client-button {
+  background: #2196F3;
+}
+
+.client-button:hover:not(:disabled) {
+  background: #1976D2;
+}
+
+.courier-button {
+  background: #9C27B0;
+}
+
+.courier-button:hover:not(:disabled) {
+  background: #7B1FA2;
+}
+
+.admin-button {
+  background: #F44336;
+}
+
+.admin-button:hover:not(:disabled) {
+  background: #D32F2F;
+}
+
+.dev-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .dev-login-section {
+    background: rgba(255, 152, 0, 0.1);
+    border-color: #ff9800;
+  }
+  
+  .dev-mode-header h3 {
+    color: #ffa726;
+  }
 }
 </style> 

@@ -84,11 +84,35 @@ export default class UserController {
       // Find user by email
       let user = await User.findBy('email', email)
       if (!user) {
-        user = await User.create({
+        // Check if this is a dev user
+        const isDevUser = email.startsWith('dev-') && email.endsWith('@test.com')
+        
+        // Create user with dev data if applicable
+        const userData: any = {
           email,
           password,
           userType: userType as UserTypeEnum
-        })
+        }
+        
+        // Add dummy data for dev users
+        if (isDevUser) {
+          switch(userType) {
+            case 'CLIENT':
+              userData.name = 'Dev Client User'
+              userData.phone = '5551234567'
+              break
+            case 'COURIER':
+              userData.name = 'Dev Courier User'
+              userData.phone = '5552345678'
+              break
+            case 'ADMIN':
+              userData.name = 'Dev Admin User'
+              userData.phone = '5553456789'
+              break
+          }
+        }
+        
+        user = await User.create(userData)
       }
       
       // Verify password
